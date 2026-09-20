@@ -318,206 +318,6 @@ body {
     html, body { background: #f4e4d0 !important; }
     main, .container { background: transparent !important; }
 
-/* ===== POINT CAFE INSTALLED-APP DESIGN ===== */
-html.pwa-standalone body{
-  background:#f7eee2;
-  padding-bottom:76px;
-}
-html.pwa-standalone body::before{
-  opacity:.16;
-  background-attachment:scroll;
-}
-html.pwa-standalone body::after{
-  background:linear-gradient(135deg,rgba(255,249,239,.88),rgba(211,180,145,.20));
-}
-
-/* clean app header */
-html.pwa-standalone header{
-  position:sticky;
-  top:0;
-  z-index:1500;
-  padding:10px 12px 11px;
-  background:rgba(255,251,246,.94);
-  border-bottom:1px solid #ead8c2;
-  box-shadow:0 5px 20px rgba(91,66,42,.10);
-}
-html.pwa-standalone .header-top{
-  max-width:1100px;
-  gap:8px;
-}
-html.pwa-standalone .brand{gap:8px}
-html.pwa-standalone .brand img{
-  width:46px;height:46px;border:0;padding:0;
-  border-radius:12px;background:#fff;
-}
-html.pwa-standalone .brand h2{font-size:17px}
-html.pwa-standalone .brand span{font-size:10px!important}
-html.pwa-standalone .search-container{
-  margin:9px auto 0;
-  max-width:1100px;
-}
-html.pwa-standalone .search-input{
-  height:44px;
-  border-radius:23px;
-  background:#fff;
-  padding:10px 18px;
-  border:1px solid #ddcbb7;
-  box-shadow:inset 0 1px 3px rgba(91,66,42,.05);
-}
-html.pwa-standalone .store-controls{
-  display:none!important;
-}
-html.pwa-standalone .header-actions{
-  gap:5px;
-}
-html.pwa-standalone .header-actions .cart-btn{
-  width:42px!important;height:42px!important;
-  border-radius:12px;
-  padding:4px!important;
-}
-html.pwa-standalone .header-actions .pwa-install-page-btn{
-  display:none!important;
-}
-
-/* announcement is quieter in app mode */
-html.pwa-standalone .ticker-wrap{
-  height:32px;line-height:32px;
-  border:0;
-  border-radius:0 0 12px 12px;
-  font-size:11px;
-  background:#ead9c3;
-}
-
-/* app content */
-html.pwa-standalone .container{
-  max-width:1100px;
-  padding:0 14px 20px;
-}
-html.pwa-standalone .coffee-hero{
-  margin:12px 0 10px!important;
-  border-radius:20px!important;
-  min-height:160px;
-  box-shadow:0 10px 28px rgba(91,66,42,.16);
-}
-html.pwa-standalone .slider-container{
-  margin:10px 0 15px;
-  border-radius:18px;
-  aspect-ratio:16/7;
-  max-height:245px;
-  box-shadow:0 8px 22px rgba(91,66,42,.12);
-}
-
-/* category strip generated from products */
-html.pwa-standalone .app-categories{
-  display:flex;
-  gap:9px;
-  overflow-x:auto;
-  padding:4px 1px 13px;
-  scrollbar-width:none;
-}
-html.pwa-standalone .app-categories::-webkit-scrollbar{display:none}
-html.pwa-standalone .app-category{
-  flex:0 0 auto;
-  min-width:76px;
-  padding:9px 10px 8px;
-  border:1px solid #ead8c2;
-  border-radius:17px;
-  background:rgba(255,255,255,.86);
-  color:#76583b;
-  text-align:center;
-  font-size:11px;
-  font-weight:800;
-  box-shadow:0 5px 13px rgba(91,66,42,.07);
-}
-html.pwa-standalone .app-category-icon{
-  display:block;
-  font-size:22px;
-  margin-bottom:3px;
-}
-
-/* section heading */
-html.pwa-standalone .app-section-title{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin:5px 2px 9px;
-  color:#684b30;
-  font-size:19px;
-  font-weight:900;
-}
-html.pwa-standalone .app-section-title small{
-  font-size:11px;
-  font-weight:700;
-  color:#9a7652;
-}
-
-/* product cards like the reference design */
-html.pwa-standalone .products-grid{
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-}
-html.pwa-standalone .product-card{
-  border:1px solid #e4d3c0;
-  border-radius:15px;
-  padding:8px;
-  background:rgba(255,255,255,.94);
-  box-shadow:0 7px 18px rgba(91,66,42,.08);
-}
-html.pwa-standalone .product-img-wrapper{
-  border:0;
-  border-radius:11px;
-}
-html.pwa-standalone .product-img-wrapper img{
-  height:112px;
-}
-html.pwa-standalone .zoom-hint{display:none}
-html.pwa-standalone .product-title{
-  font-size:13px;
-  margin:7px 0 2px;
-}
-html.pwa-standalone .product-price{
-  font-size:14px;
-  margin-bottom:7px;
-}
-html.pwa-standalone .add-to-cart{
-  border-radius:9px;
-  padding:8px;
-  font-size:12px;
-}
-
-/* app-only bottom navigation */
-html.pwa-standalone .pwa-bottom-nav{
-  display:flex;
-  position:fixed;
-  left:0;right:0;bottom:0;
-  height:66px;
-  z-index:1800;
-  background:rgba(255,251,246,.97);
-  border-top:1px solid #e4d3c0;
-  box-shadow:0 -8px 24px rgba(91,66,42,.10);
-  justify-content:space-around;
-  align-items:center;
-}
-html.pwa-standalone .pwa-bottom-nav button{
-  border:0;background:transparent;color:#92755a;
-  font-family:inherit;font-size:10px;font-weight:800;
-  display:flex;flex-direction:column;align-items:center;gap:2px;
-  min-width:58px;cursor:pointer;
-}
-html.pwa-standalone .pwa-bottom-nav .nav-icon{font-size:21px;line-height:1}
-html.pwa-standalone .pwa-bottom-nav button.active{color:#6f4d30}
-
-/* hide long info/footer in installed view for a cleaner app home */
-html.pwa-standalone .coffee-info-grid,
-html.pwa-standalone footer{
-  display:none!important;
-}
-
-@media (min-width:700px){
-  html.pwa-standalone .products-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-  html.pwa-standalone .product-img-wrapper img{height:145px}
-}
-
 
 .pwa-skip-btn{
   width:100%;margin-top:8px;min-height:40px;border:0;
@@ -707,53 +507,8 @@ html.pwa-standalone footer{
 .pwa-install-modal.installed{display:none}
 .pwa-install-page-btn{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;border:1px solid #dfc9ad!important;background:#fffaf3!important;color:#76583b!important;border-radius:10px!important;font-weight:900!important;cursor:pointer!important}
 @keyframes pwaFadeIn{from{opacity:0;transform:scale(.99)}to{opacity:1;transform:scale(1)}}
-</style><script>
-(function(){
-  try {
-    if ((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true) {
-      document.documentElement.classList.add('pwa-standalone');
-    }
-  } catch(e) {}
-})();
-</script>
-<style>
-/* POINT CAFE FINAL: installed app uses the exact page/site UI with NO install overlay. */
-html.pwa-standalone #pwa-install-modal,
-html.pwa-standalone .pwa-install-modal,
-html.pwa-standalone .pwa-install-page-btn,
-html.pwa-standalone [data-pwa-install],
-html.pwa-standalone .install-app-button {
-  display:none !important;
-  visibility:hidden !important;
-  pointer-events:none !important;
-}
-html.pwa-standalone body {
-  overflow-x:hidden;
-}
 </style>
-<script>
-(function(){
-  function pointCafeStandalone(){
-    try {
-      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
-             window.navigator.standalone === true ||
-             document.referrer.indexOf('android-app://') === 0;
-    } catch(e){ return false; }
-  }
-  function applyInstalledMode(){
-    if(!pointCafeStandalone()) return;
-    document.documentElement.classList.add('pwa-standalone');
-    var ids=['pwa-install-modal'];
-    ids.forEach(function(id){ var el=document.getElementById(id); if(el) el.remove(); });
-    document.querySelectorAll('.pwa-install-page-btn,[data-pwa-install],.install-app-button').forEach(function(el){ el.remove(); });
-  }
-  applyInstalledMode();
-  document.addEventListener('DOMContentLoaded',applyInstalledMode);
-  window.addEventListener('load',applyInstalledMode);
-  setTimeout(applyInstalledMode,250);
-  setTimeout(applyInstalledMode,1000);
-})();
-</script>
+
 
 
 <style id="point-cafe-install-final-fix">
@@ -928,14 +683,6 @@ html.pwa-standalone body {
       </div>
     </div>
   </div>
-
-  
-<nav class="pwa-bottom-nav" aria-label="التنقل" style="display:none">
-  <button class="active" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="nav-icon">⌂</span>الرئيسية</button>
-  <button onclick="document.getElementById('products-container')?.scrollIntoView({behavior:'smooth'})"><span class="nav-icon">▦</span>الأقسام</button>
-  <button onclick="toggleCart()"><span class="nav-icon">🛒</span>السلة</button>
-  <button onclick="document.getElementById('reviews-list')?.scrollIntoView({behavior:'smooth'})"><span class="nav-icon">♡</span>التقييمات</button>
-</nav>
 
 <footer>
     جميع الحقوق محفوظة لـ <br>
@@ -1628,55 +1375,19 @@ if(skipBtn) skipBtn.addEventListener('click',function(){
 });
 
 }
-function showInstallModal(){if(isStandalone()||document.documentElement.classList.contains('pwa-standalone'))return;createInstallUI();installModal.classList.remove('installed')}
+function showInstallModal(){if(isStandalone())return;createInstallUI();installModal.classList.remove('installed')}
 async function installApp(){
  if(deferredInstallPrompt){const p=deferredInstallPrompt;deferredInstallPrompt=null;try{await p.prompt();const choice=await p.userChoice;if(choice&&choice.outcome==='accepted'){installBtn.textContent='✅ تم اختيار تثبيت التطبيق';setTimeout(()=>installModal&&installModal.classList.add('installed'),500)}else installBtn.textContent='📲 اضغط لتثبيت التطبيق'}catch(e){showHelp()}return}
  showHelp();
 }
 function showHelp(){if(!helpBox)return;helpBox.style.display='block';helpBox.innerHTML='إذا لم تظهر نافذة التثبيت تلقائياً، افتح قائمة المتصفح <b>⋮</b> ثم اختر <b>تثبيت التطبيق</b> أو <b>إضافة إلى الشاشة الرئيسية</b>.';installBtn.textContent='📲 حاول التثبيت مرة أخرى'}
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;createInstallUI()});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;if(!isStandalone())createInstallUI()});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;if(installModal)installModal.classList.add('installed')});
-window.addEventListener('load',()=>{createInstallUI();if(!isStandalone() && localStorage.getItem('pointCafeInstallSkipped')!=='1')setTimeout(showInstallModal,8000);if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('PWA SW:',err))});
+window.addEventListener('load',()=>{if(!isStandalone()){createInstallUI();if(localStorage.getItem('pointCafeInstallSkipped')!=='1')setTimeout(showInstallModal,8000)}if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('PWA SW:',err))});
 window.openPointCafeInstall=showInstallModal;
 })();
 </script>
 
-<script>
-(function(){
-  function appMode(){
-    return document.documentElement.classList.contains('pwa-standalone');
-  }
-  window.renderPwaCategories=function(items){
-    if(!appMode()) return;
-    const box=document.getElementById('pwa-app-categories');
-    if(!box) return;
-    const products=Array.isArray(items)?items:[];
-    const cats=[];
-    products.forEach(p=>{
-      const c=(p.category||p.section||p.type||'').toString().trim();
-      if(c && !cats.includes(c)) cats.push(c);
-    });
-    const shown=(cats.length?cats:['الأكثر مبيعاً','المشروبات الساخنة','المشروبات الباردة','الحلويات','القهوة']).slice(0,8);
-    const icons=['⭐','☕','🥤','🍰','🫘','🎁','🔥','✨'];
-    box.innerHTML=shown.map((c,i)=>'<button class="app-category" onclick="pwaCategoryFilter('+JSON.stringify(c)+')"><span class="app-category-icon">'+icons[i%icons.length]+'</span>'+c+'</button>').join('');
-  };
-  window.pwaCategoryFilter=function(cat){
-    const q=document.getElementById('search-input');
-    if(q){q.value=cat==='الأكثر مبيعاً'?'':cat;q.dispatchEvent(new Event('input',{bubbles:true}));}
-    document.getElementById('products-container')?.scrollIntoView({behavior:'smooth',block:'start'});
-  };
-  window.addEventListener('load',function(){
-    if(appMode()){
-      const nav=document.querySelector('.pwa-bottom-nav');
-      if(nav) nav.style.display='flex';
-      setTimeout(function(){if(window.storeData) renderPwaCategories(window.storeData.products||[]);},900);
-    }
-  });
-  window.addEventListener('firebase-ready',function(){
-    setTimeout(function(){if(appMode() && window.storeData) renderPwaCategories(window.storeData.products||[]);},700);
-  });
-})();
-</script>
 
 
 
