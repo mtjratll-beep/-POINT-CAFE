@@ -78,7 +78,6 @@ h1,h2{color:var(--p)}input,button{width:100%;padding:13px;border-radius:11px;bor
 .pwa-install-title{margin:9px 0 4px;color:#76583b;font-size:21px;font-weight:900}
 .pwa-install-subtitle{margin:0 0 13px;color:#5d4b3b;font-size:13px;line-height:1.7}
 .pwa-install-btn{width:100%;min-height:50px;border:0;border-radius:13px;background:#9a7652;color:#fff;font-size:16px;font-weight:900;cursor:pointer}
-.pwa-skip-btn{width:100%;min-height:38px;margin-top:8px;border:0;border-radius:10px;background:transparent;color:#76583b;font-weight:800;cursor:pointer}
 .pwa-install-help{display:none;margin-top:10px;background:#fff;border:1px solid #dfc9ad;border-radius:11px;padding:9px;color:#5d4b3b;font-size:12px;line-height:1.7}
 .pwa-install-modal.installed{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 html.pwa-standalone #pwa-install-modal,
@@ -104,7 +103,7 @@ html.pwa-standalone [data-pwa-install]{display:none!important;visibility:hidden!
 <button onclick="driverLogin()">دخول</button>
 </div>
 <div id="app" class="wrap hide">
-<div class="card"><h1>🚗 طلبات توصيل الكوفيه</h1>
+<div class="card"><h1>🚗 طلبات توصيل POINT CAFE</h1><p class="note"><b>تطبيق السائق:</b> تطبيق توصيل POINT CAFE — يجب تثبيت التطبيق على الهاتف لاستخدام صفحة السائق.</p>
 <p id="welcome"></p>
 <button class="settings-btn" onclick="toggleDriverSettings()">⚙️ الإعدادات</button>
 <div class="settings-scene">
@@ -308,9 +307,9 @@ setTimeout(()=>openDriverSoundPermission(),700);
       '<div class="pwa-install-card">'+
       '<img class="pwa-install-logo" src="./point-cafe-logo.jpg" alt="POINT CAFE">'+
       '<div class="pwa-install-title">'+APP_NAME+'</div>'+
-      '<p class="pwa-install-subtitle">ثبّت تطبيق السائق على هاتفك ليعمل مثل أي تطبيق عادي.</p>'+
-      '<button id="pwa-install-btn" class="pwa-install-btn">📲 تثبيت التطبيق</button>'+
-      '<button id="pwa-skip-btn" class="pwa-skip-btn" type="button">تخطي</button>'+
+      '<p class="pwa-install-subtitle">يجب تثبيت <b>تطبيق توصيل POINT CAFE</b> على هاتف السائق للمتابعة واستخدام صفحة التوصيل.</p>'+
+      '<button id="pwa-install-btn" class="pwa-install-btn">📲 تثبيت تطبيق توصيل POINT CAFE</button>'+
+      ''+
       '<div id="pwa-install-help" class="pwa-install-help"></div>'+
       '</div>';
     document.body.appendChild(m);
