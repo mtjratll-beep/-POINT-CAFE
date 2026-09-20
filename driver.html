@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>POINT CAFE | توصيل كوفيه</title>
+<link rel="manifest" href="./driver-manifest.json">
+<meta name="theme-color" content="#9a7652">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="توصيل POINT CAFE">
+<link rel="apple-touch-icon" href="./point-cafe-logo.jpg">
+<script>
+(function(){
+  try{
+    const standalone =
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+      window.navigator.standalone === true ||
+      document.referrer.indexOf('android-app://') === 0;
+    if(standalone) document.documentElement.classList.add('pwa-standalone');
+  }catch(e){}
+})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import {getFirestore,doc,getDoc,collection,getDocs,query,where,updateDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+const firebaseConfig = {
+      apiKey: "AIzaSyCSjXz47oath2NA6LXAkYk_pNLK1_X3tVU",
+      authDomain: "point-cafe-665e6.firebaseapp.com",
+      projectId: "point-cafe-665e6",
+      storageBucket: "point-cafe-665e6.firebasestorage.app",
+      messagingSenderId: "1078733395604",
+      appId: "1:1078733395604:web:075d8e0f2a3f075bde0681",
+      measurementId: "G-XSPQZK57CN"
+    };
+const app=initializeApp(firebaseConfig),db=getFirestore(app);
+window.db=db;window.doc=doc;window.getDoc=getDoc;window.collection=collection;window.getDocs=getDocs;window.query=query;window.where=where;window.updateDoc=updateDoc;window.onSnapshot=onSnapshot;
+window.dispatchEvent(new Event('firebase-ready'));
+</script>
+<style>
+:root{--p:#9a7652;--ph:#76583b;--bg:#f5eadb;--card:#fffaf3;--text:#4b3828;--border:#dfc9ad;--danger:#b94b45;--success:#3e8b68}
+*{box-sizing:border-box;font-family:Tajawal,sans-serif}body{margin:0;background:var(--bg);color:var(--text);padding:18px}
+.wrap{max-width:850px;margin:auto}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:0 10px 30px #8c6d4a22;animation:up .5s ease}
+h1,h2{color:var(--p)}input,button{width:100%;padding:13px;border-radius:11px;border:1px solid var(--border);font-size:15px;margin-top:10px}button{background:var(--p);color:#fff;border:0;font-weight:800;cursor:pointer}button:hover{background:var(--ph);transform:translateY(-1px)}
+.login{max-width:420px;margin:10vh auto}.order{background:#fff;border:1px solid var(--border);border-radius:15px;padding:16px;margin:12px 0}.head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:800}.status{background:#eadbc7;padding:5px 10px;border-radius:20px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.map{background:#eadbc7;color:#4b3828}.hide{display:none}.note{font-size:13px;color:#7b624a}
+.settings-btn{width:100%;min-height:52px;margin-top:10px;border-radius:14px;font-size:17px;font-weight:800}
+.settings-scene{margin-top:14px}
+.settings-panel{background:linear-gradient(145deg,#fffaf3,#f2e1cc);border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:0 12px 30px #8c6d4a22}
+.settings-panel.hidden{display:none}
+.sound-box{background:#fff;border:1px solid var(--border);border-radius:14px;padding:13px;margin:10px 0}
+.sound-title{font-weight:800;color:var(--p);font-size:16px;margin-bottom:4px}
+.sound-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sound-actions button{margin-top:8px}
+.sound-status{margin-top:8px;background:#f7efe5;border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center;font-weight:700;font-size:13px}
+.settings-title{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--p);font-weight:800;margin-bottom:12px}
+.account-line{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;margin:8px 0;font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:10px}
+.stat{background:#fff;border:1px solid var(--border);border-radius:14px;padding:15px 8px;text-align:center}
+.stat .num{font-size:30px;font-weight:800;color:var(--p);display:block}
+.close-settings{background:#b94b45;margin-top:8px}.wrap{padding-bottom:82px}.driver-main-actions{position:fixed;left:10px;right:10px;bottom:8px;z-index:9999;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:7px;background:#fffaf3;border:1px solid var(--border);border-radius:18px;box-shadow:0 7px 22px #0002;max-width:760px;margin:0 auto}.driver-main-actions button{margin:0!important;min-height:52px;height:52px;padding:5px 3px;border:1px solid var(--border);border-radius:12px;box-shadow:0 3px 9px #8c6d4a20;font-size:13px;font-weight:800;line-height:1.2}.driver-main-actions .logout-box{background:var(--danger)!important;color:#fff}
+@media(max-width:600px){.stats{grid-template-columns:1fr 1fr 1fr}.stat{padding:12px 5px}.stat .num{font-size:25px}}
+@keyframes up{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+
+.sound-permission-modal{position:fixed;inset:0;background:#0008;z-index:100000;display:flex;align-items:center;justify-content:center;padding:18px}
+.sound-permission-card{width:min(430px,100%);background:#fffaf3;border:2px solid var(--border);border-radius:22px;padding:24px;text-align:center;box-shadow:0 18px 50px #0005}
+.sound-permission-icon{font-size:48px;margin-bottom:8px}
+.sound-permission-card h2{margin:5px 0 10px;color:var(--p);font-size:24px}
+.sound-permission-card p{line-height:1.8;margin:0 0 18px;color:#5d4b3b}
+.sound-permission-main,.sound-permission-test,.sound-permission-later{width:100%;min-height:52px;border:0;border-radius:13px;margin-top:9px;font-weight:800;font-size:16px;cursor:pointer}
+.sound-permission-main{background:var(--p);color:#fff}
+.sound-permission-test{background:#ead9c5;color:#5d432d}
+.sound-permission-later{background:transparent;color:#777}
+
+/* ===== DRIVER PWA: نفس صفحة السائق، وبدون أي رسائل تثبيت داخل التطبيق المثبت ===== */
+.pwa-install-modal{position:fixed;inset:0;z-index:200000;background:rgba(35,20,10,.72);backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:16px}
+.pwa-install-card{width:min(430px,90vw);background:linear-gradient(180deg,#fffaf3,#f5eadb);border:1.5px solid #dfc9ad;border-radius:22px;padding:20px 16px;text-align:center;box-shadow:0 20px 55px #0006;position:relative}
+.pwa-install-logo{width:82px;height:82px;object-fit:contain;border-radius:18px;border:2px solid rgba(154,118,82,.65);background:#fff;padding:5px}
+.pwa-install-title{margin:9px 0 4px;color:#76583b;font-size:21px;font-weight:900}
+.pwa-install-subtitle{margin:0 0 13px;color:#5d4b3b;font-size:13px;line-height:1.7}
+.pwa-install-btn{width:100%;min-height:50px;border:0;border-radius:13px;background:#9a7652;color:#fff;font-size:16px;font-weight:900;cursor:pointer}
+.pwa-skip-btn{width:100%;min-height:38px;margin-top:8px;border:0;border-radius:10px;background:transparent;color:#76583b;font-weight:800;cursor:pointer}
+.pwa-install-help{display:none;margin-top:10px;background:#fff;border:1px solid #dfc9ad;border-radius:11px;padding:9px;color:#5d4b3b;font-size:12px;line-height:1.7}
+.pwa-install-modal.installed{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+html.pwa-standalone #pwa-install-modal,
+html.pwa-standalone .pwa-install-page-btn,
+html.pwa-standalone [data-pwa-install]{display:none!important;visibility:hidden!important;pointer-events:none!important}
+</style>
+</head><body>
+<div id="driver-sound-permission-modal" class="sound-permission-modal" style="display:none">
+  <div class="sound-permission-card">
+    <div class="sound-permission-icon">🔔</div>
+    <h2>السماح بنغمة وصول الطلب</h2>
+    <p>نحتاج تفعيل الصوت حتى تسمع تنبيهًا واضحًا عند وصول طلب توصيل جديد. اضغط السماح وتشغيل النغمة مرة واحدة.</p>
+    <button class="sound-permission-main" onclick="enableDriverSound()">🔊 السماح وتشغيل النغمة</button>
+    <button class="sound-permission-test" onclick="previewDriverSound()">🎵 سماع النغمة أولاً</button>
+
+  </div>
+</div>
+
+<div id="login" class="card login">
+<h1>☕ POINT CAFE</h1><p>🚗 دخول سائق التوصيل</p>
+<input id="driver-name" placeholder="اسم السائق">
+<input id="driver-pass" type="password" placeholder="كلمة المرور">
+<button onclick="driverLogin()">دخول</button>
+</div>
+<div id="app" class="wrap hide">
+<div class="card"><h1>🚗 طلبات توصيل الكوفيه</h1>
+<p id="welcome"></p>
+<button class="settings-btn" onclick="toggleDriverSettings()">⚙️ الإعدادات</button>
+<div class="settings-scene">
+  <div class="settings-panel hidden" id="driver-settings-panel">
+    <div class="settings-title"><span>⚙️ إعدادات السائق</span><span>☕</span></div>
+    <div id="driver-account" class="account-line">جاري تحميل بيانات الحساب...</div>
+    <div class="sound-box">
+      <div class="sound-title">🔔 تنبيه وصول الطلب</div>
+      <p class="note">فعّل الصوت مرة واحدة للسماح بتنبيه السائق عند وصول طلب جديد.</p>
+      <div class="sound-actions">
+        <button id="driver-sound-permission" onclick="enableDriverSound()">🔊 السماح بالصوت</button>
+        <button onclick="previewDriverSound()">🎵 سماع النغمة</button>
+      </div>
+      <div id="driver-sound-status" class="sound-status">🔇 الصوت غير مفعّل</div>
+    </div>
+    <button onclick="loadMyOrders()">🔄 تحديث الإحصائيات</button>
+    <div class="settings-title" style="margin-top:16px"><span>📊 إحصائيات الطلبات</span><span>📊</span></div>
+    <div id="driver-stats" class="stats"></div>
+    <button class="close-settings" onclick="toggleDriverSettings()">إخفاء الإعدادات ✕</button>
+  </div>
+</div>
+<div class="driver-main-actions">
+  <button onclick="toggleDriverSettings()">⚙️ الإعدادات</button>
+  <button onclick="loadMyOrders()">🔄 تحديث الطلبات</button>
+  <button onclick="logout()" class="logout-box">🚪 تسجيل الخروج</button>
+</div></div>
+<div id="orders"></div>
+</div>
+<script>
+let currentDriver=null;
+let driverKnownOrderIds = new Set();
+let driverSoundTimer = null;
+let driverAudioContext = null;
+
+function getDriverSoundEnabled(){
+  return true;
+}
+function updateDriverSoundUI(){
+  const status=document.getElementById('driver-sound-status');
+  const btn=document.getElementById('driver-sound-permission');
+  if(!status)return;
+  if(getDriverSoundEnabled()){
+    status.textContent='🔊 الصوت مفعّل — سيتم تشغيل النغمة عند وصول طلب جديد';
+    if(btn)btn.textContent='🔊 الصوت مفعّل';
+  }else{
+    status.textContent='🔇 الصوت غير مفعّل';
+    if(btn)btn.textContent='🔊 السماح بالصوت';
+  }
+}
+async function prepareDriverAudio(){
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC) throw new Error('AudioContext غير مدعوم');
+  if(!driverAudioContext) driverAudioContext=new AC();
+  if(driverAudioContext.state==='suspended') await driverAudioContext.resume();
+}
+function playDriverSound(){
+  prepareDriverAudio().then(()=>{
+    const ctx=driverAudioContext, now=ctx.currentTime;
+    const pattern=[0,0.16,0.32,0.50,0.68,0.86,1.04,1.22,1.40,1.58];
+    pattern.forEach((delay,i)=>{
+      const osc=ctx.createOscillator(), gain=ctx.createGain();
+      osc.type=i%2?'square':'sawtooth';
+      osc.frequency.setValueAtTime(i%2?980:720,now+delay);
+      gain.gain.setValueAtTime(0.0001,now+delay);
+      gain.gain.exponentialRampToValueAtTime(0.32,now+delay+0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001,now+delay+0.12);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(now+delay); osc.stop(now+delay+0.13);
+    });
+  }).catch(()=>{});
+}
+async function enableDriverSound(){
+  try{
+    await prepareDriverAudio();
+    localStorage.setItem('point_driver_sound','1'); closeDriverSoundPermission();
+    updateDriverSoundUI();
+    playDriverSound();
+    alert('تم السماح بالصوت. سيصدر تنبيه عند وصول طلب جديد.');
+  }catch(e){alert('تعذر تشغيل الصوت في هذا المتصفح.');}
+}
+async function previewDriverSound(){
+  try{
+    await prepareDriverAudio();
+    playDriverSound();
+  }catch(e){alert('اضغط مرة أخرى على زر سماع النغمة أو السماح بالصوت.');}
+}
+let driverRealtimeUnsub=null;
+function startDriverOrderWatcher(){
+  if(driverRealtimeUnsub) driverRealtimeUnsub();
+  if(!currentDriver || !window.onSnapshot) return;
+  const q=window.query(window.collection(window.db,'orders'),window.where('driverId','==',currentDriver.id));
+  driverRealtimeUnsub=window.onSnapshot(q, snap=>{
+    const ids=new Set();
+    snap.docChanges().forEach(ch=>{
+      if(ch.type==='added'){ const data=ch.doc.data()||{}; if(driverKnownOrderIds.size && data.status!=='تم التوصيل' && data.status!=='رفض'){ playDriverSound(); showDriverAlert(); } }
+    });
+    snap.forEach(d=>ids.add(d.id));
+    driverKnownOrderIds=ids;
+    loadMyOrders();
+  }, err=>console.error('Realtime driver orders:',err));
+}
+function showDriverAlert(){
+  const old=document.getElementById('driver-new-order-alert');
+  if(old)old.remove();
+  const el=document.createElement('div');
+  el.id='driver-new-order-alert';
+  el.textContent='🔔 طلب جديد وصل إليك';
+  Object.assign(el.style,{position:'fixed',top:'14px',left:'14px',right:'14px',zIndex:99999,background:'#9a7652',color:'#fff',padding:'16px',borderRadius:'14px',textAlign:'center',fontWeight:'800',fontSize:'18px',boxShadow:'0 10px 30px #0004'});
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),5000);
+}
+function safe(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+async function driverLogin(){
+ const name=document.getElementById('driver-name').value.trim(),pass=document.getElementById('driver-pass').value.trim();
+ if(!name||!pass){alert('أدخل اسم السائق وكلمة المرور.');return}
+ try{
+  const snap=await window.getDoc(window.doc(window.db,'settings','store_config'));
+  const data=snap.exists()?snap.data():{}; const d=(data.drivers||[]).find(x=>x.name===name&&x.password===pass);
+  if(!d){alert('اسم السائق أو كلمة المرور غير صحيحة.');return}
+  currentDriver=d;sessionStorage.setItem('point_driver',JSON.stringify(d));
+  showApp();loadMyOrders();
+ }catch(e){console.error(e);alert('تعذر الاتصال بالسحابة.')}
+}
+function showApp(){document.getElementById('login').classList.add('hide');document.getElementById('app').classList.remove('hide');document.getElementById('welcome').innerText='مرحباً '+currentDriver.name+' — تظهر لك الطلبات التي تم إرسالها لك فقط.';document.getElementById('driver-account').innerText='اسم المستخدم: '+currentDriver.name+' | كلمة المرور: '+currentDriver.password+' (للعرض فقط)';localStorage.setItem('point_driver_sound','1');prepareDriverAudio().catch(()=>{});updateDriverSoundUI();startDriverOrderWatcher();}
+function toggleDriverSettings(){
+ const panel=document.getElementById('driver-settings-panel');
+ panel.classList.toggle('hidden');
+}
+function logout(){sessionStorage.removeItem('point_driver');location.reload()}
+async function loadMyOrders(){
+ if(!currentDriver)return;
+ const box=document.getElementById('orders');box.innerHTML='<div class="card">جاري تحميل الطلبات...</div>';
+ try{
+  const q=window.query(window.collection(window.db,'orders'),window.where('driverId','==',currentDriver.id));
+  const snap=await window.getDocs(q);let orders=[];snap.forEach(d=>orders.push({docId:d.id,...d.data()}));
+  if(driverKnownOrderIds.size===0){ orders.forEach(o=>driverKnownOrderIds.add(o.docId)); }
+  const delivered=orders.filter(o=>o.status==='تم التوصيل').length; const cancelled=orders.filter(o=>['رفض','ملغي','ملغى','ملغية'].includes(o.status)).length; document.getElementById('driver-stats').innerHTML=`<div class="stat"><span class="num">${delivered}</span><small>تم توصيله</small></div><div class="stat"><span class="num">${cancelled}</span><small>ملغي</small></div><div class="stat"><span class="num">${orders.length}</span><small>إجمالي الطلبات</small></div>`; orders=orders.filter(o=>o.status!=='تم التوصيل'&&o.status!=='رفض').sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+  if(!orders.length){box.innerHTML='<div class="card"><h2>لا توجد طلبات توصيل حالياً</h2><p class="note">عند تعيين طلب لك سيظهر هنا.</p></div>';return}
+  box.innerHTML=orders.map(o=>{
+   const products=(o.items||[]).map(i=>`<div>☕ ${safe(i.name)} × ${i.qty} — ${i.subtotal} ${safe(i.currency)}</div>`).join('');
+   return `<div class="order"><div class="head"><span>🧾 ${safe(o.orderId)}</span><span class="status">${safe(o.status||'جديد')}</span></div>
+   <p>👤 <b>${safe(o.customerName)}</b><br>📞 ${safe(o.customerPhone)}</p>
+   <div>${products}</div><p><b>💰 إجمالي المنتجات: ${safe(o.totalText)}</b></p><p><b>🚚 التوصيل: ${Number(o.deliveryFee||0)>0 ? safe(o.deliveryFee+" "+(o.deliveryCurrency||"")) : "مجاني"}</b></p><p><b>💰 الإجمالي مع التوصيل: ${safe(o.grandTotalText||o.totalText)}</b></p>
+   ${o.customerLocation?`<a href="${safe(o.customerLocation)}" target="_blank"><button class="map">📍 فتح موقع العميل في الخريطة</button></a>`:''}
+   <div class="actions"><button onclick="setDelivered('${o.docId}')">✅ تم التوصيل</button><button onclick="callCustomer('${o.customerPhone}')">📞 اتصال بالعميل</button></div>
+   </div>`;
+  }).join('');
+ }catch(e){console.error(e);box.innerHTML='<div class="card">تعذر تحميل الطلبات. تحقق من صلاحيات Firestore.</div>'}
+}
+async function setDelivered(id){
+ if(!confirm('هل تم تسليم الطلب للعميل؟'))return;
+ try{await window.updateDoc(window.doc(window.db,'orders',id),{status:'تم التوصيل',deliveredAt:new Date().toISOString(),deliveredBy:currentDriver.name});await loadMyOrders();alert('تم تسجيل التسليم، واختفى الطلب من قائمتك.')}
+ catch(e){alert('تعذر تحديث الطلب.')}
+}
+function callCustomer(phone){location.href='tel:'+phone}
+window.addEventListener('firebase-ready',()=>{
+ const saved=sessionStorage.getItem('point_driver');if(saved){try{currentDriver=JSON.parse(saved);showApp();loadMyOrders()}catch(e){}}
+});
+
+function openDriverSoundPermission(){
+  if(localStorage.getItem('point_driver_sound') !== '1'){
+    const m=document.getElementById('driver-sound-permission-modal');
+    if(m)m.style.display='flex';
+  }
+}
+function closeDriverSoundPermission(){
+  const m=document.getElementById('driver-sound-permission-modal');
+  if(m)m.style.display='none';
+}
+setTimeout(()=>openDriverSoundPermission(),700);
+</script>
+
+<script id="driver-pwa-install">
+(function(){
+  const APP_NAME='تطبيق توصيل POINT CAFE';
+  let deferredInstallPrompt=null, installModal=null, installBtn=null, helpBox=null;
+
+  function isStandalone(){
+    try{
+      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+             window.navigator.standalone===true ||
+             document.referrer.indexOf('android-app://')===0 ||
+             document.documentElement.classList.contains('pwa-standalone');
+    }catch(e){return false}
+  }
+
+  function applyStandaloneMode(){
+    if(!isStandalone()) return;
+    document.documentElement.classList.add('pwa-standalone');
+    const modal=document.getElementById('pwa-install-modal');
+    if(modal) modal.remove();
+    document.querySelectorAll('.pwa-install-page-btn,[data-pwa-install]').forEach(el=>el.remove());
+  }
+
+  function createInstallUI(){
+    if(isStandalone() || document.getElementById('pwa-install-modal')) return;
+    const m=document.createElement('div');
+    m.id='pwa-install-modal';
+    m.className='pwa-install-modal';
+    m.innerHTML=
+      '<div class="pwa-install-card">'+
+      '<img class="pwa-install-logo" src="./point-cafe-logo.jpg" alt="POINT CAFE">'+
+      '<div class="pwa-install-title">'+APP_NAME+'</div>'+
+      '<p class="pwa-install-subtitle">ثبّت تطبيق السائق على هاتفك ليعمل مثل أي تطبيق عادي.</p>'+
+      '<button id="pwa-install-btn" class="pwa-install-btn">📲 تثبيت التطبيق</button>'+
+      '<button id="pwa-skip-btn" class="pwa-skip-btn" type="button">تخطي</button>'+
+      '<div id="pwa-install-help" class="pwa-install-help"></div>'+
+      '</div>';
+    document.body.appendChild(m);
+    installModal=m;
+    installBtn=m.querySelector('#pwa-install-btn');
+    helpBox=m.querySelector('#pwa-install-help');
+
+    installBtn.addEventListener('click',installApp);
+    m.querySelector('#pwa-skip-btn').addEventListener('click',function(){
+      m.classList.add('installed');
+      m.style.setProperty('display','none','important');
+      try{localStorage.setItem('pointDriverInstallSkipped','1')}catch(e){}
+    });
+  }
+
+  async function installApp(){
+    if(deferredInstallPrompt){
+      const p=deferredInstallPrompt;
+      deferredInstallPrompt=null;
+      try{
+        await p.prompt();
+        const choice=await p.userChoice;
+        if(choice && choice.outcome==='accepted'){
+          installBtn.textContent='✅ تم تثبيت التطبيق';
+          setTimeout(()=>{ if(installModal) installModal.classList.add('installed'); },500);
+        }else{
+          installBtn.textContent='📲 تثبيت التطبيق';
+        }
+      }catch(e){showHelp()}
+      return;
+    }
+    showHelp();
+  }
+
+  function showHelp(){
+    if(!helpBox) return;
+    helpBox.style.display='block';
+    helpBox.innerHTML='إذا لم تظهر نافذة التثبيت، افتح قائمة المتصفح <b>⋮</b> ثم اختر <b>تثبيت التطبيق</b> أو <b>إضافة إلى الشاشة الرئيسية</b>.';
+  }
+
+  applyStandaloneMode();
+
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();
+    if(isStandalone()) return;
+    deferredInstallPrompt=e;
+    createInstallUI();
+  });
+
+  window.addEventListener('appinstalled',function(){
+    deferredInstallPrompt=null;
+    applyStandaloneMode();
+  });
+
+  document.addEventListener('DOMContentLoaded',function(){
+    applyStandaloneMode();
+    if(isStandalone()) return;
+    createInstallUI();
+    if(localStorage.getItem('pointDriverInstallSkipped')!=='1'){
+      setTimeout(function(){
+        if(!isStandalone() && installModal) installModal.classList.remove('installed');
+      },8000);
+    }else if(installModal){
+      installModal.classList.add('installed');
+    }
+  });
+
+  window.addEventListener('load',function(){
+    applyStandaloneMode();
+    if(!isStandalone() && 'serviceWorker' in navigator){
+      navigator.serviceWorker.register('./sw.js').catch(function(err){
+        console.warn('Driver PWA SW:',err);
+      });
+    }
+  });
+
+  setTimeout(applyStandaloneMode,250);
+  setTimeout(applyStandaloneMode,1000);
+})();
+</script>
+
+</body></html>

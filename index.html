@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تطبيق متجر POINT CAFE | كافيه POINT CAFE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
+    import { getFirestore, doc, getDoc, collection, getDocs, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCSjXz47oath2NA6LXAkYk_pNLK1_X3tVU",
+      authDomain: "point-cafe-665e6.firebaseapp.com",
+      projectId: "point-cafe-665e6",
+      storageBucket: "point-cafe-665e6.firebasestorage.app",
+      messagingSenderId: "1078733395604",
+      appId: "1:1078733395604:web:075d8e0f2a3f075bde0681",
+      measurementId: "G-XSPQZK57CN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    window.db = db;
+    window.doc = doc;
+    window.getDoc = getDoc;
+    window.collection = collection;
+    window.getDocs = getDocs;
+    window.addDoc = addDoc;
+    window.onSnapshot = onSnapshot;
+    
+    window.dispatchEvent(new Event('firebase-ready'));
+  </script>
+
+  <style>
+    :root {
+      --primary: #9a7652;
+      --primary-hover: #76583b;
+      --accent: #dc2626;
+      --bg: #f5eadb;
+      --card-bg: #ffffff;
+      --text: #4b3828;
+      --muted: #7b624a;
+      --border: #dfc9ad;
+      --star: #f59e0b;
+      --whatsapp: #25d366;
+      --radius: 16px;
+      --shadow: 0 8px 25px -8px rgba(91, 66, 42, 0.20);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+    
+    body::before{content:"";position:fixed;inset:0;z-index:-1;background:url("coffee_harvest_animated.gif") center/cover no-repeat;background-attachment:fixed;}
+body::after{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(135deg,rgba(245,231,211,.35),rgba(104,72,42,.18),rgba(39,86,58,.12));pointer-events:none;}
+@keyframes coffeeBgZoom{from{transform:scale(1)}to{transform:scale(1.06)}}
+body {
+      background-color: #d9c19f;
+      background-image: url("coffee_harvest_animated.gif");
+      background-position: center center;
+      background-size: cover;
+      background-attachment: fixed;
+      color: var(--text);
+      padding-bottom: 40px;
+    }
+
+    .ticker-wrap {
+      width: 100%;
+      background: var(--bg);
+      color: var(--primary);
+      overflow: hidden;
+      height: 38px;
+      line-height: 38px;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(91, 66, 42, 0.10);
+      border-bottom: 1px solid var(--border);
+    }
+    .ticker-move {
+      display: inline-block;
+      white-space: nowrap;
+      padding-right: 100%;
+      animation: ticker 22s linear infinite;
+    }
+    .ticker-move:hover { animation-play-state: paused; }
+    .ticker-item { display: inline-block; padding: 0 20px; }
+
+    @keyframes ticker {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(100%, 0, 0); }
+    }
+
+    #splash-screen {
+      position: fixed; inset: 0; background: var(--card-bg); z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.2s ease, visibility 0.2s; padding: 20px; text-align: center;
+    }
+    #splash-screen.fade-out { opacity: 0; visibility: hidden; }
+    .splash-logo { width: 130px; height: 130px; object-fit: contain; animation: zoomIn 0.45s ease-out; border-radius: 50%; border: 3px solid var(--primary); }
+    .splash-title { margin-top: 20px; font-size: 22px; font-weight: 800; color: var(--primary); }
+
+    @keyframes zoomIn { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .store-closed-bar {
+      background-color: var(--accent); color: #fff; text-align: center; padding: 12px 20px; font-weight: 700;
+      font-size: 14px; position: sticky; top: 0; z-index: 1001; box-shadow: 0 4px 12px rgba(220,38,38,0.2); display: none;
+    }
+
+    .whatsapp-float {
+      position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px;
+      background-color: var(--whatsapp); color: #FFF; border-radius: 50%;
+      box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+      z-index: 1000; display: flex; align-items: center; justify-content: center;
+      text-decoration: none; animation: pulse 2s infinite; transition: transform 0.2s;
+    }
+    .whatsapp-float:hover { transform: scale(1.1); }
+    .whatsapp-float svg { width: 32px; height: 32px; fill: white; }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+      70% { box-shadow: 0 0 0 18px rgba(37, 211, 102, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+    }
+
+    header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 16px; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid var(--border); box-shadow: 0 2px 10px rgba(91, 66, 42, 0.10); }
+    .header-top { display: flex; justify-content: space-between; align-items: center; max-width: 900px; margin: 0 auto; } .header-actions{display:flex;align-items:center;gap:6px}
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+    .brand img { width: 52px; height: 52px; object-fit: contain; border-radius: 50%; border: 2px solid var(--primary); background: #fff; padding: 2px; }
+    .brand h2 { font-size: 18px; font-weight: 800; color: var(--primary); }
+    
+    .search-container { display: flex; align-items: center; margin: 15px auto 0; gap: 10px; max-width: 900px; }
+    .search-input { flex: 1; padding: 12px 18px; border: 1.5px solid var(--border); border-radius: 12px; outline: none; background: #fbf5ed; transition: 0.2s; font-size: 14px; color: var(--text); }
+    .search-input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.15); }
+    
+    .cart-btn {
+      position: relative; background: #eadbc7; border: 1px solid var(--border);
+      padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 18px; transition: 0.2s; color: var(--primary);
+    }
+    .cart-btn:hover { background: #dfc9ad; }
+    .cart-badge { position: absolute; top: -6px; right: -6px; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+    .slider-container { width: 100%; overflow: hidden; margin: 15px 0 20px; border-radius: var(--radius); aspect-ratio: 12 / 5; max-height: 280px; background: #eadbc7; position: relative; border: 1px solid var(--border); }
+    .slider-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); height: 100%; }
+    .slider-slide { min-width: 100%; height: 100%; }
+    .slider-slide img { width: 100%; height: 100%; object-fit: cover; }
+
+    .container { padding: 0 12px; max-width: 900px; margin: 0 auto; }
+    
+    .products-grid { 
+      display: grid; 
+      grid-template-columns: repeat(2, 1fr); 
+      gap: 12px; 
+    }
+    .product-card {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: var(--shadow); transition: all 0.2s ease;
+      position: relative;
+    }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -10px rgba(147, 51, 234, 0.2); border-color: var(--primary); }
+    
+    .product-img-wrapper {
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #fbf5ed;
+      border: 1px solid var(--border);
+    }
+    .product-img-wrapper img { width: 100%; height: 130px; object-fit: contain; padding: 6px; transition: transform 0.3s ease; }
+    .product-img-wrapper:hover img { transform: scale(1.05); }
+    .zoom-hint {
+      position: absolute; bottom: 6px; left: 6px; background: rgba(147, 51, 234, 0.9); color: #fff;
+      font-size: 10px; padding: 2px 6px; border-radius: 6px; font-weight: 700; pointer-events: none;
+    }
+
+    .product-title { font-size: 14px; margin: 8px 0 4px; font-weight: 800; color: var(--text); line-height: 1.3; }
+    .product-price { color: var(--primary); font-weight: 800; font-size: 15px; margin-bottom: 8px; }
+    .add-to-cart {
+      background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 8px;
+      cursor: pointer; width: 100%; font-size: 13px; font-weight: 700; transition: background 0.2s;
+    }
+    .add-to-cart:hover { background: var(--primary-hover); }
+
+    .reviews-section { margin: 35px 0; background: var(--card-bg); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); }
+    .reviews-section h3 { margin-bottom: 16px; font-size: 18px; color: var(--primary); font-weight: 800; }
+    .reviews-list { max-height: 240px; overflow-y: auto; margin-bottom: 16px; padding-left: 5px; }
+    .review-item { background: #fbf5ed; border: 1px solid var(--border); padding: 12px 16px; border-radius: 12px; margin-bottom: 10px; font-size: 13px; }
+    .review-header { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+    .review-stars { color: var(--star); }
+    .star-rating { display: flex; gap: 6px; margin-bottom: 12px; direction: ltr; justify-content: flex-end; cursor: pointer; }
+    .star-rating span { font-size: 24px; color: #dfc9ad; transition: color 0.2s; }
+    .star-rating span.active { color: var(--star); }
+
+    .review-form-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; outline: none; font-size: 13px; background: #fff; }
+
+    .modal { display: none; position: fixed; inset: 0; background: rgba(59, 7, 100, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: flex-end; }
+    .modal-content { background: var(--card-bg); width: 100%; max-width: 550px; border-radius: 24px 24px 0 0; padding: 24px; max-height: 85vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.15); border-top: 3px solid var(--primary); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 15px; }
+    .modal-header h3 { font-weight: 800; font-size: 18px; color: var(--primary); }
+    
+    .cart-item { display: flex; align-items: center; gap: 12px; margin: 12px 0; font-size: 14px; border-bottom: 1px solid #eadbc7; padding-bottom: 10px; }
+    .cart-item img { width: 50px; height: 50px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); background: #fbf5ed; }
+    .cart-item-info { flex: 1; }
+    .cart-item-title { font-weight: 700; font-size: 14px; }
+    .cart-item-price-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .cart-item-total { color: var(--primary); font-size: 13px; font-weight: 800; margin-top: 2px; }
+
+    .quantity-control { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+    .qty-btn {
+      background: var(--primary); color: white; border: none; width: 26px; height: 26px;
+      border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; transition: 0.2s;
+    }
+    .qty-btn:hover { background: var(--primary-hover); }
+    .qty-input { width: 38px; text-align: center; border: 1px solid var(--border); border-radius: 6px; font-weight: 700; font-size: 13px; padding: 2px 0; }
+    
+    .bank-box { background: #fbf5ed; border: 1px dashed var(--primary); padding: 16px; border-radius: 12px; margin: 15px 0; }
+    .bank-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .bank-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .copy-btn { background: var(--primary); border: none; color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; }
+
+    .shipping-info-box { background: #fbf5ed; border: 1px solid var(--border); padding: 12px; border-radius: 10px; margin-top: 12px; text-align: center; font-size: 13px; color: var(--primary); font-weight: 700; }
+    .cart-summary-box{margin-top:14px;padding:12px 14px;background:#fff;border:2px solid var(--border);border-radius:12px;font-size:15px;line-height:1.9}.cart-summary-row{display:flex;justify-content:space-between;gap:10px;padding:3px 0}.cart-summary-row.grand{border-top:2px solid var(--primary);margin-top:5px;padding-top:8px;font-size:17px;font-weight:900;color:var(--primary)}.cart-summary-row.delivery{font-weight:800;color:var(--primary)}
+
+    .store-location-card { background: #fbf5ed; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 15px; text-align: center; font-size: 13px; }
+    .store-location-card a { color: var(--primary); font-weight: 700; text-decoration: none; }
+
+    .btn-submit-whatsapp { background: var(--whatsapp); color: white; width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; transition: 0.2s; }
+    .btn-submit-whatsapp:hover { background: #1eb956; }
+    .btn-gps { background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+
+    .img-modal {
+      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
+      z-index: 3000; justify-content: center; align-items: center; padding: 20px;
+      backdrop-filter: blur(5px);
+    }
+    .img-modal-content {
+      position: relative; max-width: 90%; max-height: 85vh; background: #fff;
+      border-radius: 16px; padding: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .img-modal-content img {
+      max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 10px;
+    }
+    .img-modal-title { font-weight: 800; color: var(--primary); font-size: 16px; margin-top: 10px; }
+    .close-img-modal {
+      position: absolute; top: -12px; right: -12px; background: var(--accent); color: white;
+      border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; font-weight: bold;
+      cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .toast-notification {
+      position: fixed; bottom: -80px; left: 50%; transform: translateX(-50%);
+      background: var(--text); color: #fff; padding: 10px 20px; border-radius: 30px;
+      display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 9999; transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 14px; font-weight: 700;
+    }
+    .toast-notification.show { bottom: 30px; }
+    .toast-notification img { width: 28px; height: 28px; border-radius: 50%; object-fit: contain; background: #fff; }
+
+    footer { text-align: center; padding: 24px; font-size: 14px; color: var(--muted); background: var(--card-bg); margin-top: 40px; border-top: 1px solid var(--border); line-height: 1.8; }
+    footer strong { color: var(--primary); font-size: 15px; }
+    .dev-link { margin-top: 6px; font-size: 11px; color: #16a34a; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; padding: 4px 9px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; transition: 0.2s; }
+    .dev-link:hover { background: #dcfce7; transform: translateY(-2px); }
+
+
+    .delivery-choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+    .delivery-choice label{margin:0;padding:11px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;text-align:center;color:var(--text)}
+    .delivery-choice input{accent-color:var(--primary);margin-left:5px}
+    .product-card,.reviews-section,.modal-content,.section-box{animation:cardIn .55s ease both}
+    .product-card:hover{transform:translateY(-6px) scale(1.01)}
+    @keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    .store-controls{display:flex;justify-content:center;align-items:center;gap:6px;max-width:760px;margin:8px auto 0;flex-wrap:wrap}.theme-btn,.lang-btn{border:1px solid var(--border);background:#fff;color:var(--primary);padding:5px 8px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;line-height:1.2}.theme-btn:hover,.lang-btn:hover{transform:translateY(-1px);background:#fbf5ed}.language-switcher{display:flex;gap:4px;direction:ltr}.lang-btn.active{background:var(--primary);color:#fff}
+    .coffee-info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0}.coffee-info-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:18px;text-align:center;box-shadow:var(--shadow)}.coffee-info-icon{font-size:30px;margin-bottom:7px}.coffee-info-card h3{color:var(--primary);font-size:16px;margin-bottom:7px}.coffee-info-card p{font-size:12px;color:var(--muted);line-height:1.8}
+    body.dark-mode{--bg:#17211f;--card-bg:#22302c;--text:#f4eadc;--muted:#c9b9a3;--border:#52665e}body.dark-mode header{background:rgba(27,39,36,.95)}body.dark-mode .search-input,body.dark-mode .review-form-input,body.dark-mode .product-img-wrapper,body.dark-mode .cart-item,body.dark-mode .coffee-info-card{background:#263833;color:var(--text)}body.dark-mode .theme-btn,body.dark-mode .lang-btn{background:#263833;color:var(--text)}body.dark-mode .ticker-wrap{background:#1c2926}
+    @media(max-width:700px){.coffee-info-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:430px){.coffee-info-grid{grid-template-columns:1fr 1fr}.store-controls{align-items:stretch}.theme-btn{flex:1}.language-switcher{flex:1}.lang-btn{flex:1;padding:7px 5px;font-size:11px)}}
+
+/* حركة كوفيه POINT CAFE */
+.coffee-hero{position:relative;overflow:hidden;min-height:175px;margin:16px 0 20px;border-radius:24px;background:radial-gradient(circle at 75% 30%,#d9b98f 0 8%,transparent 9%),linear-gradient(135deg,#4b3828 0%,#76583b 48%,#9a7652 100%);border:1px solid #b9946a;box-shadow:0 18px 40px rgba(75,56,40,.24);display:flex;align-items:center;justify-content:space-between;padding:25px 28px;color:#fff;isolation:isolate}
+.coffee-hero:before{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.08);left:-100px;top:-150px;animation:coffeeFloat 7s ease-in-out infinite}
+.coffee-copy{position:relative;z-index:3;max-width:62%;animation:heroText .8s ease both}.coffee-copy h1{font-size:28px;margin:0 0 6px;color:#fff;font-weight:800}.coffee-copy p{font-size:13px;margin:0;color:#f8ead8;line-height:1.8}
+.coffee-cup{position:relative;z-index:2;width:115px;height:85px;background:#fff8ed;border-radius:12px 12px 35px 35px;box-shadow:0 16px 20px rgba(0,0,0,.22);margin-left:12px;animation:cupBob 3s ease-in-out infinite}
+.coffee-cup:before{content:"";position:absolute;left:9px;right:9px;top:8px;height:16px;border-radius:50%;background:#4b3828;box-shadow:inset 0 3px 0 #2d2117}
+.coffee-cup:after{content:"";position:absolute;right:-29px;top:23px;width:35px;height:38px;border:8px solid #fff8ed;border-left:0;border-radius:0 25px 25px 0}
+.steam{position:absolute;top:-45px;width:12px;height:45px;border-left:3px solid rgba(255,255,255,.7);border-radius:50%;filter:blur(.3px);animation:steam 2.3s ease-in-out infinite}.steam.s1{left:30px}.steam.s2{left:55px;animation-delay:.45s}.steam.s3{left:78px;animation-delay:.9s}
+.bean{position:absolute;width:13px;height:20px;border-radius:55% 45%;background:#3a281d;opacity:.75;z-index:1}.bean:after{content:"";position:absolute;left:5px;top:2px;height:16px;border-left:2px solid #9a7652;transform:rotate(12deg)}
+.bean.b1{right:20%;bottom:18px;animation:beanDrift 5s ease-in-out infinite}.bean.b2{right:8%;top:25px;transform:rotate(35deg);animation:beanDrift 6s ease-in-out infinite .8s}.bean.b3{left:47%;top:15px;transform:rotate(-25deg);animation:beanDrift 5.5s ease-in-out infinite 1.2s}
+.hero-glow{position:absolute;right:18%;top:0;width:180px;height:180px;border-radius:50%;background:rgba(255,224,184,.14);filter:blur(8px);animation:glow 4s ease-in-out infinite}
+@keyframes heroText{from{opacity:0;transform:translateX(25px)}to{opacity:1;transform:none}}
+@keyframes cupBob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+@keyframes steam{0%{transform:translateY(10px) scaleX(.7);opacity:0}30%{opacity:.9}100%{transform:translateY(-28px) translateX(10px) scaleX(1.3);opacity:0}}
+@keyframes beanDrift{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-12px) rotate(18deg)}}
+@keyframes coffeeFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,15px)}}
+@keyframes glow{0%,100%{opacity:.5;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+@media(max-width:600px){.coffee-hero{min-height:165px;padding:20px}.coffee-copy{max-width:67%}.coffee-copy h1{font-size:22px}.coffee-copy p{font-size:12px}.coffee-cup{width:92px;height:70px}.coffee-cup:after{right:-24px;width:30px;height:31px;border-width:7px;border-left:0}}
+
+  
+    #order-success-popup{position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);padding:20px}
+    .order-success-card{background:#fff;border-radius:18px;padding:24px 32px;text-align:center;box-shadow:0 15px 45px rgba(0,0,0,.25);min-width:230px;animation:orderSuccessPop .18s ease-out}
+    .order-success-icon{font-size:42px;line-height:1;margin-bottom:10px}
+    .order-success-title{font-size:20px;font-weight:800;color:#3e8b68}
+    .order-success-number{font-size:13px;color:#7b624a;margin-top:6px}
+    @keyframes orderSuccessPop{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+
+    .coffee-harvest-banner{position:relative;width:100%;margin:16px 0 20px;border-radius:20px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow);background:#eadbc7;aspect-ratio:16/7;min-height:190px}
+    .coffee-harvest-banner img{width:100%;height:100%;display:block;object-fit:cover}
+    .coffee-harvest-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(72,43,23,.55),rgba(72,43,23,.05) 65%,rgba(72,43,23,.18));display:flex;align-items:flex-end;padding:18px}
+    .coffee-harvest-text{background:rgba(255,248,238,.88);backdrop-filter:blur(4px);border-radius:14px;padding:10px 16px;color:#5b422a;font-weight:800;max-width:360px}
+    .coffee-harvest-text strong{display:block;font-size:18px}.coffee-harvest-text span{font-size:12px;font-weight:600}
+    @media(max-width:600px){.coffee-harvest-banner{aspect-ratio:1.55;min-height:180px}.coffee-harvest-overlay{padding:10px}.coffee-harvest-text{padding:8px 11px}.coffee-harvest-text strong{font-size:15px}.coffee-harvest-text span{font-size:10px}}
+  
+    html, body { background: #f4e4d0 !important; }
+    main, .container { background: transparent !important; }
+
+/* ===== POINT CAFE INSTALLED-APP DESIGN ===== */
+html.pwa-standalone body{
+  background:#f7eee2;
+  padding-bottom:76px;
+}
+html.pwa-standalone body::before{
+  opacity:.16;
+  background-attachment:scroll;
+}
+html.pwa-standalone body::after{
+  background:linear-gradient(135deg,rgba(255,249,239,.88),rgba(211,180,145,.20));
+}
+
+/* clean app header */
+html.pwa-standalone header{
+  position:sticky;
+  top:0;
+  z-index:1500;
+  padding:10px 12px 11px;
+  background:rgba(255,251,246,.94);
+  border-bottom:1px solid #ead8c2;
+  box-shadow:0 5px 20px rgba(91,66,42,.10);
+}
+html.pwa-standalone .header-top{
+  max-width:1100px;
+  gap:8px;
+}
+html.pwa-standalone .brand{gap:8px}
+html.pwa-standalone .brand img{
+  width:46px;height:46px;border:0;padding:0;
+  border-radius:12px;background:#fff;
+}
+html.pwa-standalone .brand h2{font-size:17px}
+html.pwa-standalone .brand span{font-size:10px!important}
+html.pwa-standalone .search-container{
+  margin:9px auto 0;
+  max-width:1100px;
+}
+html.pwa-standalone .search-input{
+  height:44px;
+  border-radius:23px;
+  background:#fff;
+  padding:10px 18px;
+  border:1px solid #ddcbb7;
+  box-shadow:inset 0 1px 3px rgba(91,66,42,.05);
+}
+html.pwa-standalone .store-controls{
+  display:none!important;
+}
+html.pwa-standalone .header-actions{
+  gap:5px;
+}
+html.pwa-standalone .header-actions .cart-btn{
+  width:42px!important;height:42px!important;
+  border-radius:12px;
+  padding:4px!important;
+}
+html.pwa-standalone .header-actions .pwa-install-page-btn{
+  display:none!important;
+}
+
+/* announcement is quieter in app mode */
+html.pwa-standalone .ticker-wrap{
+  height:32px;line-height:32px;
+  border:0;
+  border-radius:0 0 12px 12px;
+  font-size:11px;
+  background:#ead9c3;
+}
+
+/* app content */
+html.pwa-standalone .container{
+  max-width:1100px;
+  padding:0 14px 20px;
+}
+html.pwa-standalone .coffee-hero{
+  margin:12px 0 10px!important;
+  border-radius:20px!important;
+  min-height:160px;
+  box-shadow:0 10px 28px rgba(91,66,42,.16);
+}
+html.pwa-standalone .slider-container{
+  margin:10px 0 15px;
+  border-radius:18px;
+  aspect-ratio:16/7;
+  max-height:245px;
+  box-shadow:0 8px 22px rgba(91,66,42,.12);
+}
+
+/* category strip generated from products */
+html.pwa-standalone .app-categories{
+  display:flex;
+  gap:9px;
+  overflow-x:auto;
+  padding:4px 1px 13px;
+  scrollbar-width:none;
+}
+html.pwa-standalone .app-categories::-webkit-scrollbar{display:none}
+html.pwa-standalone .app-category{
+  flex:0 0 auto;
+  min-width:76px;
+  padding:9px 10px 8px;
+  border:1px solid #ead8c2;
+  border-radius:17px;
+  background:rgba(255,255,255,.86);
+  color:#76583b;
+  text-align:center;
+  font-size:11px;
+  font-weight:800;
+  box-shadow:0 5px 13px rgba(91,66,42,.07);
+}
+html.pwa-standalone .app-category-icon{
+  display:block;
+  font-size:22px;
+  margin-bottom:3px;
+}
+
+/* section heading */
+html.pwa-standalone .app-section-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:5px 2px 9px;
+  color:#684b30;
+  font-size:19px;
+  font-weight:900;
+}
+html.pwa-standalone .app-section-title small{
+  font-size:11px;
+  font-weight:700;
+  color:#9a7652;
+}
+
+/* product cards like the reference design */
+html.pwa-standalone .products-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+html.pwa-standalone .product-card{
+  border:1px solid #e4d3c0;
+  border-radius:15px;
+  padding:8px;
+  background:rgba(255,255,255,.94);
+  box-shadow:0 7px 18px rgba(91,66,42,.08);
+}
+html.pwa-standalone .product-img-wrapper{
+  border:0;
+  border-radius:11px;
+}
+html.pwa-standalone .product-img-wrapper img{
+  height:112px;
+}
+html.pwa-standalone .zoom-hint{display:none}
+html.pwa-standalone .product-title{
+  font-size:13px;
+  margin:7px 0 2px;
+}
+html.pwa-standalone .product-price{
+  font-size:14px;
+  margin-bottom:7px;
+}
+html.pwa-standalone .add-to-cart{
+  border-radius:9px;
+  padding:8px;
+  font-size:12px;
+}
+
+/* app-only bottom navigation */
+html.pwa-standalone .pwa-bottom-nav{
+  display:flex;
+  position:fixed;
+  left:0;right:0;bottom:0;
+  height:66px;
+  z-index:1800;
+  background:rgba(255,251,246,.97);
+  border-top:1px solid #e4d3c0;
+  box-shadow:0 -8px 24px rgba(91,66,42,.10);
+  justify-content:space-around;
+  align-items:center;
+}
+html.pwa-standalone .pwa-bottom-nav button{
+  border:0;background:transparent;color:#92755a;
+  font-family:inherit;font-size:10px;font-weight:800;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  min-width:58px;cursor:pointer;
+}
+html.pwa-standalone .pwa-bottom-nav .nav-icon{font-size:21px;line-height:1}
+html.pwa-standalone .pwa-bottom-nav button.active{color:#6f4d30}
+
+/* hide long info/footer in installed view for a cleaner app home */
+html.pwa-standalone .coffee-info-grid,
+html.pwa-standalone footer{
+  display:none!important;
+}
+
+@media (min-width:700px){
+  html.pwa-standalone .products-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  html.pwa-standalone .product-img-wrapper img{height:145px}
+}
+
+
+.pwa-skip-btn{
+  width:100%;margin-top:8px;min-height:40px;border:0;
+  background:transparent;color:#76583b;font-size:13px;
+  font-weight:800;cursor:pointer;border-radius:10px;
+}
+.pwa-skip-btn:active{background:rgba(118,88,59,.08)}
+
+
+/* ===== SMALL NON-FORCED INSTALL NOTICE ===== */
+.pwa-install-modal{
+  position:fixed!important;
+  inset:auto 12px 78px auto!important;
+  width:auto!important;
+  height:auto!important;
+  background:transparent!important;
+  display:block!important;
+  padding:0!important;
+  z-index:200000!important;
+}
+.pwa-install-card{
+  width:285px!important;
+  max-width:calc(100vw - 24px)!important;
+  box-sizing:border-box;
+  display:grid!important;
+  grid-template-columns:48px 1fr;
+  grid-template-rows:auto auto;
+  gap:4px 10px;
+  align-items:center;
+  padding:10px 11px!important;
+  background:rgba(255,250,243,.94)!important;
+  border:1px solid rgba(154,118,82,.35)!important;
+  border-radius:16px!important;
+  box-shadow:0 8px 24px rgba(45,25,10,.16)!important;
+  text-align:right!important;
+  position:relative;
+}
+.pwa-install-logo{
+  grid-row:1 / 3;
+  width:44px!important;height:44px!important;
+  border-radius:11px!important;
+  border:1px solid rgba(154,118,82,.45)!important;
+  padding:3px!important;
+}
+.pwa-install-title{
+  margin:0!important;
+  font-size:13px!important;
+  line-height:1.25!important;
+  color:#76583b!important;
+}
+.pwa-install-subtitle{
+  margin:0!important;
+  font-size:10px!important;
+  line-height:1.3!important;
+  color:#806b58!important;
+}
+.pwa-install-btn{
+  grid-column:1 / 3;
+  min-height:34px!important;
+  margin-top:3px!important;
+  border-radius:9px!important;
+  font-size:12px!important;
+  padding:5px 8px!important;
+}
+.pwa-install-help{display:none!important}
+.pwa-skip-btn{
+  position:absolute!important;
+  top:4px!important;
+  left:5px!important;
+  width:22px!important;
+  min-height:22px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:50%!important;
+  background:rgba(118,88,59,.10)!important;
+  color:#76583b!important;
+  font-size:15px!important;
+  line-height:22px!important;
+  z-index:3;
+}
+@media(max-width:420px){
+  .pwa-install-modal{right:9px!important;bottom:72px!important}
+  .pwa-install-card{width:250px!important}
+}
+
+
+/* ===== POINT CAFE welcome/info category ===== */
+.pca-welcome-card{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin:8px 12px 14px;
+  padding:13px 15px;
+  border:1px solid #ead8c2;
+  border-radius:18px;
+  background:rgba(255,250,243,.92);
+  box-shadow:0 6px 18px rgba(91,66,42,.08);
+  direction:rtl;
+}
+.pca-welcome-icon{
+  flex:0 0 54px;
+  width:54px;height:54px;
+  border-radius:50%;
+  overflow:hidden;
+  border:1px solid #e2cdb3;
+  background:#f7ead9;
+  display:flex;align-items:center;justify-content:center;
+}
+.pca-welcome-icon img{
+  width:100%;height:100%;object-fit:cover;
+}
+.pca-welcome-text{min-width:0;text-align:right}
+.pca-welcome-title{
+  color:#6f4d30;
+  font-size:17px;
+  font-weight:900;
+  margin:0 0 3px;
+}
+.pca-welcome-desc{
+  color:#806b58;
+  font-size:12px;
+  line-height:1.7;
+  margin:0;
+}
+@media(max-width:520px){
+  .pca-welcome-card{margin:7px 9px 12px;padding:11px 12px;gap:11px}
+  .pca-welcome-icon{flex-basis:46px;width:46px;height:46px}
+  .pca-welcome-title{font-size:15px}
+  .pca-welcome-desc{font-size:11px}
+}
+
+
+<style>
+/* FINAL CLEAN INSTALL UI */
+.pwa-install-modal{
+  position:fixed!important; inset:auto 10px 76px auto!important;
+  width:auto!important;height:auto!important;padding:0!important;
+  background:transparent!important;display:block!important;z-index:200000!important;
+}
+.pwa-install-card{
+  direction:rtl!important;width:270px!important;max-width:calc(100vw - 20px)!important;
+  box-sizing:border-box!important;display:grid!important;
+  grid-template-columns:44px 1fr!important;grid-template-rows:auto auto auto!important;
+  gap:3px 9px!important;align-items:center!important;
+  padding:10px!important;background:rgba(255,250,243,.97)!important;
+  border:1px solid #dfc9ad!important;border-radius:15px!important;
+  box-shadow:0 7px 22px rgba(65,43,24,.18)!important;text-align:right!important;
+}
+.pwa-install-logo{
+  grid-row:1/3!important;width:40px!important;height:40px!important;
+  border-radius:10px!important;padding:2px!important;
+}
+.pwa-install-title{margin:0!important;font-size:13px!important;line-height:1.2!important}
+.pwa-install-subtitle{margin:0!important;font-size:10px!important;line-height:1.4!important}
+.pwa-install-btn{
+  grid-column:1/3!important;min-height:34px!important;margin-top:3px!important;
+  border-radius:9px!important;font-size:12px!important;
+}
+.pwa-skip-btn{
+  position:absolute!important;top:4px!important;left:5px!important;
+  width:30px!important;min-height:25px!important;margin:0!important;
+  padding:0!important;border:0!important;border-radius:7px!important;
+  background:#f1e5d7!important;color:#76583b!important;
+  font-family:inherit!important;font-size:10px!important;font-weight:900!important;
+  z-index:4!important;
+}
+.pwa-install-help{display:none!important}
+
+</style>
+
+</style>
+
+<link rel="manifest" href="store-manifest.json"><meta name="theme-color" content="#9a7652"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="تطبيق متجر POINT CAFE"><link rel="apple-touch-icon" href="point-cafe-logo.jpg">
+<style>
+/* POINT CAFE PWA INSTALL */
+.pwa-install-modal{position:fixed;inset:0;z-index:200000;background:rgba(47,27,12,.82);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:18px}.pwa-install-card{width:min(430px,100%);background:linear-gradient(180deg,#fffaf3,#f5eadb);border:2px solid #dfc9ad;border-radius:24px;padding:24px 20px;text-align:center;box-shadow:0 25px 70px #0008}.pwa-install-logo{width:112px;height:112px;object-fit:contain;border-radius:22px;border:2px solid #9a7652;background:#fff;padding:6px}.pwa-install-title{margin:12px 0 5px;color:#76583b;font-size:24px;font-weight:900}.pwa-install-subtitle{margin:0 0 17px;color:#6f5945;font-size:14px;line-height:1.8}.pwa-install-btn{width:100%;min-height:55px;border:0;border-radius:14px;background:#9a7652;color:#fff;font-size:17px;font-weight:900;cursor:pointer}.pwa-install-btn:active{transform:scale(.98)}.pwa-install-help{display:none;margin-top:12px;background:#fff;border:1px solid #dfc9ad;border-radius:12px;padding:10px;color:#5d4b3b;font-size:12px;line-height:1.8}.pwa-install-modal.installed{display:none}.pwa-install-page-btn{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;border:1px solid #dfc9ad!important;background:#fffaf3!important;color:#76583b!important;border-radius:10px!important;font-weight:900!important;cursor:pointer!important}.pwa-install-page-btn:hover{background:#eadbc7!important}
+</style>
+<style>
+/* POINT CAFE PWA INSTALL */
+.pwa-install-modal{position:fixed;inset:0;z-index:200000;background:rgba(35,20,10,.03);display:flex;align-items:center;justify-content:center;padding:16px;animation:pwaFadeIn .3s ease}
+.pwa-install-card{width:min(430px,90vw);background:rgba(255,250,243,.55);border:1.5px solid rgba(154,118,82,.55);border-radius:22px;padding:19px 16px;text-align:center;box-shadow:0 16px 40px rgba(45,25,10,.20);position:relative}
+.pwa-install-logo{width:82px;height:82px;object-fit:contain;border-radius:18px;border:2px solid rgba(154,118,82,.65);background:rgba(255,255,255,.75);padding:5px}
+.pwa-install-title{margin:9px 0 4px;color:#76583b;font-size:21px;font-weight:900}
+.pwa-install-subtitle{margin:0 0 13px;color:#5d4b3b;font-size:13px;line-height:1.7}
+.pwa-install-btn{width:100%;min-height:50px;border:0;border-radius:13px;background:rgba(154,118,82,.92);color:#fff;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 7px 15px rgba(118,88,59,.20)}
+.pwa-install-help{display:none;margin-top:10px;background:rgba(255,255,255,.70);border:1px solid rgba(223,201,173,.85);border-radius:11px;padding:9px;color:#5d4b3b;font-size:12px;line-height:1.7}
+.pwa-install-modal.installed{display:none}
+.pwa-install-page-btn{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;border:1px solid #dfc9ad!important;background:#fffaf3!important;color:#76583b!important;border-radius:10px!important;font-weight:900!important;cursor:pointer!important}
+@keyframes pwaFadeIn{from{opacity:0;transform:scale(.99)}to{opacity:1;transform:scale(1)}}
+</style><script>
+(function(){
+  try {
+    if ((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true) {
+      document.documentElement.classList.add('pwa-standalone');
+    }
+  } catch(e) {}
+})();
+</script>
+<style>
+/* POINT CAFE FINAL: installed app uses the exact page/site UI with NO install overlay. */
+html.pwa-standalone #pwa-install-modal,
+html.pwa-standalone .pwa-install-modal,
+html.pwa-standalone .pwa-install-page-btn,
+html.pwa-standalone [data-pwa-install],
+html.pwa-standalone .install-app-button {
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+html.pwa-standalone body {
+  overflow-x:hidden;
+}
+</style>
+<script>
+(function(){
+  function pointCafeStandalone(){
+    try {
+      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+             window.navigator.standalone === true ||
+             document.referrer.indexOf('android-app://') === 0;
+    } catch(e){ return false; }
+  }
+  function applyInstalledMode(){
+    if(!pointCafeStandalone()) return;
+    document.documentElement.classList.add('pwa-standalone');
+    var ids=['pwa-install-modal'];
+    ids.forEach(function(id){ var el=document.getElementById(id); if(el) el.remove(); });
+    document.querySelectorAll('.pwa-install-page-btn,[data-pwa-install],.install-app-button').forEach(function(el){ el.remove(); });
+  }
+  applyInstalledMode();
+  document.addEventListener('DOMContentLoaded',applyInstalledMode);
+  window.addEventListener('load',applyInstalledMode);
+  setTimeout(applyInstalledMode,250);
+  setTimeout(applyInstalledMode,1000);
+})();
+</script>
+
+
+<style id="point-cafe-install-final-fix">
+/* POINT CAFE FINAL INSTALL UI: one horizontal header button + reliable skip */
+.header-actions .pwa-install-page-btn{
+  width:118px!important;height:42px!important;min-width:118px!important;
+  padding:4px 8px!important;box-sizing:border-box!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  white-space:nowrap!important;word-break:keep-all!important;overflow:hidden!important;
+  font-size:10px!important;line-height:1!important;
+  border:1px solid #d9c3a9!important;border-radius:12px!important;
+  background:#fffaf3!important;color:#76583b!important;
+}
+.header-actions .pwa-install-page-btn br{display:none!important}
+.pwa-install-modal.installed{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+.pwa-skip-btn{
+  cursor:pointer!important;touch-action:manipulation!important;
+}
+</style>
+<script>
+(function(){
+  function hidePointCafeInstall(){
+    var modal=document.getElementById('pwa-install-modal');
+    if(modal){
+      modal.classList.add('installed');
+      modal.style.setProperty('display','none','important');
+      modal.style.setProperty('visibility','hidden','important');
+      modal.style.setProperty('pointer-events','none','important');
+    }
+    try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(e){}
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target && e.target.closest ? e.target.closest('#pwa-skip-btn') : null;
+    if(b){ e.preventDefault(); e.stopPropagation(); hidePointCafeInstall(); }
+  },true);
+  window.hidePointCafeInstall=hidePointCafeInstall;
+})();
+</script>
+
+<style id="point-cafe-header-mini-final">
+/* تصغير رأس المتجر وزر التثبيت بدون تغيير ترتيب العناصر */
+.header-top .brand{gap:7px!important}
+.header-top .brand img{width:40px!important;height:40px!important}
+.header-top .brand h2{font-family:'Tajawal',sans-serif!important;font-size:14px!important;line-height:1.05!important;font-weight:800!important;margin:0!important}
+.header-top .brand span{font-family:'Tajawal',sans-serif!important;font-size:8.5px!important;line-height:1.1!important;font-weight:600!important;display:block!important;margin-top:2px!important}
+.header-actions{gap:4px!important}
+.header-actions .pwa-install-page-btn{width:88px!important;height:34px!important;min-width:88px!important;padding:3px 5px!important;font-family:'Tajawal',sans-serif!important;font-size:8.5px!important;line-height:1.05!important;font-weight:800!important;border-radius:9px!important}
+.header-actions .cart-btn:not(.pwa-install-page-btn){padding:7px 9px!important;font-size:15px!important;border-radius:9px!important}
+.header-actions .cart-badge{width:17px!important;height:17px!important;font-size:9px!important;top:-5px!important;right:-5px!important}
+@media(max-width:380px){
+ .header-top .brand img{width:36px!important;height:36px!important}
+ .header-top .brand h2{font-size:12px!important}
+ .header-top .brand span{font-size:7.5px!important}
+ .header-actions .pwa-install-page-btn{width:78px!important;min-width:78px!important;font-size:7.5px!important}
+}
+</style>
+</head>
+<body>
+
+  <div id="closed-banner" class="store-closed-bar">
+    🔒 المتجر مغلق حالياً: <span id="closed-reason-text">سوف نعود قريباً</span>
+  </div>
+
+  <div id="splash-screen">
+    <img id="splash-img" src="https://via.placeholder.com/120?text=متجر+أم+سالم" class="splash-logo" alt="شعار المتجر">
+    <div class="splash-title">POINT CAFE<br><span style="font-size: 14px; color:var(--primary); font-weight:600;">كافيه ومشروبات وحلويات</span></div>
+  </div>
+
+  <a id="whatsapp-float-btn" href="https://wa.me/967771234567" class="whatsapp-float" target="_blank" title="تواصل عبر الواتساب">
+    <svg viewBox="0 0 32 32">
+      <path d="M16 2a13 13 0 0 0-11 20l-2 7 7-2a13 13 0 1 0 6-25zm0 24a11 11 0 0 1-5.6-1.5l-.4-.2-4.1 1.1 1.1-4-.3-.5A11 11 0 1 1 16 26zm6-8c-.3-.2-1.9-1-2.2-1.1s-.5-.2-.7.2-.8 1.1-1 1.3-.4.2-.7 0a9 9 0 0 1-2.6-1.6 10 10 0 0 1-1.8-2.3c-.2-.3 0-.5.1-.7s.3-.4.5-.6l.3-.4c.1-.2.1-.3 0-.5s-.7-1.7-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.2 1.2-1.2 2.9 1.2 3.4 1.4 3.6 2.4 3.7 5.8 5.2c.8.3 1.4.5 1.9.7.8.2 1.5.2 2.1.1.7-.1 2.2-.9 2.5-1.8s.3-1.6.2-1.8c-.1-.1-.3-.2-.6-.4z"/>
+    </svg>
+  </a>
+
+  <div id="toast" class="toast-notification">
+    <img id="toast-img" src="" alt="شعار">
+    <span>تمت إضافة المنتج إلى السلة 🛍️</span>
+  </div>
+
+  <header>
+    <div class="header-top">
+      <div class="brand">
+        <img id="header-logo" src="https://via.placeholder.com/45?text=أم+سالم" alt="شعار المتجر">
+        <div>
+          <h2>POINT CAFE</h2>
+          <span style="font-size:11px; color:var(--primary); font-weight:700;">اطلب بكل سهولة</span>
+        </div>
+      </div>
+      <div class="header-actions"><button class="cart-btn pwa-install-page-btn" style="width:104px;height:42px;padding:4px 7px;font-size:11px;line-height:1.1;font-weight:900;white-space:normal" onclick="openPointCafeInstall()" title="اضغط تثبيت التطبيق تلقائيًا">📲 اضغط تثبيت التطبيق تلقائي</button><button class="cart-btn" onclick="toggleCart()">🛒 <span id="cart-count" class="cart-badge">0</span></button></div>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="search-input" class="search-input" placeholder="ابحث عن قهوة أو مشروب..." oninput="filterProducts()">
+    </div>
+    <div class="store-controls" aria-label="إعدادات المتجر">
+      <button type="button" class="theme-btn" id="theme-toggle" onclick="toggleTheme()">🌙 الوضع الليلي</button>
+      <div class="language-switcher">
+        <button type="button" class="lang-btn active" data-lang="ar" onclick="setLanguage('ar')">العربية</button>
+        <button type="button" class="lang-btn" data-lang="en" onclick="setLanguage('en')">English</button>
+        <button type="button" class="lang-btn" data-lang="zh" onclick="setLanguage('zh')">中文</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+<div class="ticker-wrap">
+      <div class="ticker-move">
+        <div class="ticker-item">🌸 أهلاً بكم في POINT CAFE ☕ نقدم لكم أشهى المشروبات والحلويات 🛍️</div>
+        <div class="ticker-item">✨ توصيل سريع أو استلام من الفرع.. أهلاً وسهلاً بكم ✨</div>
+      </div>
+    </div>
+
+
+    <section class="coffee-hero" aria-label="ترحيب POINT CAFE">
+      <div class="hero-glow"></div>
+      <span class="bean b1"></span><span class="bean b2"></span><span class="bean b3"></span>
+      <div class="coffee-copy">
+        <h1>☕ أهلاً بك في POINT CAFE</h1>
+        <p>قهوتك المفضلة، مشروباتك وحلوياتك في تجربة كوفيه عصرية ✨</p>
+      </div>
+      <div class="coffee-cup" aria-hidden="true">
+        <span class="steam s1"></span><span class="steam s2"></span><span class="steam s3"></span>
+      </div>
+    </section>
+
+    <div class="slider-container" id="slider-box">
+      <div class="slider-track" id="slider-main"></div>
+    </div>
+
+    
+<div id="pwa-app-categories" class="app-categories" aria-label="أقسام المتجر"></div>
+<div class="pca-welcome-card" aria-label="عن POINT CAFE">
+  <div class="pca-welcome-icon">☕</div>
+  <div class="pca-welcome-text">
+    <h3 class="pca-welcome-title">☕ أهلاً بك في POINT CAFE</h3>
+    <p class="pca-welcome-desc">قهوتك المفضلة، مشروباتك وحلوياتك في تجربة كوفيه عصرية ✨</p>
+  </div>
+</div>
+
+
+
+<div class="app-section-title"><span>☕ أحدث المنتجات</span><small>عرض الكل ←</small></div>
+<div class="products-grid" id="products-container"></div>
+
+
+    <section class="coffee-info-grid" aria-label="معلومات الكوفيه">
+      <article class="coffee-info-card"><div class="coffee-info-icon">☕</div><h3 data-i18n="aboutTitle">من نحن</h3><p data-i18n="aboutText">كوفيه POINT CAFE يقدم القهوة والمشروبات والحلويات بطلب سهل وخدمة ودودة.</p></article>
+      <article class="coffee-info-card"><div class="coffee-info-icon">🚚</div><h3 data-i18n="deliveryTitle">التوصيل</h3><p data-i18n="deliveryText">نوفر التوصيل داخل مناطق الخدمة، ويمكنك إرسال موقعك مع الطلب.</p></article>
+      <article class="coffee-info-card"><div class="coffee-info-icon">💳</div><h3 data-i18n="paymentTitle">دفع تحويل</h3><p data-i18n="paymentText">يمكنك اختيار التحويل وإرفاق صورة الحوالة ليتم التحقق منها.</p></article>
+      <article class="coffee-info-card"><div class="coffee-info-icon">🏪</div><h3 data-i18n="storeTitle">متجر الكوفيه</h3><p data-i18n="storeText">تصفح المنتجات، أضفها إلى السلة، ثم اختر التوصيل أو الاستلام.</p></article>
+    </section>
+
+
+    <div class="reviews-section">
+      <h3>آراء وتقييمات العملاء</h3>
+      <div class="reviews-list" id="reviews-list"></div>
+      
+      <div style="background: #fbf5ed; padding:16px; border-radius:12px; border:1px solid var(--border);">
+        <h4 style="font-size:14px; margin-bottom:10px; color:var(--primary);">أضف رأيك وتقييمك:</h4>
+        <input type="text" id="review-name" class="review-form-input" placeholder="اسمك الكريم">
+        
+        <div class="star-rating" id="star-rating">
+          <span onclick="setRating(5)">★</span>
+          <span onclick="setRating(4)">★</span>
+          <span onclick="setRating(3)">★</span>
+          <span onclick="setRating(2)">★</span>
+          <span onclick="setRating(1)">★</span>
+        </div>
+        
+        <input type="text" id="review-text" class="review-form-input" placeholder="اكتب رأيك حول جودة المنتجات وتجربة المتجر...">
+        <button class="add-to-cart" onclick="addReview()">إرسال التقييم</button>
+      </div>
+    </div>
+  </div>
+
+  
+<nav class="pwa-bottom-nav" aria-label="التنقل" style="display:none">
+  <button class="active" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="nav-icon">⌂</span>الرئيسية</button>
+  <button onclick="document.getElementById('products-container')?.scrollIntoView({behavior:'smooth'})"><span class="nav-icon">▦</span>الأقسام</button>
+  <button onclick="toggleCart()"><span class="nav-icon">🛒</span>السلة</button>
+  <button onclick="document.getElementById('reviews-list')?.scrollIntoView({behavior:'smooth'})"><span class="nav-icon">♡</span>التقييمات</button>
+</nav>
+
+<footer>
+    جميع الحقوق محفوظة لـ <br>
+    <strong>POINT CAFE</strong> 2026<br>
+    <a href="https://wa.me/0553804010" target="_blank" class="dev-link">
+      <span>مبرمج</span> 
+      <span style="direction:ltr;">0553804010</span>
+      <span>💬</span>
+    </a>
+  </footer>
+
+  <div class="modal" id="cart-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>سلة التسوق</h3>
+        <button onclick="toggleCart()" style="border:none; background:none; font-size:20px; cursor:pointer; color:var(--primary);">✕</button>
+      </div>
+
+      <div id="store-location-box" class="store-location-card" style="display:none;">
+        📍 <strong>موقع المتجر:</strong> <a id="store-location-link" href="#" target="_blank" rel="noopener">فتح موقع المتجر على الخريطة 🗺️</a>
+      </div>
+
+      <div id="cart-items"></div>
+      <div id="cart-total" class="cart-summary-box"><div class="cart-summary-row"><span>الإجمالي:</span><strong>0</strong></div><div class="cart-summary-row delivery"><span>التوصيل:</span><strong>مجاني</strong></div><div class="cart-summary-row grand"><span>الإجمالي مع التوصيل:</span><strong>0</strong></div></div>
+
+      <div style="margin-top: 15px; background: #fbf5ed; padding: 14px; border: 1px solid var(--border); border-radius: 12px;">
+        <label style="font-size: 13px; font-weight: 700; color:var(--primary); display:block; margin-bottom:6px;">👤 اسم العميل (إجباري):</label>
+        <input type="text" id="customer-name" class="review-form-input" placeholder="أدخل اسمك الكامل هنا..." required>
+
+        <label style="font-size: 13px; font-weight: 700; color:var(--primary); display:block; margin-top:8px; margin-bottom:6px;">📞 رقم الجوال للتواصل (إجباري):</label>
+        <input type="tel" id="customer-phone" class="review-form-input" placeholder="مثال: 77xxxxxxx أو 71xxxxxxx" inputmode="tel" required>
+
+        <label style="font-size: 13px; font-weight: 700; color:var(--primary); display:block; margin-top:8px; margin-bottom:6px;">🚚 طريقة الاستلام:</label>
+        <div class="delivery-choice">
+          <label><input type="radio" name="delivery-type" value="delivery" checked onchange="toggleDeliveryFields()"> 🚚 توصيل إلى الموقع</label>
+          <label><input type="radio" name="delivery-type" value="pickup" onchange="toggleDeliveryFields()"> 🏪 استلام من الفرع</label>
+        </div>
+
+        <div id="delivery-fields">
+          <label style="font-size: 13px; font-weight: 700; color:var(--primary); display:block; margin-top:8px; margin-bottom:6px;">📍 موقع التوصيل / العنوان:</label>
+          <input type="text" id="customer-location" class="review-form-input" placeholder="أدخل العنوان أو المنطقة...">
+          <button type="button" class="btn-gps" onclick="getCurrentLocation()">📍 اضغط هنا لتحديد موقعك تلقائياً</button>
+        </div>
+      </div>
+
+      <div class="payment-box" style="background:#fbf5ed;border:1px solid var(--border);padding:14px;border-radius:12px;margin-top:14px;">
+        <label style="font-size:13px;font-weight:700;color:var(--primary);display:block;margin-bottom:7px;">💳 طريقة الدفع (إجباري):</label>
+        <div class="delivery-choice">
+          <label><input type="radio" name="payment-method" value="cash" checked onchange="togglePaymentFields()"> 💵 كاش</label>
+          <label><input type="radio" name="payment-method" value="transfer" onchange="togglePaymentFields()"> 🏦 تحويل</label>
+        </div>
+        <div id="transfer-fields" style="display:none;margin-top:12px;">
+          <p style="font-weight:800;color:var(--primary);margin-bottom:8px;">🏦 اختر البنك الذي ستُحوّل إليه:</p>
+          <select id="selected-bank" class="review-form-input"></select>
+          <label style="margin-top:10px;">📷 صورة الحوالة (إجباري):</label>
+          <input type="file" id="transfer-image" class="review-form-input" accept="image/*" onchange="previewTransferImage(event)">
+          <img id="transfer-preview" style="display:none;width:100%;max-height:220px;object-fit:contain;border:1px dashed var(--border);border-radius:10px;background:#fff;padding:5px;margin-top:8px;" alt="صورة الحوالة">
+          <p class="note">اختر صورة الحوالة من المعرض، وستظهر مع الطلب للمدير.</p>
+        </div>
+      </div>
+
+      <div class="shipping-info-box">
+        🚚 سيتم عرض بيانات التوصيل للمدير ليتم تجهيز الطلب وتسليمه للسائق.
+      </div>
+
+      <div class="bank-box" id="bank-accounts-container">
+        <p style="font-weight:800; margin-bottom:10px; text-align:center; color:var(--primary);">حسابات التحويل المالي المعتمدة:</p>
+        <div id="bank-list-modal"></div>
+      </div>
+
+      <button class="btn-submit-whatsapp" id="btn-submit-order" onclick="sendOrderToWhatsApp()">إتمام الطلب وإرساله ☕</button>
+    </div>
+  </div>
+
+  <div class="img-modal" id="image-view-modal" onclick="closeProductImageModal(event)">
+    <div class="img-modal-content" onclick="event.stopPropagation()">
+      <button class="close-img-modal" onclick="closeProductImageModal()">✕</button>
+      <img id="modal-product-img" src="" alt="صورة المنتج مكبرة">
+      <div class="img-modal-title" id="modal-product-title"></div>
+    </div>
+  </div>
+
+  <script>
+    let storeData = {
+      name: "POINT CAFE",
+      slogan: "أشهى القهوة والمشروبات والحلويات",
+      logo: "https://via.placeholder.com/120?text=أم+سالم",
+      phone: "967771234567",
+      locationUrl: "",
+      isClosed: false,
+      closeReason: "المتجر مغلق حالياً، نسعد بخدمتكم قريباً.",
+      sliders: [],
+      bankAccounts: [],
+      deliveryFree: true,
+      deliveryFee: 0,
+      deliveryCurrency: "ر.س",
+      products: [],
+      reviews: []
+    };
+
+    // عرض آخر بيانات محفوظة فوراً من الجهاز ثم تحديثها لحظياً من Firebase.
+    try {
+      const cached = localStorage.getItem('point_cafe_store_cache');
+      if (cached) storeData = { ...storeData, ...JSON.parse(cached) };
+    } catch(e) {}
+
+    let cart = [];
+    let selectedRating = 5;
+    let transferImage = '';
+    let selectedPayment = 'cash';
+    let currentSlide = 0;
+    let sliderInterval = null;
+
+    // دخول سريع: إخفاء شاشة البداية بعد ثانية واحدة كحد أقصى،
+    // بدون انتظار تحميل بيانات Firebase حتى لا يتأخر فتح المتجر.
+    setTimeout(() => {
+      const splash = document.getElementById('splash-screen');
+      if (splash) splash.classList.add('fade-out');
+    }, 1000);
+
+    let realtimeStoreStarted = false;
+    window.addEventListener('firebase-ready', async () => {
+      await fetchStoreDataFromCloud();
+      startRealtimeStoreSync();
+    });
+
+    function startRealtimeStoreSync(){
+      if(realtimeStoreStarted || !window.onSnapshot || !window.db) return;
+      realtimeStoreStarted = true;
+      const ref = window.doc(window.db, 'settings', 'store_config');
+      window.onSnapshot(ref, snap => {
+        if(!snap.exists()) return;
+        storeData = { ...storeData, ...snap.data() };
+        try { localStorage.setItem('point_cafe_store_cache', JSON.stringify(storeData)); } catch(e) {}
+        renderStoreInfo();
+        checkStoreStatus();
+        renderSliders();
+        renderProducts(storeData.products || []);
+        renderCartBankAccounts();
+        toggleDeliveryFields();
+      }, err => console.error('Realtime store sync:', err));
+    }
+
+    async function fetchStoreDataFromCloud() {
+      try {
+        const docRef = window.doc(window.db, "settings", "store_config");
+        const docSnap = await window.getDoc(docRef);
+        if (docSnap.exists()) {
+          storeData = { ...storeData, ...docSnap.data() };
+          try { localStorage.setItem('point_cafe_store_cache', JSON.stringify(storeData)); } catch(e) {}
+        }
+
+        const reviewsSnap = await window.getDocs(window.collection(window.db, "reviews"));
+        let cloudReviews = [];
+        reviewsSnap.forEach(d => cloudReviews.push(d.data()));
+        if(cloudReviews.length > 0) storeData.reviews = cloudReviews;
+
+      } catch(e) {
+        console.error("خطأ في جلب بيانات السحابة:", e);
+      }
+
+      initUI();
+    }
+
+    function initUI() {
+      initAppearance();
+      checkStoreStatus();
+      renderStoreInfo();
+      renderSliders();
+      renderProducts(storeData.products);
+      renderReviews();
+      renderCartBankAccounts();
+      toggleDeliveryFields();
+
+      // إذا كانت بيانات السحابة جاهزة مبكراً، لا ننتظر أكثر من ثانية.
+      const splash = document.getElementById('splash-screen');
+      if (splash) splash.classList.add('fade-out');
+    }
+
+    function checkStoreStatus() {
+      const closedBanner = document.getElementById('closed-banner');
+      if (storeData.isClosed) {
+        closedBanner.style.display = 'block';
+        document.getElementById('closed-reason-text').innerText = storeData.closeReason || "المتجر مغلق حالياً.";
+      } else {
+        closedBanner.style.display = 'none';
+      }
+    }
+
+    function renderStoreInfo() {
+      document.getElementById('splash-img').src = storeData.logo || "https://via.placeholder.com/120?text=أم+سالم";
+      document.getElementById('header-logo').src = storeData.logo || "https://via.placeholder.com/45?text=أم+سالم";
+      document.getElementById('toast-img').src = storeData.logo || "https://via.placeholder.com/45?text=أم+سالم";
+      const whatsappPhone = normalizeWhatsAppPhone(storeData.phone) || '967771234567';
+      document.getElementById('whatsapp-float-btn').href = `https://wa.me/${whatsappPhone}`;
+
+      const storeLocBox = document.getElementById('store-location-box');
+      const storeLocLink = document.getElementById('store-location-link');
+      if (storeData.locationUrl) {
+        storeLocLink.href = storeData.locationUrl;
+        storeLocBox.style.display = 'block';
+      } else {
+        storeLocBox.style.display = 'none';
+      }
+    }
+
+    function renderSliders() {
+      const track = document.getElementById('slider-main');
+      const box = document.getElementById('slider-box');
+      const sliders = storeData.sliders || [];
+
+      if (sliders.length === 0) {
+        box.style.display = 'none';
+        return;
+      }
+
+      box.style.display = 'block';
+      track.innerHTML = sliders.map(img => `
+        <div class="slider-slide"><img src="${img}"></div>
+      `).join('');
+
+      if (sliderInterval) clearInterval(sliderInterval);
+      if (sliders.length > 1) {
+        sliderInterval = setInterval(() => {
+          currentSlide = (currentSlide + 1) % sliders.length;
+          track.style.transform = `translateX(${currentSlide * 100}%)`;
+        }, 3000);
+      }
+    }
+
+    function renderProducts(items) {
+      const container = document.getElementById('products-container');
+      container.innerHTML = '';
+      if(!items || items.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding:30px; color:var(--muted);">لا توجد منتجات حالياً</p>';
+        return;
+      }
+      
+      items.forEach((p) => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="product-img-wrapper" onclick="openProductImageModal('${p.img}', '${p.name.replace(/'/g, "\\'")}')">
+            <img src="${p.img}" alt="${p.name}">
+            <span class="zoom-hint">🔍 تكبير</span>
+          </div>
+          <div>
+            ${p.specialOffer ? '<div style="display:inline-block;background:#e53935;color:#fff;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:900;margin-bottom:6px;box-shadow:0 3px 10px #e5393544">🔥 عرض خاص</div>' : ''}
+            <div class="product-title">${p.name}</div>
+            <div class="product-price">${p.price} ${p.currency || 'ر.س'}</div>${p.specs ? `<div class="product-specs">${p.specs}</div>` : ''}
+          </div>
+          <button class="add-to-cart" onclick="addToCart(${p.id})">إضافة للسلة 🛍️</button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openProductImageModal(imgSrc, title) {
+      document.getElementById('modal-product-img').src = imgSrc;
+      document.getElementById('modal-product-title').innerText = title;
+      document.getElementById('image-view-modal').style.display = 'flex';
+    }
+
+    function closeProductImageModal() {
+      document.getElementById('image-view-modal').style.display = 'none';
+    }
+
+    function filterProducts() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const filtered = (storeData.products || []).filter(p => p.name.toLowerCase().includes(query));
+      renderProducts(filtered);
+    }
+
+    function addToCart(id) {
+      if (storeData.isClosed) {
+        alert("عذراً، المتجر مغلق حالياً: " + (storeData.closeReason || ""));
+        return;
+      }
+      const existing = cart.find(item => item.id === id);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ id: id, qty: 1 });
+      }
+      updateCartUI();
+      showToast();
+    }
+
+    function updateQuantity(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
+      item.qty += delta;
+      if (item.qty <= 0) {
+        cart = cart.filter(i => i.id !== id);
+      }
+      updateCartUI();
+    }
+
+    function setQuantity(id, value) {
+      const val = parseInt(value);
+      if (isNaN(val) || val <= 0) {
+        cart = cart.filter(i => i.id !== id);
+      } else {
+        const item = cart.find(i => i.id === id);
+        if (item) item.qty = val;
+      }
+      updateCartUI();
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(i => i.id !== id);
+      updateCartUI();
+    }
+
+    function showToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 2000);
+    }
+
+    function getDeliveryInfo() {
+      const type = document.querySelector('input[name="delivery-type"]:checked')?.value || 'delivery';
+      if (type !== 'delivery') return { fee: 0, currency: storeData.deliveryCurrency || 'ر.س', free: true, pickup: true };
+      const free = storeData.deliveryFree === true || Number(storeData.deliveryFee || 0) <= 0;
+      return { fee: free ? 0 : Number(storeData.deliveryFee || 0), currency: storeData.deliveryCurrency || 'ر.س', free, pickup: false };
+    }
+
+    function buildTotalText(totals) {
+      return Object.keys(totals).map(curr => `${totals[curr]} ${curr}`).join(' | ');
+    }
+
+    function updateCartUI() {
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('cart-count').innerText = totalCount;
+      const cartItems = document.getElementById('cart-items');
+      const cartTotal = document.getElementById('cart-total');
+
+      if (cart.length === 0) {
+        cartItems.innerHTML = '<p style="text-align:center; padding:20px; color:var(--muted);">السلة فارغة</p>';
+        cartTotal.innerHTML = '<div class="cart-summary-row"><span>الإجمالي:</span><strong>0</strong></div><div class="cart-summary-row delivery"><span>التوصيل:</span><strong>مجاني</strong></div><div class="cart-summary-row grand"><span>الإجمالي مع التوصيل:</span><strong>0</strong></div>';
+        return;
+      }
+
+      let totals = {};
+      cartItems.innerHTML = cart.map(cartItem => {
+        const p = (storeData.products || []).find(prod => prod.id === cartItem.id);
+        if(!p) return '';
+        let curr = p.currency || 'ر.س';
+        let itemTotal = Number(p.price) * cartItem.qty;
+        totals[curr] = (totals[curr] || 0) + itemTotal;
+
+        return `
+          <div class="cart-item">
+            <img src="${p.img}">
+            <div class="cart-item-info">
+              <div class="cart-item-title">${p.name}</div>
+              <div class="cart-item-price-detail">السعر الفردي: ${p.price} ${curr}</div>
+              <div class="quantity-control">
+                <button class="qty-btn" onclick="updateQuantity(${p.id}, -1)">-</button>
+                <input type="number" class="qty-input" value="${cartItem.qty}" min="1" onchange="setQuantity(${p.id}, this.value)">
+                <button class="qty-btn" onclick="updateQuantity(${p.id}, 1)">+</button>
+              </div>
+              <div class="cart-item-total">الإجمالي: ${itemTotal} ${curr}</div>
+            </div>
+            <button onclick="removeFromCart(${p.id})" style="color:var(--accent); border:none; background:none; cursor:pointer; font-weight:700; font-size:13px;">حذف 🗑️</button>
+          </div>
+        `;
+      }).join('');
+
+      const delivery = getDeliveryInfo();
+      const productsText = buildTotalText(totals) || '0';
+      const grandTotals = { ...totals };
+      if (delivery.fee > 0) grandTotals[delivery.currency] = (grandTotals[delivery.currency] || 0) + delivery.fee;
+      const grandText = buildTotalText(grandTotals) || '0';
+      const deliveryText = delivery.pickup ? 'مجاني (استلام من الفرع)' : (delivery.free ? 'مجاني' : `${delivery.fee} ${delivery.currency}`);
+      cartTotal.innerHTML = `<div class="cart-summary-row"><span>الإجمالي:</span><strong>${productsText}</strong></div><div class="cart-summary-row delivery"><span>التوصيل:</span><strong>${deliveryText}</strong></div><div class="cart-summary-row grand"><span>الإجمالي مع التوصيل:</span><strong>${grandText}</strong></div>`;
+    }
+
+    function renderCartBankAccounts() {
+      const container = document.getElementById('bank-list-modal');
+      const box = document.getElementById('bank-accounts-container');
+      const accounts = storeData.bankAccounts || [];
+
+      if (accounts.length === 0) {
+        box.style.display = 'none';
+        return;
+      }
+      box.style.display = 'block';
+
+      const select = document.getElementById('selected-bank');
+      if (select) select.innerHTML = '<option value="">-- اختر البنك --</option>' + accounts.map((acc,i) => `<option value="${i}">${acc.bankName} — ${acc.accountNumber}</option>`).join('');
+      container.innerHTML = accounts.map((acc) => `
+        <div class="bank-item">
+          <div style="display:flex;align-items:center;gap:10px;">
+            ${acc.logo ? `<img src="${acc.logo}" alt="شعار ${acc.bankName}" style="width:46px;height:46px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--border);padding:4px;">` : ''}
+            <div>
+              <strong>${acc.bankName}</strong><br>
+              <span style="font-size:11px; color:var(--muted);">المستفيد: ${acc.accountName || ''}</span><br>
+              <span style="font-size:12px; color:var(--primary); font-weight:700;">${acc.accountNumber}</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyAccountNum('${acc.accountNumber}')">نسخ الرقم</button>
+        </div>
+      `).join('');
+    }
+
+    function copyAccountNum(num) {
+      navigator.clipboard.writeText(num);
+      alert('تم نسخ رقم الحساب بنجاح');
+    }
+
+    function toggleCart() {
+      const modal = document.getElementById('cart-modal');
+      modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+      updateCartUI();
+      renderCartBankAccounts();
+    }
+
+    function toggleDeliveryFields() {
+      const type = document.querySelector('input[name="delivery-type"]:checked')?.value;
+      const box = document.getElementById('delivery-fields');
+      if (box) box.style.display = type === 'pickup' ? 'none' : 'block';
+      updateCartUI();
+    }
+
+    function getCurrentLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          document.getElementById('customer-location').value = `https://maps.google.com/?q=${lat},${lon}`;
+        }, () => alert("تعذر تحديد الموقع الجغرافي."));
+      } else {
+        alert("المتصفح لا يدعم تحديد الموقع.");
+      }
+    }
+
+    function togglePaymentFields() {
+      selectedPayment = document.querySelector('input[name="payment-method"]:checked')?.value || 'cash';
+      document.getElementById('transfer-fields').style.display = selectedPayment === 'transfer' ? 'block' : 'none';
+      renderCartBankAccounts();
+    }
+
+    async function previewTransferImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        transferImage = await processOrderImage(file, 900);
+        const img = document.getElementById('transfer-preview');
+        img.src = transferImage; img.style.display = 'block';
+      } catch(e) { alert('تعذر قراءة صورة الحوالة.'); }
+    }
+
+    function processOrderImage(file, maxWidth=900) {
+      return new Promise((resolve,reject)=>{
+        const r=new FileReader(); r.onload=e=>{const img=new Image(); img.onload=()=>{let w=img.width,h=img.height;if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);resolve(c.toDataURL('image/jpeg',0.82));};img.onerror=()=>reject();img.src=e.target.result;};r.onerror=()=>reject();r.readAsDataURL(file);
+      });
+    }
+
+    function showOrderSuccessPopup(orderId) {
+      const old = document.getElementById('order-success-popup');
+      if (old) old.remove();
+
+      const popup = document.createElement('div');
+      popup.id = 'order-success-popup';
+      popup.innerHTML = `
+        <div class="order-success-card">
+          <div class="order-success-icon">✅</div>
+          <div class="order-success-title">تم الطلب بنجاح</div>
+          <div class="order-success-number">رقم الطلب: ${orderId}</div>
+        </div>
+      `;
+      document.body.appendChild(popup);
+      setTimeout(() => popup.remove(), 1800);
+    }
+
+    async function sendOrderToWhatsApp() {
+      if (storeData.isClosed) {
+        alert("عذراً، الكافيه مغلق حالياً وإرسال الطلبات متوقف!");
+        return;
+      }
+      if (cart.length === 0) { alert("السلة فارغة!"); return; }
+
+      const customerName = document.getElementById('customer-name').value.trim();
+      const customerPhone = document.getElementById('customer-phone').value.trim();
+      const deliveryType = document.querySelector('input[name="delivery-type"]:checked')?.value || 'delivery';
+      const location = document.getElementById('customer-location').value.trim();
+      const paymentMethod = document.querySelector('input[name="payment-method"]:checked')?.value || 'cash';
+      const selectedBankIndex = document.getElementById('selected-bank')?.value || '';
+      const selectedBank = paymentMethod === 'transfer' && selectedBankIndex !== '' ? (storeData.bankAccounts || [])[Number(selectedBankIndex)] : null;
+
+      if (!customerName) { alert("اسم العميل إجباري."); return; }
+      const normalizedPhone = normalizeYemenPhone(customerPhone);
+      if (!normalizedPhone) { alert("رقم الجوال يجب أن يكون يمنياً ويبدأ بـ 77 أو 71 أو 73 أو 78."); return; }
+      if (deliveryType === 'delivery' && !location) { alert("يرجى تحديد موقع/عنوان التوصيل."); return; }
+      if (paymentMethod === 'transfer' && !selectedBank) { alert('يجب اختيار طريقة الدفع تحويل ثم اختيار البنك.'); return; }
+      if (paymentMethod === 'transfer' && !transferImage) { alert('يرجى تحديد صورة الحوالة من المعرض.'); return; }
+
+      const orderId = 'POINT-' + Date.now().toString().slice(-8);
+      const items = cart.map(cartItem => {
+        const p = (storeData.products || []).find(prod => prod.id === cartItem.id);
+        if (!p) return null;
+        return {
+          id:p.id, name:p.name, price:Number(p.price)||0, cost:Number(p.cost)||0,
+          currency:p.currency||'ر.س', qty:cartItem.qty,
+          subtotal:(Number(p.price)||0)*cartItem.qty, img:p.img||''
+        };
+      }).filter(Boolean);
+
+      if (!items.length) { alert("تعذر تجهيز المنتجات."); return; }
+
+      const totals = {};
+      items.forEach(i => totals[i.currency] = (totals[i.currency]||0) + i.subtotal);
+      const delivery = deliveryType === 'delivery'
+        ? { fee: (storeData.deliveryFree === true ? 0 : Number(storeData.deliveryFee || 0)), currency: storeData.deliveryCurrency || 'ر.س', free: storeData.deliveryFree === true || Number(storeData.deliveryFee || 0) <= 0 }
+        : { fee: 0, currency: storeData.deliveryCurrency || 'ر.س', free: true };
+      const grandTotals = { ...totals };
+      if (delivery.fee > 0) grandTotals[delivery.currency] = (grandTotals[delivery.currency] || 0) + delivery.fee;
+      const totalText = buildTotalText(totals);
+      const grandTotalText = buildTotalText(grandTotals);
+
+      const order = {
+        orderId,
+        customerName,
+        customerPhone: normalizedPhone,
+        deliveryType,
+        paymentMethod,
+        paymentBank: selectedBank ? {
+          bankName:selectedBank.bankName,
+          accountName:selectedBank.accountName,
+          accountNumber:selectedBank.accountNumber
+        } : null,
+        transferImage: paymentMethod === 'transfer' ? transferImage : '',
+        customerLocation: deliveryType === 'delivery' ? location : '',
+        items,
+        totals,
+        deliveryFee: delivery.fee,
+        deliveryCurrency: delivery.currency,
+        deliveryFree: delivery.free,
+        grandTotals,
+        totalText,
+        grandTotalText,
+        status: 'جديد',
+        driverId: '',
+        driverName: '',
+        createdAt: new Date().toISOString()
+      };
+
+      let msg = `☕ *طلب جديد من POINT CAFE*\n*رقم الطلب:* ${orderId}\n👤 *العميل:* ${customerName}\n📞 *الجوال:* ${normalizedPhone}\n`;
+      msg += `📦 *طريقة الاستلام:* ${deliveryType === 'delivery' ? 'توصيل إلى الموقع' : 'استلام من الفرع'}\n`;
+      if (deliveryType === 'delivery') msg += `📍 *الموقع:* ${location}\n`;
+      msg += `💳 *طريقة الدفع:* ${paymentMethod === 'transfer' ? 'تحويل' : 'كاش'}\n`;
+      if (selectedBank) msg += `🏦 *البنك:* ${selectedBank.bankName}\n`;
+      msg += `💰 *الإجمالي:* ${totalText}\n`;
+      msg += `🚚 *التوصيل:* ${delivery.fee > 0 ? delivery.fee + ' ' + delivery.currency : 'مجاني'}\n`;
+      msg += `💰 *الإجمالي مع التوصيل:* ${grandTotalText}\n\n`;
+      items.forEach((i,n) => msg += `${n+1}. ${i.name} × ${i.qty} = ${i.subtotal} ${i.currency}\n`);
+
+      const targetPhone = normalizeWhatsAppPhone(storeData.phone) || '967771234567';
+      const url = `https://wa.me/${targetPhone}?text=${encodeURIComponent(msg)}`;
+
+      // فتح واتساب أولاً من نفس ضغطة المستخدم حتى لا يمنعه المتصفح.
+      // لا ننتظر Firebase قبل الإرسال.
+      try {
+        const waLink = document.createElement('a');
+        waLink.href = url;
+        waLink.target = '_self';
+        waLink.rel = 'noopener';
+        document.body.appendChild(waLink);
+        waLink.click();
+        waLink.remove();
+      } catch (e) {
+        window.location.assign(url);
+      }
+
+      // حفظ الطلب في الخلفية فقط، ولا يمنع انتقال العميل إلى واتساب.
+      try {
+        if (window.db && window.addDoc && window.collection) {
+          window.addDoc(window.collection(window.db, 'orders'), order).catch(e =>
+            console.error('تعذر حفظ الطلب في Firebase:', e)
+          );
+        }
+      } catch (e) {
+        console.error('تعذر بدء حفظ الطلب:', e);
+      }
+
+      showOrderSuccessPopup(orderId);
+      cart = [];
+      updateCartUI();
+      document.getElementById('customer-name').value = '';
+      document.getElementById('customer-phone').value = '';
+      document.getElementById('customer-location').value = '';
+      transferImage = '';
+      document.getElementById('transfer-image').value = '';
+      document.getElementById('transfer-preview').style.display = 'none';
+      document.querySelector('input[name="payment-method"][value="cash"]').checked = true;
+      togglePaymentFields();
+      document.getElementById('cart-modal').style.display = 'none';
+    }
+
+    const translations={ar:{aboutTitle:"من نحن",aboutText:"كوفيه POINT CAFE يقدم القهوة والمشروبات والحلويات بطلب سهل وخدمة ودودة.",deliveryTitle:"التوصيل",deliveryText:"نوفر التوصيل داخل مناطق الخدمة، ويمكنك إرسال موقعك مع الطلب.",paymentTitle:"دفع تحويل",paymentText:"يمكنك اختيار التحويل وإرفاق صورة الحوالة ليتم التحقق منها.",storeTitle:"متجر الكوفيه",storeText:"تصفح المنتجات، أضفها إلى السلة، ثم اختر التوصيل أو الاستلام.",themeLight:"☀️ الوضع النهاري",themeDark:"🌙 الوضع الليلي"},en:{aboutTitle:"About Us",aboutText:"POINT CAFE serves coffee, drinks and desserts with an easy ordering experience.",deliveryTitle:"Delivery",deliveryText:"Delivery is available in service areas. You can send your location with the order.",paymentTitle:"Bank Transfer",paymentText:"Choose transfer payment and attach the transfer receipt for verification.",storeTitle:"Coffee Shop",storeText:"Browse products, add them to your cart, then choose delivery or pickup.",themeLight:"☀️ Light Mode",themeDark:"🌙 Dark Mode"},zh:{aboutTitle:"关于我们",aboutText:"POINT CAFE 提供咖啡、饮品和甜点，点单简单方便。",deliveryTitle:"配送",deliveryText:"服务区域内提供配送，您可以随订单发送您的位置。",paymentTitle:"转账支付",paymentText:"选择转账付款并上传转账凭证，以便核实。",storeTitle:"咖啡店",storeText:"浏览商品，加入购物车，然后选择配送或到店自取。",themeLight:"☀️ 浅色模式",themeDark:"🌙 深色模式"}};
+    function setLanguage(lang){const t=translations[lang]||translations.ar;document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(t[k])el.textContent=t[k]});document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));localStorage.setItem('point_cafe_lang',lang);updateThemeButton()}
+    function toggleTheme(){document.body.classList.toggle('dark-mode');localStorage.setItem('point_cafe_theme',document.body.classList.contains('dark-mode')?'dark':'light');updateThemeButton()}
+    function updateThemeButton(){const b=document.getElementById('theme-toggle');if(!b)return;const dark=document.body.classList.contains('dark-mode');const lang=localStorage.getItem('point_cafe_lang')||'ar';b.textContent=translations[lang][dark?'themeLight':'themeDark']}
+    function initAppearance(){if(localStorage.getItem('point_cafe_theme')==='dark')document.body.classList.add('dark-mode');setLanguage(localStorage.getItem('point_cafe_lang')||'ar')}
+    function normalizeYemenPhone(phone){
+      let n = String(phone || '').replace(/\D/g, '');
+      if (n.startsWith('00')) n = n.slice(2);
+      if (n.startsWith('967')) n = n.slice(3);
+      if (n.startsWith('0')) n = n.slice(1);
+      if (/^7[1378]\d{7}$/.test(n)) return '967' + n;
+      return '';
+    }
+
+    function normalizeWhatsAppPhone(phone){
+      let n=String(phone||'').replace(/\D/g,'');
+      if(n.startsWith('00')) n=n.slice(2);
+      if(n.startsWith('0')) n=n.slice(1);
+      // رقم يمني محلي مثل 777052026 يتحول تلقائياً إلى 967777052026
+      if(/^7[0-9]{8}$/.test(n)) n='967'+n;
+      return n.length >= 10 && n.length <= 15 ? n : '';
+    }
+
+    function renderReviews() {
+      const list = document.getElementById('reviews-list');
+      list.innerHTML = (storeData.reviews || []).map(r => `
+        <div class="review-item">
+          <div class="review-header">
+            <span>${r.name}</span>
+            <span class="review-stars">${'★'.repeat(r.rating)}</span>
+          </div>
+          <div>${r.text}</div>
+        </div>
+      `).join('');
+    }
+
+    function setRating(stars) {
+      selectedRating = stars;
+      const elements = document.querySelectorAll('#star-rating span');
+      elements.forEach((el, index) => {
+        if (5 - index <= stars) el.classList.add('active');
+        else el.classList.remove('active');
+      });
+    }
+
+    async function addReview() {
+      const name = document.getElementById('review-name').value.trim();
+      const text = document.getElementById('review-text').value.trim();
+
+      if (!name || !text) {
+        alert('يرجى كتابة الاسم ورأيك قبل الإرسال.');
+        return;
+      }
+
+      const newReview = { name, rating: selectedRating, text, date: new Date().toISOString() };
+      
+      try {
+        await window.addDoc(window.collection(window.db, "reviews"), newReview);
+      } catch(e) {
+        console.error("خطأ في حفظ التقييم سحابياً:", e);
+      }
+
+      if(!storeData.reviews) storeData.reviews = [];
+      storeData.reviews.push(newReview);
+      renderReviews();
+
+      document.getElementById('review-name').value = '';
+      document.getElementById('review-text').value = '';
+      alert('شكراً لك على تقييمك!');
+    }
+  </script>
+
+<script>
+(function(){
+const APP_NAME='تطبيق متجر POINT CAFE';
+let deferredInstallPrompt=null,installModal=null,installBtn=null,helpBox=null;
+function isStandalone(){return(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true}
+function createInstallUI(){
+ if(document.getElementById('pwa-install-modal'))return;
+ const m=document.createElement('div');m.id='pwa-install-modal';m.className='pwa-install-modal';
+ m.innerHTML='<div class="pwa-install-card"><img class="pwa-install-logo" src="./point-cafe-logo.jpg" alt="POINT CAFE"><div class="pwa-install-title">'+APP_NAME+'</div><p class="pwa-install-subtitle">ثبّت التطبيق على هاتفك للوصول إليه بسرعة مثل أي تطبيق عادي.</p><button id="pwa-install-btn" class="pwa-install-btn">📲 تثبيت التطبيق</button><button id="pwa-skip-btn" class="pwa-skip-btn" type="button">تخطي</button><div id="pwa-install-help" class="pwa-install-help"></div></div>';
+ document.body.appendChild(m);installModal=m;installBtn=m.querySelector('#pwa-install-btn');helpBox=m.querySelector('#pwa-install-help');installBtn.addEventListener('click',installApp);
+const skipBtn=m.querySelector('#pwa-skip-btn');
+if(skipBtn) skipBtn.addEventListener('click',function(){
+  try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(e){}
+  m.classList.add('installed');
+  m.style.setProperty('display','none','important');
+  m.style.setProperty('visibility','hidden','important');
+  m.style.setProperty('pointer-events','none','important');
+});
+
+}
+function showInstallModal(){if(isStandalone()||document.documentElement.classList.contains('pwa-standalone'))return;createInstallUI();installModal.classList.remove('installed')}
+async function installApp(){
+ if(deferredInstallPrompt){const p=deferredInstallPrompt;deferredInstallPrompt=null;try{await p.prompt();const choice=await p.userChoice;if(choice&&choice.outcome==='accepted'){installBtn.textContent='✅ تم اختيار تثبيت التطبيق';setTimeout(()=>installModal&&installModal.classList.add('installed'),500)}else installBtn.textContent='📲 اضغط لتثبيت التطبيق'}catch(e){showHelp()}return}
+ showHelp();
+}
+function showHelp(){if(!helpBox)return;helpBox.style.display='block';helpBox.innerHTML='إذا لم تظهر نافذة التثبيت تلقائياً، افتح قائمة المتصفح <b>⋮</b> ثم اختر <b>تثبيت التطبيق</b> أو <b>إضافة إلى الشاشة الرئيسية</b>.';installBtn.textContent='📲 حاول التثبيت مرة أخرى'}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;createInstallUI()});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;if(installModal)installModal.classList.add('installed')});
+window.addEventListener('load',()=>{createInstallUI();if(!isStandalone() && localStorage.getItem('pointCafeInstallSkipped')!=='1')setTimeout(showInstallModal,8000);if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('PWA SW:',err))});
+window.openPointCafeInstall=showInstallModal;
+})();
+</script>
+
+<script>
+(function(){
+  function appMode(){
+    return document.documentElement.classList.contains('pwa-standalone');
+  }
+  window.renderPwaCategories=function(items){
+    if(!appMode()) return;
+    const box=document.getElementById('pwa-app-categories');
+    if(!box) return;
+    const products=Array.isArray(items)?items:[];
+    const cats=[];
+    products.forEach(p=>{
+      const c=(p.category||p.section||p.type||'').toString().trim();
+      if(c && !cats.includes(c)) cats.push(c);
+    });
+    const shown=(cats.length?cats:['الأكثر مبيعاً','المشروبات الساخنة','المشروبات الباردة','الحلويات','القهوة']).slice(0,8);
+    const icons=['⭐','☕','🥤','🍰','🫘','🎁','🔥','✨'];
+    box.innerHTML=shown.map((c,i)=>'<button class="app-category" onclick="pwaCategoryFilter('+JSON.stringify(c)+')"><span class="app-category-icon">'+icons[i%icons.length]+'</span>'+c+'</button>').join('');
+  };
+  window.pwaCategoryFilter=function(cat){
+    const q=document.getElementById('search-input');
+    if(q){q.value=cat==='الأكثر مبيعاً'?'':cat;q.dispatchEvent(new Event('input',{bubbles:true}));}
+    document.getElementById('products-container')?.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+  window.addEventListener('load',function(){
+    if(appMode()){
+      const nav=document.querySelector('.pwa-bottom-nav');
+      if(nav) nav.style.display='flex';
+      setTimeout(function(){if(window.storeData) renderPwaCategories(window.storeData.products||[]);},900);
+    }
+  });
+  window.addEventListener('firebase-ready',function(){
+    setTimeout(function(){if(appMode() && window.storeData) renderPwaCategories(window.storeData.products||[]);},700);
+  });
+})();
+</script>
+
+
+
+
+
+<style id="pca-final-install-fix">
+.pwa-install-modal.installed{display:none!important;visibility:hidden!important;pointer-events:none!important}
+.pwa-install-modal:not(.installed){display:block}
+.pwa-install-card .pwa-skip-btn{
+  width:34px!important;height:26px!important;min-height:26px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  padding:0!important;margin:0!important;
+  position:absolute!important;top:6px!important;left:6px!important;
+  border-radius:8px!important;
+  background:#f0e2d2!important;color:#76583b!important;
+  font-size:10px!important;font-weight:900!important;
+}
+.header-actions .pwa-install-page-btn{
+  width:42px!important;height:42px!important;
+  padding:5px!important;font-size:16px!important;
+  border:1px solid #d9c3a9!important;border-radius:12px!important;
+  background:#fffaf3!important;color:#76583b!important;
+}
+</style>
+<script>
+document.addEventListener('click', function(e){
+  if(e.target && e.target.id === 'pwa-skip-btn'){
+    const modal=document.getElementById('pwa-install-modal');
+    if(modal){
+      modal.classList.add('installed');
+      modal.style.display='none';
+    }
+    try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(_){}
+  }
+});
+</script>
+
+<style id="point-cafe-install-polish">
+/* FINAL INSTALL UI POLISH - POINT CAFE */
+.pwa-install-modal:not(.installed){
+  position:fixed!important;
+  inset:auto 12px 78px auto!important;
+  width:auto!important;
+  height:auto!important;
+  padding:0!important;
+  background:transparent!important;
+  display:block!important;
+  z-index:200000!important;
+}
+.pwa-install-card{
+  direction:rtl!important;
+  width:285px!important;
+  max-width:calc(100vw - 24px)!important;
+  display:grid!important;
+  grid-template-columns:46px 1fr!important;
+  grid-template-rows:auto auto auto!important;
+  gap:5px 10px!important;
+  align-items:center!important;
+  padding:12px!important;
+  background:rgba(255,250,243,.98)!important;
+  border:1px solid #dfc9ad!important;
+  border-radius:16px!important;
+  box-shadow:0 10px 28px rgba(65,43,24,.20)!important;
+  text-align:right!important;
+  position:relative!important;
+}
+.pwa-install-logo{
+  grid-row:1/3!important;
+  width:46px!important;height:46px!important;
+  border-radius:11px!important;
+  border:1px solid rgba(154,118,82,.45)!important;
+  padding:3px!important;
+}
+.pwa-install-title{
+  margin:0!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:13px!important;
+  line-height:1.35!important;
+  font-weight:800!important;
+  color:#76583b!important;
+}
+.pwa-install-subtitle{
+  margin:0!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:10.5px!important;
+  line-height:1.5!important;
+  font-weight:500!important;
+  color:#806b58!important;
+}
+.pwa-install-btn{
+  grid-column:1/3!important;
+  width:100%!important;
+  min-height:38px!important;
+  margin:4px 0 0!important;
+  padding:6px 10px!important;
+  border:0!important;
+  border-radius:10px!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:13px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  background:#9a7652!important;
+  color:#fff!important;
+  box-shadow:0 4px 10px rgba(118,88,59,.16)!important;
+}
+.pwa-install-btn:active{transform:scale(.98)}
+.pwa-install-help{
+  grid-column:1/3!important;
+  display:none!important;
+  margin:3px 0 0!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:10px!important;
+  line-height:1.6!important;
+}
+.pwa-install-card .pwa-skip-btn{
+  position:absolute!important;
+  top:6px!important;
+  left:6px!important;
+  width:36px!important;
+  height:27px!important;
+  min-height:27px!important;
+  margin:0!important;
+  padding:0!important;
+  border:1px solid #dfc9ad!important;
+  border-radius:8px!important;
+  background:#f1e5d7!important;
+  color:#76583b!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:10px!important;
+  line-height:27px!important;
+  font-weight:800!important;
+  cursor:pointer!important;
+  z-index:5!important;
+}
+.pwa-install-card .pwa-skip-btn:active{background:#eadbc7!important;transform:scale(.97)}
+.header-actions .pwa-install-page-btn{
+  width:auto!important;
+  min-width:118px!important;
+  height:42px!important;
+  padding:5px 10px!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:12px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+  word-break:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+@media(max-width:420px){
+  .pwa-install-modal:not(.installed){right:9px!important;bottom:72px!important}
+  .pwa-install-card{width:260px!important}
+  .header-actions .pwa-install-page-btn{min-width:112px!important;font-size:11px!important}
+}
+</style>
+<script id="point-cafe-install-polish-js">
+(function(){
+  function hideInstallNotice(){
+    var modal=document.getElementById('pwa-install-modal');
+    if(!modal)return;
+    modal.classList.add('installed');
+    modal.style.setProperty('display','none','important');
+    modal.style.setProperty('visibility','hidden','important');
+    modal.style.setProperty('opacity','0','important');
+    modal.style.setProperty('pointer-events','none','important');
+    try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(e){}
+  }
+  document.addEventListener('click',function(e){
+    var btn=e.target && e.target.closest ? e.target.closest('#pwa-skip-btn') : null;
+    if(btn){
+      e.preventDefault();
+      e.stopPropagation();
+      hideInstallNotice();
+    }
+  },true);
+  window.hidePointCafeInstall=hideInstallNotice;
+})();
+</script>
+
+</body>
+</html>

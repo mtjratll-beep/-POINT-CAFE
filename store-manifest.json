@@ -1,0 +1,22 @@
+{
+  "name": "تطبيق متجر POINT CAFE",
+  "short_name": "POINT CAFE",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5eadb",
+  "theme_color": "#9a7652",
+  "description": "تطبيق متجر POINT CAFE",
+  "icons": [
+    {
+      "src": "point-cafe-logo.jpg",
+      "sizes": "1536x1536",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "display_override": [
+    "standalone"
+  ]
+}

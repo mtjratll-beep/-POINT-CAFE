@@ -1,0 +1,19 @@
+{
+  "name": "تطبيق توصيل POINT CAFE",
+  "short_name": "توصيل POINT CAFE",
+  "start_url": "./driver.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5eadb",
+  "theme_color": "#9a7652",
+  "description": "تطبيق توصيل POINT CAFE",
+  "icons": [
+    {
+      "src": "point-cafe-logo.jpg",
+      "sizes": "1536x1536",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

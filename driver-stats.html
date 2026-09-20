@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>تطبيق توصيل POINT CAFE | إحصائيات السائق</title><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><style>:root{--p:#9a7652;--ph:#76583b;--bg:#f5eadb;--card:#fffaf3;--text:#4b3828;--border:#dfc9ad;--danger:#b94b45;--success:#3e8b68}*{box-sizing:border-box;font-family:Tajawal,sans-serif}body{margin:0;background:var(--bg);color:var(--text);padding:18px}.wrap{max-width:850px;margin:auto}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:0 10px 30px #8c6d4a22}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}.stat{text-align:center;padding:20px 10px}.num{font-size:32px;font-weight:800;color:var(--p)}button{width:100%;padding:13px;border:0;border-radius:11px;background:var(--p);color:#fff;font-weight:800;margin-top:12px;cursor:pointer}.note{font-size:13px;color:#7b624a}@media(max-width:600px){.stats{grid-template-columns:1fr}.num{font-size:28px}}
+.pwa-skip-btn{
+  width:100%;margin-top:8px;min-height:40px;border:0;
+  background:transparent;color:#76583b;font-size:13px;
+  font-weight:800;cursor:pointer;border-radius:10px;
+}
+.pwa-skip-btn:active{background:rgba(118,88,59,.08)}
+
+
+/* ===== SMALL NON-FORCED INSTALL NOTICE ===== */
+.pwa-install-modal{
+  position:fixed!important;
+  inset:auto 12px 78px auto!important;
+  width:auto!important;
+  height:auto!important;
+  background:transparent!important;
+  display:block!important;
+  padding:0!important;
+  z-index:200000!important;
+}
+.pwa-install-card{
+  width:285px!important;
+  max-width:calc(100vw - 24px)!important;
+  box-sizing:border-box;
+  display:grid!important;
+  grid-template-columns:48px 1fr;
+  grid-template-rows:auto auto;
+  gap:4px 10px;
+  align-items:center;
+  padding:10px 11px!important;
+  background:rgba(255,250,243,.94)!important;
+  border:1px solid rgba(154,118,82,.35)!important;
+  border-radius:16px!important;
+  box-shadow:0 8px 24px rgba(45,25,10,.16)!important;
+  text-align:right!important;
+  position:relative;
+}
+.pwa-install-logo{
+  grid-row:1 / 3;
+  width:44px!important;height:44px!important;
+  border-radius:11px!important;
+  border:1px solid rgba(154,118,82,.45)!important;
+  padding:3px!important;
+}
+.pwa-install-title{
+  margin:0!important;
+  font-size:13px!important;
+  line-height:1.25!important;
+  color:#76583b!important;
+}
+.pwa-install-subtitle{
+  margin:0!important;
+  font-size:10px!important;
+  line-height:1.3!important;
+  color:#806b58!important;
+}
+.pwa-install-btn{
+  grid-column:1 / 3;
+  min-height:34px!important;
+  margin-top:3px!important;
+  border-radius:9px!important;
+  font-size:12px!important;
+  padding:5px 8px!important;
+}
+.pwa-install-help{display:none!important}
+.pwa-skip-btn{
+  position:absolute!important;
+  top:4px!important;
+  left:5px!important;
+  width:22px!important;
+  min-height:22px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:50%!important;
+  background:rgba(118,88,59,.10)!important;
+  color:#76583b!important;
+  font-size:15px!important;
+  line-height:22px!important;
+  z-index:3;
+}
+@media(max-width:420px){
+  .pwa-install-modal{right:9px!important;bottom:72px!important}
+  .pwa-install-card{width:250px!important}
+}
+
+</style>
+<link rel="manifest" href="driver-manifest.json"><meta name="theme-color" content="#9a7652"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="تطبيق توصيل POINT CAFE"><link rel="apple-touch-icon" href="point-cafe-logo.jpg">
+<style>
+/* POINT CAFE PWA INSTALL */
+.pwa-install-modal{position:fixed;inset:0;z-index:200000;background:rgba(47,27,12,.82);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:18px}.pwa-install-card{width:min(430px,100%);background:linear-gradient(180deg,#fffaf3,#f5eadb);border:2px solid #dfc9ad;border-radius:24px;padding:24px 20px;text-align:center;box-shadow:0 25px 70px #0008}.pwa-install-logo{width:112px;height:112px;object-fit:contain;border-radius:22px;border:2px solid #9a7652;background:#fff;padding:6px}.pwa-install-title{margin:12px 0 5px;color:#76583b;font-size:24px;font-weight:900}.pwa-install-subtitle{margin:0 0 17px;color:#6f5945;font-size:14px;line-height:1.8}.pwa-install-btn{width:100%;min-height:55px;border:0;border-radius:14px;background:#9a7652;color:#fff;font-size:17px;font-weight:900;cursor:pointer}.pwa-install-btn:active{transform:scale(.98)}.pwa-install-help{display:none;margin-top:12px;background:#fff;border:1px solid #dfc9ad;border-radius:12px;padding:10px;color:#5d4b3b;font-size:12px;line-height:1.8}.pwa-install-modal.installed{display:none}.pwa-install-page-btn{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;border:1px solid #dfc9ad!important;background:#fffaf3!important;color:#76583b!important;border-radius:10px!important;font-weight:900!important;cursor:pointer!important}.pwa-install-page-btn:hover{background:#eadbc7!important}
+</style>
+<style>
+/* POINT CAFE PWA INSTALL */
+.pwa-install-modal{position:fixed;inset:0;z-index:200000;background:rgba(35,20,10,.03);display:flex;align-items:center;justify-content:center;padding:16px;animation:pwaFadeIn .3s ease}
+.pwa-install-card{width:min(430px,90vw);background:rgba(255,250,243,.55);border:1.5px solid rgba(154,118,82,.55);border-radius:22px;padding:19px 16px;text-align:center;box-shadow:0 16px 40px rgba(45,25,10,.20);position:relative}
+.pwa-install-logo{width:82px;height:82px;object-fit:contain;border-radius:18px;border:2px solid rgba(154,118,82,.65);background:rgba(255,255,255,.75);padding:5px}
+.pwa-install-title{margin:9px 0 4px;color:#76583b;font-size:21px;font-weight:900}
+.pwa-install-subtitle{margin:0 0 13px;color:#5d4b3b;font-size:13px;line-height:1.7}
+.pwa-install-btn{width:100%;min-height:50px;border:0;border-radius:13px;background:rgba(154,118,82,.92);color:#fff;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 7px 15px rgba(118,88,59,.20)}
+.pwa-install-help{display:none;margin-top:10px;background:rgba(255,255,255,.70);border:1px solid rgba(223,201,173,.85);border-radius:11px;padding:9px;color:#5d4b3b;font-size:12px;line-height:1.7}
+.pwa-install-modal.installed{display:none}
+.pwa-install-page-btn{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;border:1px solid #dfc9ad!important;background:#fffaf3!important;color:#76583b!important;border-radius:10px!important;font-weight:900!important;cursor:pointer!important}
+@keyframes pwaFadeIn{from{opacity:0;transform:scale(.99)}to{opacity:1;transform:scale(1)}}
+</style><style>
+/* POINT CAFE FINAL: installed app uses the exact page/site UI with NO install overlay. */
+html.pwa-standalone #pwa-install-modal,
+html.pwa-standalone .pwa-install-modal,
+html.pwa-standalone .pwa-install-page-btn,
+html.pwa-standalone [data-pwa-install],
+html.pwa-standalone .install-app-button {
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+html.pwa-standalone body {
+  overflow-x:hidden;
+}
+</style>
+<script>
+(function(){
+  function pointCafeStandalone(){
+    try {
+      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+             window.navigator.standalone === true ||
+             document.referrer.indexOf('android-app://') === 0;
+    } catch(e){ return false; }
+  }
+  function applyInstalledMode(){
+    if(!pointCafeStandalone()) return;
+    document.documentElement.classList.add('pwa-standalone');
+    var ids=['pwa-install-modal'];
+    ids.forEach(function(id){ var el=document.getElementById(id); if(el) el.remove(); });
+    document.querySelectorAll('.pwa-install-page-btn,[data-pwa-install],.install-app-button').forEach(function(el){ el.remove(); });
+  }
+  applyInstalledMode();
+  document.addEventListener('DOMContentLoaded',applyInstalledMode);
+  window.addEventListener('load',applyInstalledMode);
+  setTimeout(applyInstalledMode,250);
+  setTimeout(applyInstalledMode,1000);
+})();
+</script>
+
+
+<style id="point-cafe-install-final-fix">
+/* POINT CAFE FINAL INSTALL UI: one horizontal header button + reliable skip */
+.header-actions .pwa-install-page-btn{
+  width:118px!important;height:42px!important;min-width:118px!important;
+  padding:4px 8px!important;box-sizing:border-box!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  white-space:nowrap!important;word-break:keep-all!important;overflow:hidden!important;
+  font-size:10px!important;line-height:1!important;
+  border:1px solid #d9c3a9!important;border-radius:12px!important;
+  background:#fffaf3!important;color:#76583b!important;
+}
+.header-actions .pwa-install-page-btn br{display:none!important}
+.pwa-install-modal.installed{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+.pwa-skip-btn{
+  cursor:pointer!important;touch-action:manipulation!important;
+}
+</style>
+<script>
+(function(){
+  function hidePointCafeInstall(){
+    var modal=document.getElementById('pwa-install-modal');
+    if(modal){
+      modal.classList.add('installed');
+      modal.style.setProperty('display','none','important');
+      modal.style.setProperty('visibility','hidden','important');
+      modal.style.setProperty('pointer-events','none','important');
+    }
+    try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(e){}
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target && e.target.closest ? e.target.closest('#pwa-skip-btn') : null;
+    if(b){ e.preventDefault(); e.stopPropagation(); hidePointCafeInstall(); }
+  },true);
+  window.hidePointCafeInstall=hidePointCafeInstall;
+})();
+</script>
+
+</head><body><div class="wrap"><div class="card"><h1>📊 إحصائيات الطلبات</h1><div id="account" class="note"></div><div id="stats" class="stats"><div class="card stat"><div class="num">0</div><small>تم توصيله</small></div><div class="card stat"><div class="num">0</div><small>ملغي</small></div><div class="card stat"><div class="num">0</div><small>إجمالي الطلبات</small></div></div><button onclick="location.href='driver.html'">🚗 العودة إلى طلبات التوصيل</button></div></div><script type="module">import {initializeApp} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";import {getFirestore,doc,getDoc,collection,getDocs,query,where} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";const firebaseConfig = {
+      apiKey: "AIzaSyCSjXz47oath2NA6LXAkYk_pNLK1_X3tVU",
+      authDomain: "point-cafe-665e6.firebaseapp.com",
+      projectId: "point-cafe-665e6",
+      storageBucket: "point-cafe-665e6.firebasestorage.app",
+      messagingSenderId: "1078733395604",
+      appId: "1:1078733395604:web:075d8e0f2a3f075bde0681",
+      measurementId: "G-XSPQZK57CN"
+    };const app=initializeApp(firebaseConfig),db=getFirestore(app);function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}async function init(){const saved=sessionStorage.getItem('point_driver');if(!saved){location.href='driver.html';return}const d=JSON.parse(saved);document.getElementById('account').innerText='اسم المستخدم: '+d.name+' | كلمة المرور: '+d.password+' (للعرض فقط)';try{const snap=await getDocs(query(collection(db,'orders'),where('driverId','==',d.id)));let all=[];snap.forEach(x=>all.push(x.data()));const delivered=all.filter(o=>o.status==='تم التوصيل').length,cancelled=all.filter(o=>['رفض','ملغي','ملغى','ملغية'].includes(o.status)).length;document.getElementById('stats').innerHTML=`<div class="card stat"><div class="num">${delivered}</div><small>تم توصيله</small></div><div class="card stat"><div class="num">${cancelled}</div><small>ملغي</small></div><div class="card stat"><div class="num">${all.length}</div><small>إجمالي الطلبات</small></div>`}catch(e){document.getElementById('stats').innerHTML='<div class="card">تعذر تحميل الإحصائيات.</div>'}}init();</script>
+<script>
+(function(){
+const APP_NAME='تطبيق توصيل POINT CAFE';
+let deferredInstallPrompt=null,installModal=null,installBtn=null,helpBox=null;
+function isStandalone(){return(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true}
+function createInstallUI(){
+ if(document.getElementById('pwa-install-modal'))return;
+ const m=document.createElement('div');m.id='pwa-install-modal';m.className='pwa-install-modal';
+ m.innerHTML='<div class="pwa-install-card"><img class="pwa-install-logo" src="./point-cafe-logo.jpg" alt="POINT CAFE"><div class="pwa-install-title">'+APP_NAME+'</div><p class="pwa-install-subtitle">ثبّت التطبيق على هاتفك للوصول إليه بسرعة مثل أي تطبيق عادي.</p><button id="pwa-install-btn" class="pwa-install-btn">📲 تثبيت التطبيق</button><button id="pwa-skip-btn" class="pwa-skip-btn" type="button">تخطي</button><div id="pwa-install-help" class="pwa-install-help"></div></div>';
+ document.body.appendChild(m);installModal=m;installBtn=m.querySelector('#pwa-install-btn');helpBox=m.querySelector('#pwa-install-help');installBtn.addEventListener('click',installApp);
+const skipBtn=m.querySelector('#pwa-skip-btn');
+if(skipBtn) skipBtn.addEventListener('click',function(){
+  try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(e){}
+  m.classList.add('installed');
+  m.style.setProperty('display','none','important');
+  m.style.setProperty('visibility','hidden','important');
+  m.style.setProperty('pointer-events','none','important');
+});
+
+}
+function showInstallModal(){if(isStandalone()||document.documentElement.classList.contains('pwa-standalone'))return;createInstallUI();installModal.classList.remove('installed')}
+async function installApp(){
+ if(deferredInstallPrompt){const p=deferredInstallPrompt;deferredInstallPrompt=null;try{await p.prompt();const choice=await p.userChoice;if(choice&&choice.outcome==='accepted'){installBtn.textContent='✅ تم اختيار تثبيت التطبيق';setTimeout(()=>installModal&&installModal.classList.add('installed'),500)}else installBtn.textContent='📲 اضغط لتثبيت التطبيق'}catch(e){showHelp()}return}
+ showHelp();
+}
+function showHelp(){if(!helpBox)return;helpBox.style.display='block';helpBox.innerHTML='إذا لم تظهر نافذة التثبيت تلقائياً، افتح قائمة المتصفح <b>⋮</b> ثم اختر <b>تثبيت التطبيق</b> أو <b>إضافة إلى الشاشة الرئيسية</b>.';installBtn.textContent='📲 حاول التثبيت مرة أخرى'}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;createInstallUI()});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;if(installModal)installModal.classList.add('installed')});
+window.addEventListener('load',()=>{createInstallUI();if(!isStandalone() && localStorage.getItem('pointCafeInstallSkipped')!=='1')setTimeout(showInstallModal,8000);if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('PWA SW:',err))});
+window.openPointCafeInstall=showInstallModal;
+})();
+</script>
+</body></html>
