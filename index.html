@@ -122,7 +122,6 @@ body {
       animation: none !important;
       position: static !important;
     }
-    .ticker-move:hover { animation: none !important; transform: none !important; }
     .ticker-item {
       display: block;
       width: 100%;
@@ -273,8 +272,9 @@ body {
     .store-location-card { background: #fbf5ed; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 15px; text-align: center; font-size: 13px; }
     .store-location-card a { color: var(--primary); font-weight: 700; text-decoration: none; }
 
-    .btn-submit-whatsapp { background: var(--whatsapp); color: white; width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; transition: 0.2s; }
-    .btn-submit-whatsapp:hover { background: #1eb956; }
+    .order-submit-sticky-wrap { position: sticky; bottom: 0; z-index: 20; margin: 12px -24px 0; padding: 10px 24px calc(10px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to top, var(--card-bg) 78%, rgba(255,255,255,0)); }
+    .btn-submit-whatsapp { background: var(--whatsapp); color: white; width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 0; transition: none; box-shadow: 0 6px 18px rgba(0,0,0,.14); }
+    .btn-submit-whatsapp:hover { background: #1eb956; transform: none; }
     .btn-gps { background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 6px; }
 
     .img-modal {
@@ -1022,7 +1022,6 @@ body{padding-bottom:95px!important}
     transition:none!important;
   }
   #header-logo,.brand img{transform:none!important;animation:none!important;transition:none!important;}
-  .ticker-move{transform:none!important;animation:none!important;}
   /* إبقاء الأيقونات والنجوم في ترتيبها عند تغيير اللغة */
   .coffee-info-icon,.bottom-nav-icon,.cart-btn,.customer-mini-btn{direction:rtl!important;}
 </style>
@@ -1069,22 +1068,139 @@ body{padding-bottom:95px!important}
 <style id="point-cafe-product-detail-nav-fix">.point-bottom-nav{z-index:14500!important}.product-detail-modal{z-index:14000!important}</style>
 
 <style id="point-cafe-moving-welcome-final">
-/* شريط الترحيب: الحركة الحقيقية يتم تشغيلها بالجافاسكربت حتى لا تتعارض مع أي CSS آخر */
+/* شريط الإعلان: نفس حركة إعلانات المتجر الأصلية، تلقائية ومستمرّة */
 .ticker-wrap{position:relative!important;overflow:hidden!important;width:100%!important;direction:ltr!important;}
 .ticker-wrap .ticker-move{
-  width:max-content!important;min-width:0!important;height:100%!important;
-  display:flex!important;flex-direction:row!important;align-items:center!important;
-  justify-content:flex-start!important;overflow:visible!important;
-  transform:translate3d(0,0,0)!important;animation:none!important;
+  display:inline-block!important;
+  width:max-content!important;
+  min-width:0!important;
+  height:100%!important;
+  white-space:nowrap!important;
+  padding-right:100%!important;
+  animation:tickerMove 12s linear infinite!important;
   will-change:transform!important;
+  transform:none!important;
 }
 .ticker-wrap .ticker-item{
-  display:block!important;width:max-content!important;min-width:max-content!important;
-  flex:0 0 auto!important;padding:0 35px!important;margin:0!important;
-  white-space:nowrap!important;text-align:center!important;position:static!important;
-  transform:none!important;animation:none!important;
+  display:inline-block!important;
+  width:max-content!important;
+  min-width:0!important;
+  padding:0 10px!important;
+  margin:0!important;
+  white-space:nowrap!important;
+  text-align:center!important;
+  position:static!important;
+  transform:none!important;
+  animation:none!important;
+}
+@keyframes tickerMove{
+  from{transform:translateX(100%)!important;}
+  to{transform:translateX(-100%)!important;}
 }
 </style>
+
+<style id="point-cafe-cart-and-ticker-final-fix">
+/* إصلاح السلة: نافذة كاملة قابلة للتمرير والزر الأخير يظهر بوضوح فوق الشريط السفلي */
+#cart-modal{align-items:flex-end!important;overflow:hidden!important;padding:0!important;}
+#cart-modal .modal-content{
+  width:100%!important;max-width:560px!important;
+  height:calc(100dvh - 8px)!important;max-height:calc(100dvh - 8px)!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  box-sizing:border-box!important;padding:16px 16px 105px!important;
+  border-radius:22px 22px 0 0!important;
+  scroll-padding-bottom:105px!important;
+}
+#cart-modal #btn-submit-order{
+  /* ثابت أسفل نافذة السلة نفسها، وخارج منطقة التمرير */
+  position:absolute!important;
+  left:50%!important;
+  bottom:calc(76px + env(safe-area-inset-bottom))!important;
+  transform:translateX(-50%)!important;
+  z-index:20050!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:min(560px,calc(100vw - 32px))!important;
+  min-height:58px!important;
+  margin:0!important;padding:14px 16px!important;
+  box-sizing:border-box!important;
+  box-shadow:0 -5px 20px rgba(0,0,0,.14),0 8px 20px rgba(0,0,0,.12)!important;
+  border-radius:16px!important;
+  transition:none!important;
+  animation:none!important;
+}
+#cart-modal #btn-submit-order:hover,#cart-modal #btn-submit-order:active{
+  transform:translateX(-50%)!important;
+}
+#cart-modal .modal-content{
+  padding-bottom:150px!important;
+}
+@media(min-width:700px){
+  #cart-modal #btn-submit-order{bottom:24px!important;}
+}
+@media(max-width:600px){
+  #cart-modal #btn-submit-order{width:100%!important;bottom:auto!important;}
+}
+#cart-modal .modal-content{
+  overscroll-behavior:contain!important;
+  scroll-behavior:smooth!important;
+}
+#cart-modal #cart-items{min-height:20px!important;}
+/* نفس حركة الإعلان الرئيسية على شريط الترحيب */
+#point-cafe-main-ticker-track{
+  display:inline-block!important;
+  width:max-content!important;
+  min-width:0!important;
+  padding-right:100%!important;
+  transform:none!important;
+  animation:tickerMove 12s linear infinite!important;
+  will-change:transform!important;
+}
+#point-cafe-main-ticker-track .ticker-item{
+  display:inline-block!important;
+  width:max-content!important;
+  min-width:0!important;
+  padding:0 10px!important;
+  white-space:nowrap!important;
+  flex:none!important;
+}
+@media(max-width:600px){
+  #cart-modal .modal-content{height:calc(100dvh - 4px)!important;max-height:calc(100dvh - 4px)!important;padding:13px 12px 110px!important;}
+}
+</style>
+
+<style id="point-cafe-submit-below-shipping-final">
+/* الزر تحت رسالة بيانات التوصيل مباشرة، ويثبت في أسفل مساحة التمرير عند تحريك السلة */
+#cart-modal .order-submit-sticky-wrap{
+  position:static!important;
+  bottom:auto!important;
+  left:auto!important;
+  right:auto!important;
+  z-index:1!important;
+  margin:12px 0 0!important;
+  padding:0!important;
+  background:transparent!important;
+}
+#cart-modal #btn-submit-order{
+  position:relative!important;
+  left:auto!important;
+  bottom:auto!important;
+  transform:none!important;
+  width:100%!important;
+  min-height:58px!important;
+  margin:0!important;
+  padding:14px 16px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  border-radius:16px!important;
+  transition:none!important;
+  animation:none!important;
+  box-shadow:0 6px 18px rgba(0,0,0,.14)!important;
+}
+#cart-modal #btn-submit-order:hover,#cart-modal #btn-submit-order:active{transform:none!important;}
+</style>
+
 </head>
 <body>
 
@@ -1105,10 +1221,10 @@ body{padding-bottom:95px!important}
 
   <div class="point-ai-modal" id="point-ai-modal" onclick="if(event.target===this)closePointCafeAssistant()">
     <div class="point-ai-card" role="dialog" aria-modal="true" aria-label="مساعد POINT CAFE">
-      <div class="point-ai-head"><img id="ai-chat-logo" src="./point-cafe-logo.jpg" alt="POINT CAFE"><div><strong>🤖 مساعد POINT CAFE</strong><small>اسأل عن المنتجات، الأسعار، الطلبات والتوصيل</small></div><button class="point-ai-close" onclick="closePointCafeAssistant()">✕</button></div>
+      <div class="point-ai-head"><img id="ai-chat-logo" src="./point-cafe-logo.jpg" alt="POINT CAFE"><div><strong>🤖 مساعد POINT CAFE</strong><small>اسأل عن المنتجات، الأسعار، الطلبات والتوصيل والاسترجاع</small></div><button class="point-ai-close" onclick="closePointCafeAssistant()">✕</button></div>
       <div class="point-ai-messages" id="point-ai-messages"></div>
       <div class="point-ai-suggestions">
-        <button onclick="askPointCafeAssistant('ما المنتجات المتوفرة؟')">المنتجات</button><button onclick="askPointCafeAssistant('ما الأسعار؟')">الأسعار</button><button onclick="askPointCafeAssistant('كيف أطلب؟')">طريقة الطلب</button><button onclick="askPointCafeAssistant('أين طلبي؟')">تتبع طلبي</button>
+        <button onclick="askPointCafeAssistant('ما المنتجات المتوفرة؟')">المنتجات</button><button onclick="askPointCafeAssistant('ما الأسعار؟')">الأسعار</button><button onclick="askPointCafeAssistant('كيف أطلب؟')">طريقة الطلب</button><button onclick="askPointCafeAssistant('كيف أسترجع المنتج وما هي طريقة الاسترجاع؟')">الاسترجاع</button><button onclick="askPointCafeAssistant('أين طلبي؟')">تتبع طلبي</button>
       </div>
       <div class="point-ai-input"><input id="point-ai-input" placeholder="اكتب سؤالك هنا..." onkeydown="if(event.key==='Enter')sendPointCafeAssistant()"><button onclick="sendPointCafeAssistant()">إرسال</button></div>
     </div>
@@ -1363,12 +1479,16 @@ body{padding-bottom:95px!important}
         🚚 سيتم عرض بيانات التوصيل للمدير ليتم تجهيز الطلب وتسليمه للسائق.
       </div>
 
+      <!-- زر الإرسال ثابت في مكانه تحت رسالة بيانات التوصيل، وليس Sticky ولا Fixed -->
+      <div class="order-submit-sticky-wrap">
+        <button class="btn-submit-whatsapp" id="btn-submit-order" type="button" onclick="sendOrderToWhatsApp()">إتمام الطلب وإرساله ☕</button>
+      </div>
+
       <div class="bank-box" id="bank-accounts-container">
         <p style="font-weight:800; margin-bottom:10px; text-align:center; color:var(--primary);">حسابات التحويل المالي المعتمدة:</p>
         <div id="bank-list-modal"></div>
       </div>
 
-      <button class="btn-submit-whatsapp" id="btn-submit-order" onclick="sendOrderToWhatsApp()">إتمام الطلب وإرساله ☕</button>
     </div>
   </div>
 
@@ -1795,7 +1915,7 @@ body{padding-bottom:95px!important}
         <div style="margin-top:7px;font-size:12px;line-height:1.8">${items||'لا توجد تفاصيل'}</div>
         <div class="customer-order-items"><b>💰 الإجمالي:</b> ${escCustomer(o.grandTotalText||o.totalText||'')}<br><b>💳 الدفع:</b> ${o.paymentMethod==='transfer'?'تحويل':'كاش'}<br><b>📍 الاستلام:</b> ${o.deliveryType==='delivery'?'توصيل':'استلام من الفرع'}${o.driverName?`<br><b>🚗 السائق:</b> ${escCustomer(o.driverName)} ${o.driverPhone?` — 📞 ${escCustomer(o.driverPhone)}`:''}`:''}</div>
         ${!delivered&&!cancelled&&o.deliveryType==='delivery'?`<button class="btn" style="margin-top:10px" onclick="openCustomerTrackingForOrder('${escCustomer(o.docId)}')">🗺️ تتبع السائق الآن</button>`:''}
-        ${delivered && storeData.returnEnabled!==false && !['مكتمل','مرفوض','ملغي'].includes(String(o.returnStatus||'')) ? `<button class="btn" style="margin-top:10px;background:#8b5e34;color:#fff" onclick="openCustomerReturn('${escCustomer(o.docId)}')">↩️ طلب استرجاع المنتج</button>` : ''}
+        ${delivered && storeData.returnEnabled!==false && !['مكتمل','مرفوض','ملغي','محذوف'].includes(String(o.returnStatus||'')) ? `<button class="btn" style="margin-top:10px;background:#8b5e34;color:#fff" onclick="openCustomerReturn('${escCustomer(o.docId)}')">↩️ طلب استرجاع المنتج</button>` : ''}
         ${o.returnStatus?`<div style="margin-top:9px;padding:10px;background:#fff7ed;border:1px solid #ead2b5;border-radius:10px;line-height:1.8"><b>↩️ حالة الاسترجاع:</b> ${escCustomer(o.returnStatus)}${o.returnAdminMessage?`<br>💬 رسالة المتجر: ${escCustomer(o.returnAdminMessage)}`:''}${o.returnFeeText?`<br>💰 الرسوم: ${escCustomer(o.returnFeeText)}`:''}</div>`:''}
         </div>`;
       }).join('');
@@ -2487,15 +2607,18 @@ body{padding-bottom:95px!important}
         createdAt: new Date().toISOString()
       };
 
-      let msg = `☕ *طلب جديد من POINT CAFE*\n*رقم الطلب:* ${orderId}\n👤 *العميل:* ${customerName}\n📞 *الجوال:* ${normalizedPhone}\n`;
+      let msg = `☕ *طلب جديد من POINT CAFE*\n*رقم الطلب:* ${orderId}\n👤 *اسم العميل:* ${customerName}\n📞 *الجوال:* ${normalizedPhone}\n`;
+      if(currentCustomer?.email) msg += `📧 *البريد:* ${currentCustomer.email}\n`;
       msg += `📦 *طريقة الاستلام:* ${deliveryType === 'delivery' ? 'توصيل إلى الموقع' : 'استلام من الفرع'}\n`;
-      if (deliveryType === 'delivery') msg += `📍 *الموقع:* ${location}\n`;
-      msg += `💳 *طريقة الدفع:* ${paymentMethod === 'transfer' ? 'تحويل' : 'كاش'}\n`;
-      if (selectedBank) msg += `🏦 *البنك:* ${selectedBank.bankName}\n`;
-      msg += `💰 *الإجمالي:* ${totalText}\n`;
-      msg += `🚚 *التوصيل:* ${delivery.fee > 0 ? delivery.fee + ' ' + delivery.currency : 'مجاني'}\n`;
-      msg += `💰 *الإجمالي مع التوصيل:* ${grandTotalText}\n\n`;
-      items.forEach((i,n) => msg += `${n+1}. ${i.name} × ${i.qty} = ${i.subtotal} ${i.currency}\n`);
+      if (deliveryType === 'delivery') msg += `📍 *العنوان/الموقع:* ${location}\n`;
+      msg += `💳 *طريقة الدفع:* ${paymentMethod === 'transfer' ? 'تحويل بنكي' : 'كاش'}\n`;
+      if (selectedBank) msg += `🏦 *بيانات البنك:* ${selectedBank.bankName} — ${selectedBank.accountName||''} — ${selectedBank.accountNumber||''}\n`;
+      if (paymentMethod === 'transfer' && transferImage) msg += `🧾 *صورة الحوالة:* محفوظة مع الطلب في النظام\n`;
+      msg += `💵 *قيمة المنتجات:* ${totalText}\n`;
+      msg += `🚚 *رسوم التوصيل:* ${delivery.fee > 0 ? delivery.fee + ' ' + delivery.currency : 'مجاني'}\n`;
+      msg += `💰 *الإجمالي النهائي:* ${grandTotalText}\n\n`;
+      msg += `🛒 *تفاصيل جميع المنتجات:*\n`;
+      items.forEach((i,n) => msg += `${n+1}. ${i.name} × ${i.qty} — ${i.price} ${i.currency} للقطعة = ${i.subtotal} ${i.currency}\n`);
 
       const targetPhone = normalizeWhatsAppPhone(storeData.phone) || '967771234567';
       const url = `https://wa.me/${targetPhone}?text=${encodeURIComponent(msg)}`;
@@ -2583,9 +2706,13 @@ body{padding-bottom:95px!important}
       if(/(توصيل|يوصل|التوصيل|استلام)/i.test(text))return storeData.deliveryFree?'التوصيل مجاني حالياً حسب إعدادات المتجر. ويمكنك أيضاً اختيار الاستلام من الفرع.':`رسوم التوصيل ${storeData.deliveryFee||0} ${storeData.deliveryCurrency||'ر.س'}، ويمكنك اختيار الاستلام من الفرع.`;
       if(/(دفع|تحويل|بنك|حوالة)/i.test(text))return (storeData.bankAccounts||[]).length?'يمكنك الدفع بالتحويل واختيار أحد الحسابات البنكية الظاهرة عند إتمام الطلب، كما يتوفر الدفع كاش.':'يتوفر الدفع كاش، ويمكن أن تظهر خيارات التحويل عند تفعيل الحسابات البنكية من لوحة المدير.';
       if(/(طلبي|طلب|تتبع|وين|اين|أين)/i.test(text)&&currentCustomer){try{const qs=window.query(window.collection(window.db,'orders'),window.where('customerUid','==',currentCustomer.uid));const snap=await window.getDocs(qs);if(snap.empty)return'لا توجد طلبات مرتبطة بحسابك حتى الآن.';const rows=[];snap.forEach(d=>rows.push(d.data()));rows.sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));const o=rows[0];return `آخر طلب ${o.orderId||''}: الحالة ${o.status||'جديد'}، الإجمالي ${o.grandTotalText||o.totalText||'غير متوفر'}${o.driverName?'، السائق: '+o.driverName:''}. افتح «طلباتي» لرؤية الخريطة المباشرة.`;}catch(e){return'افتح «طلباتي» وسأعرض لك حالة طلبك عند توفر الاتصال.';}}
-      if(/(كيف اطلب|كيف أطلب|طريقة الطلب)/i.test(text))return'اختر المنتج واضغط «إضافة للسلة»، ثم افتح السلة وأدخل بيانات التوصيل والدفع واضغط «إتمام الطلب وإرساله». ';
-      if(/(موقع|عنوان|مكان المتجر)/i.test(text))return storeData.locationUrl?'موقع المتجر متاح من زر موقع المتجر داخل الصفحة.':'يمكن للمدير إضافة موقع المتجر من لوحة التحكم.';
-      return ai.fallback||'أستطيع مساعدتك في منتجات POINT CAFE وأسعارها والتوصيل والدفع وطلبك الحالي. اكتب اسم المنتج أو سؤالك بالتفصيل.';
+      if(/(استرجاع|ارجاع|إرجاع|مرتجع|استبدال|رجع|أرجع|أرجاع)/i.test(text)){
+        if(storeData.returnEnabled===false) return 'طلبات الاسترجاع غير مفعّلة حالياً من إدارة المتجر. إذا أردت السؤال عن شيء آخر فأنا هنا 😊';
+        return '↩️ طريقة الاسترجاع في POINT CAFE: بعد اكتمال توصيل الطلب افتح «طلباتي»، اختر الطلب، ثم اضغط «طلب استرجاع المنتج». اختر المنتج وسبب الاسترجاع واكتب المشكلة بالتفصيل ثم أرسل الطلب. لا يمكن الاسترجاع إذا تم فك الغلاف أو فتح العبوة إلا وفق سياسة المتجر والحالات التي يوافق عليها المدير. بعد الإرسال يراجع المدير الطلب ويحدد القبول أو الرفض والرسوم إن وجدت، ويمكن متابعة حالة الاسترجاع من الطلب. إذا أردت السؤال عن شيء آخر اكتب سؤالك هنا 😊';
+      }
+      if(/(كيف اطلب|كيف أطلب|طريقة الطلب)/i.test(text))return'اختر المنتج واضغط «إضافة للسلة»، ثم افتح السلة وأدخل بيانات العميل والتوصيل والدفع، وبعدها اضغط «إتمام الطلب وإرساله». إذا أردت السؤال عن شيء آخر اكتب سؤالك هنا 😊';
+      if(/(موقع|عنوان|مكان المتجر)/i.test(text))return storeData.locationUrl?'موقع المتجر متاح من زر موقع المتجر داخل الصفحة. إذا أردت السؤال عن شيء آخر اكتب سؤالك هنا 😊':'يمكن للمدير إضافة موقع المتجر من لوحة التحكم. إذا أردت السؤال عن شيء آخر اكتب سؤالك هنا 😊';
+      return (ai.fallback||'أستطيع مساعدتك في منتجات POINT CAFE وأسعارها والتوصيل والدفع والاسترجاع وطلبك الحالي. اكتب سؤالك بالتفصيل.')+' إذا أردت السؤال عن شيء آخر اكتب سؤالك هنا 😊';
     }
     async function askPointCafeAssistant(q){const text=q||document.getElementById('point-ai-input')?.value||'';if(!String(text).trim())return;document.getElementById('point-ai-input').value='';const fab=document.querySelector('.point-ai-fab');fab?.classList.add('ai-thinking');appendPointCafeMessage('user',text);appendPointCafeMessage('bot','...');try{const reply=await pointCafeAssistantReply(text);const box=document.getElementById('point-ai-messages');const last=box.lastElementChild;if(last&&last.classList.contains('bot'))last.textContent=reply;else appendPointCafeMessage('bot',reply);}finally{setTimeout(()=>fab?.classList.remove('ai-thinking'),350);}}
     function sendPointCafeAssistant(){askPointCafeAssistant();}
@@ -2924,44 +3051,15 @@ document.addEventListener('click', function(e){
 
 <script id="point-cafe-ticker-real-motion">
 (function(){
-  function startPointCafeTicker(){
-    var track=document.getElementById('point-cafe-main-ticker-track');
-    if(!track) return;
-    var first=track.querySelector('.ticker-item');
-    var second=track.querySelectorAll('.ticker-item')[1];
-    if(!first || !second) return;
-
-    track.style.animation='none';
-    track.style.transform='translate3d(0,0,0)';
-    track.style.width='max-content';
-    track.style.display='flex';
-
-    var x=0;
-    var last=performance.now();
-    var running=true;
-
-    function frame(now){
-      if(!running) return;
-      var dt=Math.min(40, now-last);
-      last=now;
-      var distance=first.getBoundingClientRect().width;
-      if(distance>0){
-        x -= (dt * 0.055);
-        if(x <= -distance) x += distance;
-        track.style.transform='translate3d('+x+'px,0,0)';
-      }
-      requestAnimationFrame(frame);
-    }
-
-    requestAnimationFrame(frame);
-
-    window.addEventListener('resize',function(){
-      if(x < -first.getBoundingClientRect().width) x=0;
+  // الحركة تلقائية عبر CSS، ولا تعتمد على لمس الشاشة أو التمرير.
+  function ensureTickerRunning(){
+    var tracks=document.querySelectorAll('.ticker-wrap .ticker-move');
+    tracks.forEach(function(track){
+      track.style.animation='tickerMove 12s linear infinite';
     });
   }
-
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startPointCafeTicker);
-  else startPointCafeTicker();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',ensureTickerRunning);
+  else ensureTickerRunning();
 })();
 </script>
 </body>

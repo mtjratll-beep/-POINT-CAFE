@@ -474,7 +474,7 @@ body{
   <div class="login-card">
     <h2>☕ تسجيل الدخول لمدير كوفيه POINT CAFE</h2>
     <p style="margin:10px 0 14px;color:var(--text-muted)">الدخول محمي بحساب Firebase الخاص بالمدير.</p>
-    <input type="email" id="admin-email" placeholder="بريد المدير الإلكتروني" autocomplete="username">
+    <input type="email" id="admin-email" placeholder="أدخل بريد مدير POINT CAFE" autocomplete="username">
     <input type="password" id="admin-password" placeholder="كلمة مرور المدير" autocomplete="current-password">
     <button class="btn" onclick="checkPassword()">🔐 دخول آمن</button>
     <div id="admin-login-error" style="display:none;margin-top:12px;color:#b91c1c;font-weight:700"></div>
@@ -794,7 +794,7 @@ body{
   // لا توجد كلمة مرور داخل ملف الموقع. كلمة المرور محفوظة في Firebase Authentication.
   // ضع UID حساب المدير بعد إنشائه في Firebase Authentication.
   // هذا المعرف ليس كلمة مرور ولا يمنح صلاحية بمفرده؛ Rules في Firestore هي التي تحمي البيانات.
-  const ADMIN_UID = "ضع_UID_المدير_هنا";
+  const ADMIN_UID = "L6mpnUY9BfMZGZQ1lUCv8M4rObI3";
   let firebaseAdminUser = null;
   let firebaseAuthReady = false;
 
@@ -911,17 +911,23 @@ body{
     return str.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
   }
 
+  let adminLoginBusy = false;
   async function checkPassword() {
+    if(adminLoginBusy) return;
     const emailInput = document.getElementById('admin-email').value.trim().toLowerCase();
-    const passwordInput = document.getElementById('admin-password').value.trim();
+    const passwordInput = document.getElementById('admin-password').value;
     const errorBox = document.getElementById('admin-login-error');
+    const loginButton = document.querySelector('#login-overlay .login-card .btn');
     errorBox.style.display = 'none';
-
-    if (!emailInput || !passwordInput) {
-      errorBox.textContent = 'أدخل بريد المدير وكلمة المرور.';
+    errorBox.textContent = '';
+    if(!emailInput || !passwordInput.trim()){
+      errorBox.textContent = 'أدخل بريد المدير ورمز/كلمة المرور.';
       errorBox.style.display = 'block';
       return;
     }
+    adminLoginBusy=true;
+    if(loginButton){loginButton.disabled=true;loginButton.textContent='⏳ جارٍ التحقق...';}
+
 
     if (ADMIN_UID && !ADMIN_UID.includes('ضع_UID_المدير')) {
       // يتم التحقق من UID بعد تسجيل الدخول، ثم تمنع Firestore أي كتابة لغير المدير.
@@ -944,8 +950,12 @@ body{
       showAdminPanel();
     } catch (e) {
       console.error('Admin Firebase login:', e);
-      errorBox.textContent = (e?.code==='auth/invalid-credential' ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' : 'فشل تسجيل الدخول. تأكد من تفعيل Email/Password في Firebase Authentication.');
+      const wrong = ['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email','auth/invalid-login-credentials'].includes(e?.code);
+      errorBox.textContent = wrong ? '❌ الرمز/كلمة المرور أو البريد الإلكتروني غير صحيح.' : '❌ تعذر تسجيل الدخول. تأكد من اتصال الإنترنت وإعداد Firebase Authentication.';
       errorBox.style.display = 'block';
+    } finally {
+      adminLoginBusy=false;
+      if(loginButton){loginButton.disabled=false;loginButton.textContent='🔐 دخول آمن';}
     }
   }
 
@@ -1801,7 +1811,9 @@ body{
     const orders=await getAllOrdersForReport(); const filtered=orders.filter(o=>{const d=orderDateValue(o); if(!d)return false; return period==='day'?d.toISOString().slice(0,10)===key:d.toISOString().slice(0,7)===key;});
     const total=filtered.reduce((s,o)=>s+numericTotal(o),0); const totalCost=filtered.reduce((s,o)=>{let c=(o.items||[]).reduce((a,i)=>a+(Number(i.cost)||0)*(Number(i.qty)||0),0);if(o.returnStatus==='مكتمل'&&o.returnItem)c-=((Number(o.returnItem.cost)||0)*(Number(o.returnItem.qty)||0));return s+c;},0); const netProfit=total-totalCost; const currency=filtered.find(o=>o.currency)?.currency||'ريال';
     const w=window.open('','_blank','width=800,height=800'); if(!w)return;
-    w.document.write(`<html dir="rtl"><head><title>تقرير الربح ${key||''}</title><style>body{font-family:Arial;padding:25px}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{border:1px solid #aaa;padding:8px;text-align:right}.summary{font-size:18px;font-weight:bold;margin:12px 0}</style></head><body><h1>POINT CAFE</h1><h2>تقرير المبيعات والأرباح</h2><p>الفترة: ${period==='day'?'يوم':'شهر'} — ${key||'—'}</p><div class="summary">إجمالي الطلبات: ${filtered.length}</div><div class="summary">إجمالي مبلغ البيع: ${total.toLocaleString('ar-EG')} ${currency}</div><div class="summary">إجمالي التكلفة: ${totalCost.toLocaleString('ar-EG')} ${currency}</div><div class="summary">صافي الربح: ${netProfit.toLocaleString('ar-EG')} ${currency}</div><table><tr><th>رقم الطلب</th><th>التاريخ</th><th>العميل</th><th>المبلغ</th></tr>${filtered.map(o=>`<tr><td>${o.orderId||o.docId}</td><td>${orderDateValue(o)?.toLocaleString('ar-EG')||'—'}</td><td>${o.customerName||'—'}</td><td>${numericTotal(o).toLocaleString('ar-EG')} ${o.currency||currency}</td></tr>`).join('')}</table><script>window.print()<\/script>
+    w.document.write(`<html dir="rtl"><head><title>تقرير الربح ${key||''}</title><style>body{font-family:Arial;padding:25px}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{border:1px solid #aaa;padding:8px;text-align:right}.summary{font-size:18px;font-weight:bold;margin:12px 0}</style></head><body><h1>POINT CAFE</h1><h2>تقرير المبيعات والأرباح</h2><p>الفترة: ${period==='day'?'يوم':'شهر'} — ${key||'—'}</p><div class="summary">إجمالي الطلبات: ${filtered.length}</div><div class="summary">إجمالي مبلغ البيع: ${total.toLocaleString('ar-EG')} ${currency}</div><div class="summary">إجمالي التكلفة: ${totalCost.toLocaleString('ar-EG')} ${currency}</div><div class="summary">صافي الربح: ${netProfit.toLocaleString('ar-EG')} ${currency}</div><table><tr><th>رقم الطلب</th><th>التاريخ</th><th>العميل</th><th>المبلغ</th></tr>${filtered.map(o=>`<tr><td>${o.orderId||o.docId}</td><td>${orderDateValue(o)?.toLocaleString('ar-EG')||'—'}</td><td>${o.customerName||'—'}</td><td>${numericTotal(o).toLocaleString('ar-EG')} ${o.currency||currency}</td></tr>`).join('')}</table><script>window.print()<\/script></body></html>`);
+  }
+</script>
 
 <script>
   let whatsappSelectedProductIds = new Set();
@@ -1841,7 +1853,7 @@ body{
     if(action==='قبول' && driverId){data.returnDriverId=d.id;data.returnDriverName=d.name;}
     try{await window.updateDoc(window.doc(window.db,'orders',docId),data);await loadOrders();renderReturnRequests();alert('تم تحديث الاسترجاع.');}catch(e){console.error(e);alert('تعذر تحديث الاسترجاع.');}
   }
-  async function deleteReturn(docId){if(!confirm('حذف طلب الاسترجاع؟'))return;try{await window.updateDoc(window.doc(window.db,'orders',docId),{returnStatus:'محذوف',returnUpdatedAt:new Date().toISOString()});await loadOrders();renderReturnRequests();}catch(e){alert('تعذر حذف الاسترجاع.');}}
+  async function deleteReturn(docId){if(!confirm('حذف طلب الاسترجاع نهائياً؟\nسيتم حذف سجل الطلب من Firebase ولا يمكن التراجع عن ذلك.'))return;try{await window.deleteDoc(window.doc(window.db,'orders',docId));await loadOrders();renderReturnRequests();alert('تم حذف طلب الاسترجاع نهائياً.');}catch(e){console.error(e);alert('تعذر حذف الاسترجاع نهائياً. تأكد من صلاحيات المدير.');}}
 
   function getWhatsAppProductImage(p){
     return p?.img || (Array.isArray(p?.images) ? p.images[0] : '') || 'https://via.placeholder.com/300?text=POINT+CAFE';
@@ -2040,9 +2052,7 @@ body{
   }
 
 </script>
-</body></html>`); w.document.close();
-  }
-
+<script>
   function choosePrintType(o, isReturn=false){
     const existing=document.getElementById('print-type-modal');
     if(existing) existing.remove();
@@ -2258,7 +2268,10 @@ window.openPointCafeInstall=showInstallModal;
     try{ settingsSnap=await window.getDoc(window.doc(window.db,'settings','store_config')); }
     catch(e){ throw new Error(`تعذر قراءة إعدادات المتجر: ${backupErrorText(e)}`); }
     const data={settings:{store_config:settingsSnap.exists()?settingsSnap.data():{}},collections:{}};
-    for(const name of ['products','orders','reviews']) data.collections[name]=await getAllCollection(name);
+    /* النسخة تشمل كل مجموعات البيانات التي يستخدمها التطبيق، وطلبات الاسترجاع محفوظة أيضاً كنسخة مستقلة للعرض. */
+    for(const name of ['products','orders','reviews','customers','drivers']) data.collections[name]=await getAllCollection(name);
+    const orderEntries=data.collections.orders||{};
+    data.collections.returns=Object.fromEntries(Object.entries(orderEntries).filter(([id,o])=>o && o.returnStatus));
     const counts={}; for(const [k,v] of Object.entries(data.collections)) counts[k]=Object.keys(v).length; counts.settings=settingsSnap.exists()?1:0;
     return {format:BACKUP_FORMAT,createdAt:new Date().toISOString(),source:'POINT CAFE',firebaseProject:'point-cafe-665e6',backupBy:{uid:firebaseAdminUser.uid,email:firebaseAdminUser.email||''},counts,data};
   }
@@ -2266,21 +2279,21 @@ window.openPointCafeInstall=showInstallModal;
   async function createPointCafeBackup(){try{backupStatus('⏳ جاري جمع بيانات الموقع...');const pass=backupAskPassword();if(!pass)return;const obj=await buildBackupObject();const enc=await encryptBackup(obj,pass);const stamp=new Date().toISOString().replace(/[:.]/g,'-');downloadText(`POINT-CAFE-backup-${stamp}.pcbackup`,JSON.stringify(enc));backupStatus('✅ تم إنشاء النسخة كاملة بنجاح. احفظ الملف.',true);localStorage.setItem('pointcafe_last_backup',obj.createdAt)}catch(e){console.error(e);const msg=backupErrorText(e);backupStatus('❌ '+msg);alert('فشل إنشاء النسخة\n\n'+msg+'\n\nإذا ظهرت Missing or insufficient permissions فالمشكلة من Firestore Rules وليست من ملف النسخة. استخدم ملف firestore.rules المرفق ثم انشره.');}}
   function chooseBackupFile(){return new Promise(resolve=>{const input=document.createElement('input');input.type='file';input.accept='.pcbackup,.json,application/json';input.onchange=()=>resolve(input.files?.[0]||null);input.click()})}
   async function readBackupFromFile(file){const text=await file.text();let wrapper;try{wrapper=JSON.parse(text)}catch{throw new Error('الملف ليس نسخة احتياطية صحيحة.')}const pass=backupAskPassword();if(!pass)return null;return await decryptBackup(wrapper,pass)}
-  function backupSummary(obj){const c=obj.counts||{};return `<div class="backup-read-grid"><div class="backup-read-card">📦 المنتجات<b>${c.products||0}</b></div><div class="backup-read-card">🧾 الطلبات<b>${c.orders||0}</b></div><div class="backup-read-card">⭐ المراجعات<b>${c.reviews||0}</b></div><div class="backup-read-card">⚙️ الإعدادات<b>${c.settings||1}</b></div><div class="backup-read-card">🕒 تاريخ النسخة<b style="font-size:14px">${obj.createdAt?new Date(obj.createdAt).toLocaleString('ar-SA'):''}</b></div></div>`}
-  function showBackupReadOnly(obj){let m=document.getElementById('backup-view-modal');if(!m){m=document.createElement('div');m.id='backup-view-modal';m.className='backup-modal';document.body.appendChild(m)}const products=Object.values(obj.data?.collections?.products||{});const orders=Object.values(obj.data?.collections?.orders||{});m.innerHTML=`<div class="backup-modal-card"><div class="backup-modal-head"><div><h2>💾 عرض نسخة POINT CAFE</h2><div class="note">وضع قراءة فقط — لن يتم تعديل السحابة</div></div><button class="btn btn-danger" onclick="document.getElementById('backup-view-modal').style.display='none'">إغلاق ✕</button></div>${backupSummary(obj)}<div class="backup-card"><strong>🏪 بيانات المتجر</strong><div>${escapeBackupHtml(JSON.stringify(obj.data?.settings?.store_config||{},null,2))}</div></div><div class="backup-table-wrap"><h3>📦 المنتجات</h3><table class="backup-table"><thead><tr><th>الاسم</th><th>السعر</th><th>المعرف</th></tr></thead><tbody>${products.map((x,i)=>`<tr><td>${escapeBackupHtml(x.name||x.title||'—')}</td><td>${escapeBackupHtml(String(x.price??'—'))}</td><td>${escapeBackupHtml(String(Object.keys(obj.data.collections.products)[i]||'—'))}</td></tr>`).join('')}</tbody></table></div><div class="backup-table-wrap"><h3>🧾 الطلبات</h3><table class="backup-table"><thead><tr><th>رقم الطلب</th><th>الحالة</th><th>الإجمالي</th><th>التاريخ</th></tr></thead><tbody>${orders.slice(0,300).map((x,i)=>`<tr><td>${escapeBackupHtml(String(x.orderNumber||x.id||'—'))}</td><td>${escapeBackupHtml(String(x.status||'—'))}</td><td>${escapeBackupHtml(String(x.total??x.grandTotal??'—'))}</td><td>${escapeBackupHtml(String(x.createdAt||x.date||'—'))}</td></tr>`).join('')}</tbody></table></div></div>`;m.style.display='block'}
+  function backupSummary(obj){const c=obj.counts||{};return `<div class="backup-read-grid"><div class="backup-read-card">📦 المنتجات<b>${c.products||0}</b></div><div class="backup-read-card">🧾 الطلبات<b>${c.orders||0}</b></div><div class="backup-read-card">↩️ الاسترجاعات<b>${c.returns||0}</b></div><div class="backup-read-card">👥 العملاء<b>${c.customers||0}</b></div><div class="backup-read-card">🚗 السائقون<b>${c.drivers||0}</b></div><div class="backup-read-card">⭐ المراجعات<b>${c.reviews||0}</b></div><div class="backup-read-card">⚙️ الإعدادات<b>${c.settings||1}</b></div><div class="backup-read-card">🕒 تاريخ النسخة<b style="font-size:14px">${obj.createdAt?new Date(obj.createdAt).toLocaleString('ar-SA'):''}</b></div></div>`}
+  function showBackupReadOnly(obj){let m=document.getElementById('backup-view-modal');if(!m){m=document.createElement('div');m.id='backup-view-modal';m.className='backup-modal';document.body.appendChild(m)}const products=Object.values(obj.data?.collections?.products||{});const orders=Object.values(obj.data?.collections?.orders||{});m.innerHTML=`<div class="backup-modal-card"><div class="backup-modal-head"><div><h2>💾 عرض نسخة POINT CAFE</h2><div class="note">وضع قراءة فقط — لن يتم تعديل السحابة</div></div><button class="btn btn-danger" onclick="document.getElementById('backup-view-modal').style.display='none'">إغلاق ✕</button></div>${backupSummary(obj)}<div class="backup-card"><strong>🏪 بيانات المتجر</strong><div>${escapeBackupHtml(JSON.stringify(obj.data?.settings?.store_config||{},null,2))}</div></div><div class="backup-table-wrap"><h3>📦 المنتجات</h3><table class="backup-table"><thead><tr><th>الاسم</th><th>السعر</th><th>المعرف</th></tr></thead><tbody>${products.map((x,i)=>`<tr><td>${escapeBackupHtml(x.name||x.title||'—')}</td><td>${escapeBackupHtml(String(x.price??'—'))}</td><td>${escapeBackupHtml(String(Object.keys(obj.data.collections.products)[i]||'—'))}</td></tr>`).join('')}</tbody></table></div><div class="backup-table-wrap"><h3>🧾 الطلبات</h3><table class="backup-table"><thead><tr><th>رقم الطلب</th><th>الحالة</th><th>الإجمالي</th><th>التاريخ</th></tr></thead><tbody>${orders.slice(0,300).map((x,i)=>`<tr><td>${escapeBackupHtml(String(x.orderNumber||x.id||'—'))}</td><td>${escapeBackupHtml(String(x.status||'—'))}</td><td>${escapeBackupHtml(String(x.total??x.grandTotal??'—'))}</td><td>${escapeBackupHtml(String(x.createdAt||x.date||'—'))}</td></tr>`).join('')}</tbody></table></div><div class="backup-table-wrap"><h3>↩️ طلبات الاسترجاع</h3><table class="backup-table"><thead><tr><th>رقم الطلب</th><th>العميل</th><th>المنتج</th><th>الحالة</th><th>السبب</th></tr></thead><tbody>${Object.values(obj.data?.collections?.returns||{}).slice(0,300).map(x=>`<tr><td>${escapeBackupHtml(String(x.orderId||'—'))}</td><td>${escapeBackupHtml(String(x.customerName||'—'))}</td><td>${escapeBackupHtml(String(x.returnItem?.name||'—'))}</td><td>${escapeBackupHtml(String(x.returnStatus||'—'))}</td><td>${escapeBackupHtml(String(x.returnReason||'—'))}</td></tr>`).join('')||'<tr><td colspan="5">لا توجد طلبات استرجاع محفوظة.</td></tr>'}</tbody></table></div></div>`;m.style.display='block'}
   function escapeBackupHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
   async function openBackupFile(){try{backupStatus('📂 اختر ملف النسخة من الفلاش أو الهارد...');const f=await chooseBackupFile();if(!f)return;const obj=await readBackupFromFile(f);if(!obj)return;showBackupReadOnly(obj);backupStatus('✅ تم فتح النسخة بوضع القراءة فقط.',true)}catch(e){console.error(e);backupStatus('❌ تعذر فتح النسخة: '+(e.message||e));alert('تعذر فتح النسخة. تأكد من كلمة المرور وسلامة الملف.')}}
   async function updateBackupFile(){try{backupStatus('🔄 اختر النسخة القديمة لتحديثها...');const f=await chooseBackupFile();if(!f)return;const pass=backupAskPassword();if(!pass)return;const old=JSON.parse(await f.text());await decryptBackup(old,pass);const obj=await buildBackupObject();const enc=await encryptBackup(obj,pass);downloadText(`POINT-CAFE-backup-updated-${new Date().toISOString().replace(/[:.]/g,'-')}.pcbackup`,JSON.stringify(enc));backupStatus('✅ تم إنشاء نسخة محدثة. استبدل الملف القديم في الفلاش/الهارد بالملف الجديد.',true)}catch(e){console.error(e);backupStatus('❌ '+backupErrorText(e));alert('فشل تحديث النسخة: '+backupErrorText(e))}}
   async function checkBackupFile(){try{const f=await chooseBackupFile();if(!f)return;const pass=backupAskPassword();if(!pass)return;const obj=await decryptBackup(JSON.parse(await f.text()),pass);const total=Object.values(obj.counts||{}).reduce((a,b)=>a+Number(b||0),0);alert(`✅ النسخة سليمة وقابلة للفتح.\n\nالتاريخ: ${new Date(obj.createdAt).toLocaleString('ar-SA')}\nعدد العناصر المحفوظة: ${total}`);backupStatus('✅ فحص النسخة نجح.',true)}catch(e){alert('❌ فشل فحص النسخة: '+(e.message||e));backupStatus('❌ النسخة لم تجتز الفحص.')}}
   async function compareAndSyncBackup(){
-    try{const f=await chooseBackupFile();if(!f)return;const pass=backupAskPassword();if(!pass)return;const backup=await decryptBackup(JSON.parse(await f.text()),pass);const cloud=await buildBackupObject();const b=backup.data?.collections||{},c=cloud.data?.collections||{};let lines=[];for(const name of ['products','orders','reviews']){const bn=Object.keys(b[name]||{}).length,cn=Object.keys(c[name]||{}).length;lines.push(`${name}: النسخة ${bn} / السحابة ${cn}`)}const ok=confirm('مقارنة قبل المزامنة:\n\n'+lines.join('\n')+'\n\nلن يتم تنفيذ شيء الآن. هل تريد الانتقال إلى الاستعادة؟');if(ok)await restoreObjectToCloud(backup,pass)}catch(e){alert('تعذر المقارنة: '+(e.message||e))}}
+    try{const f=await chooseBackupFile();if(!f)return;const pass=backupAskPassword();if(!pass)return;const backup=await decryptBackup(JSON.parse(await f.text()),pass);const cloud=await buildBackupObject();const b=backup.data?.collections||{},c=cloud.data?.collections||{};let lines=[];for(const name of ['products','orders','reviews','customers','drivers','returns']){const bn=Object.keys(b[name]||{}).length,cn=Object.keys(c[name]||{}).length;lines.push(`${name}: النسخة ${bn} / السحابة ${cn}`)}const ok=confirm('مقارنة قبل المزامنة:\n\n'+lines.join('\n')+'\n\nلن يتم تنفيذ شيء الآن. هل تريد الانتقال إلى الاستعادة؟');if(ok)await restoreObjectToCloud(backup,pass)}catch(e){alert('تعذر المقارنة: '+(e.message||e))}}
   async function restoreBackupToCloud(){try{const f=await chooseBackupFile();if(!f)return;const pass=backupAskPassword();if(!pass)return;const backup=await decryptBackup(JSON.parse(await f.text()),pass);const confirmed=confirm('⚠️ تحذير مهم\n\nسيتم استبدال/تحديث بيانات السحابة بالبيانات الموجودة في النسخة.\nخذ نسخة حالية أولاً قبل الاستعادة.\n\nهل أنت متأكد؟');if(!confirmed)return;await restoreObjectToCloud(backup,pass)}catch(e){alert('❌ فشلت الاستعادة: '+(e.message||e))}}
   async function restoreObjectToCloud(backup,pass){
     if(!firebaseAdminUser)throw new Error('يجب تسجيل الدخول بحساب المدير.');
     backupStatus('🛡️ جارٍ إنشاء نسخة أمان من السحابة قبل الاستعادة...');
     const safety=await buildBackupObject();downloadText(`POINT-CAFE-before-restore-${new Date().toISOString().replace(/[:.]/g,'-')}.pcbackup`,JSON.stringify(await encryptBackup(safety,pass)));
     const data=backup.data||{};const settings=data.settings?.store_config||{};await window.setDoc(window.doc(window.db,'settings','store_config'),settings);
-    for(const name of ['orders','reviews','products']){
+    for(const name of ['orders','reviews','products','customers','drivers']){
       const target=data.collections?.[name]||{};
       const current=await getAllCollection(name);
       for(const [id,value] of Object.entries(target)){await window.setDoc(window.doc(window.db,name,id),value)}
