@@ -1,0 +1,15 @@
+{
+  "name": "توصيل POINT CAFE",
+  "short_name": "سائق POINT CAFE",
+  "start_url": "./driver.html",
+  "display": "standalone",
+  "background_color": "#f5eadb",
+  "theme_color": "#9a7652",
+  "icons": [
+    {
+      "src": "./point-cafe-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

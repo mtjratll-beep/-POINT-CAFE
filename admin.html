@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم المدير POINT CAFE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCSjXz47oath2NA6LXAkYk_pNLK1_X3tVU",
+      authDomain: "point-cafe-665e6.firebaseapp.com",
+      projectId: "point-cafe-665e6",
+      storageBucket: "point-cafe-665e6.firebasestorage.app",
+      messagingSenderId: "1078733395604",
+      appId: "1:1078733395604:web:075d8e0f2a3f075bde0681",
+      measurementId: "G-XSPQZK57CN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const driverAuthApp = initializeApp(firebaseConfig, "POINT_CAFE_DRIVER_AUTH");
+    const driverAuth = getAuth(driverAuthApp);
+    window.driverAuth = driverAuth;
+
+    window.db = db;
+    window.auth = auth;
+    window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
+    window.firebaseSignOut = signOut;
+    window.firebaseCreateUserWithEmailAndPassword = createUserWithEmailAndPassword;
+    window.firebaseOnAuthStateChanged = onAuthStateChanged;
+    window.doc = doc;
+    window.getDoc = getDoc;
+    window.setDoc = setDoc;
+    window.collection = collection;
+    window.getDocs = getDocs;
+    window.addDoc = addDoc;
+    window.updateDoc = updateDoc;
+    window.deleteDoc = deleteDoc;
+    window.onSnapshot = onSnapshot;
+    
+    window.dispatchEvent(new Event('firebase-ready'));
+  </script>
+
+  <style>
+    :root {
+      --primary: #9a7652;
+      --primary-hover: #76583b;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --success: #10b981;
+      --bg-main: #f5eadb;
+      --card-bg: #ffffff;
+      --text-main: #4b3828;
+      --text-muted: #7b624a;
+      --border: #dfc9ad;
+      --shadow: 0 10px 25px -5px rgba(91, 66, 42, 0.20);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+    body {
+      background-color: var(--bg-main);
+      background-image: radial-gradient(#eadbc7 15%, transparent 16%), radial-gradient(#eadbc7 15%, transparent 16%);
+      background-size: 30px 30px;
+      background-position: 0 0, 15px 15px;
+      color: var(--text-main);
+      padding: 20px;
+      line-height: 1.5;
+    }
+
+    /* Overlay Login */
+    #login-overlay {
+      position: fixed; inset: 0; background: rgba(59, 7, 100, 0.85);
+      backdrop-filter: blur(8px); z-index: 9999;
+      display: flex; justify-content: center; align-items: center; padding: 20px;
+    }
+    .login-card {
+      background: var(--card-bg); padding: 32px; border-radius: var(--radius); width: 100%; max-width: 400px;
+      text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 2px solid var(--border);
+    }
+    .login-card h2 { font-size: 22px; margin-bottom: 20px; color: var(--primary); font-weight: 800; }
+    .login-card input {
+      width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px;
+      margin-bottom: 20px; text-align: center; font-size: 18px; outline: none; transition: 0.2s;
+    }
+    .login-card input:focus { border-color: var(--primary); }
+
+    /* Main Container */
+    .admin-container { max-width: 900px; margin: 0 auto; display: none; }
+    .admin-header {
+      background: var(--card-bg); padding: 24px; border-radius: var(--radius);
+      box-shadow: var(--shadow); margin-bottom: 24px; text-align: center; border: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+    }
+    .admin-header h1 { font-size: 18px; color: var(--primary); font-weight: 800; }
+
+    .section-box {
+      background: var(--card-bg); border: 1px solid var(--border); padding: 24px;
+      border-radius: var(--radius); margin-bottom: 24px; box-shadow: var(--shadow);
+    }
+    .section-title {
+      font-weight: 800; margin-bottom: 16px; color: var(--primary); font-size: 18px;
+      display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 12px;
+    }
+    
+    label { font-size: 14px; font-weight: 700; display: block; margin: 12px 0 6px; color: var(--text-muted); }
+    input, select, textarea {
+      width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 10px;
+      font-size: 14px; outline: none; background: #fbf5ed; transition: all 0.2s; color: var(--text-main);
+    }
+    input:focus, select:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.15); }
+    
+    /* Buttons */
+    .btn {
+      background: var(--primary); color: #fff; border: none; padding: 12px 20px;
+      border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 14px;
+      width: 100%; margin-top: 10px; transition: 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-danger { background: var(--danger); }
+    .btn-danger:hover { background: var(--danger-hover); }
+    .btn-success { background: var(--success); }
+
+    /* Badges & Cards */
+    .status-badge { padding: 6px 14px; border-radius: 30px; font-size: 12px; font-weight: 700; color: white; }
+    .status-open { background-color: var(--success); }
+    .status-closed { background-color: var(--danger); }
+    
+    .item-card {
+      display: flex; align-items: center; justify-content: space-between; background: #fbf5ed;
+      border: 1px solid var(--border); padding: 12px 16px; border-radius: 12px; margin-top: 10px; transition: 0.2s; gap: 10px;
+    }
+    .item-card:hover { border-color: var(--primary); background: #fff; }
+    .item-card img { width: 50px; height: 50px; object-fit: contain; border-radius: 8px; background: #fff; border: 1px solid var(--border); }
+    .item-info { flex: 1; margin: 0 5px; font-size: 13px; color: var(--text-muted); }
+    .item-info strong { font-size: 15px; color: var(--text-main); display: block; margin-bottom: 2px; }
+    
+    .preview-img { width: 90px; height: 90px; object-fit: contain; border-radius: 12px; border: 2px dashed var(--border); display: block; margin-top: 10px; padding: 5px; background: #fff; }
+    .note { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    
+    .flex-row { display: flex; gap: 12px; }
+    .flex-row > div { flex: 1; }
+
+    .sync-status { font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px; background: #eadbc7; color: var(--primary); }
+
+    .item-card,.section-box{animation:fadeUp .45s ease both}.admin-section{display:none}#store-section{display:block}
+
+    /* ترتيب أزرار صفحات المدير في الجهة اليمنى على اللابتوب والآيباد */
+    #admin-nav{direction:rtl;}
+    #admin-nav > div:last-child{direction:rtl;}
+    #admin-nav .btn{text-align:right;justify-content:flex-start;}
+    @media (min-width:601px){
+      #admin-nav{max-width:520px;margin-left:0;margin-right:auto;}
+    }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    .order-card{background:#fbf5ed;border:1px solid var(--border);border-radius:14px;padding:16px;margin:12px 0;box-shadow:var(--shadow)}
+    .order-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:800;color:var(--primary)}
+    .order-products{margin:10px 0;padding:10px;background:#fff;border-radius:10px}
+    .admin-sound-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.sound-btn{width:100%;margin:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--primary);color:#fff;font-weight:800;cursor:pointer}.admin-sound-status{margin-top:7px;font-size:12px;font-weight:700;color:var(--text-muted);background:#fff8ef;border:1px solid var(--border);border-radius:9px;padding:6px 9px;text-align:center}
+    .order-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+    .order-actions .btn{margin:0}
+    .driver-pill{display:inline-block;background:#eadbc7;border-radius:20px;padding:4px 9px;font-size:12px;margin:3px}
+    .order-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.order-filter-btn{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;font-weight:800;cursor:pointer}.order-filter-btn.active{background:var(--primary);color:#fff}.order-filter-count{display:block;font-size:18px;margin-top:3px}.report-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.report-card{background:#fff8ef;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}.report-card strong{display:block;font-size:22px;color:var(--primary);margin-top:6px}@media(max-width:700px){.report-grid{grid-template-columns:1fr}}
+  
+.sound-permission-modal{position:fixed;inset:0;background:#0008;z-index:100000;display:flex;align-items:center;justify-content:center;padding:18px}
+.sound-permission-card{width:min(430px,100%);background:#fffaf3;border:2px solid var(--border);border-radius:22px;padding:24px;text-align:center;box-shadow:0 18px 50px #0005}
+.sound-permission-icon{font-size:48px;margin-bottom:8px}
+.sound-permission-card h2{margin:5px 0 10px;color:var(--p);font-size:24px}
+.sound-permission-card p{line-height:1.8;margin:0 0 18px;color:#5d4b3b}
+.sound-permission-main,.sound-permission-test,.sound-permission-later{width:100%;min-height:52px;border:0;border-radius:13px;margin-top:9px;font-weight:800;font-size:16px;cursor:pointer}
+.sound-permission-main{background:var(--p);color:#fff}
+.sound-permission-test{background:#ead9c5;color:#5d432d}
+.sound-permission-later{background:transparent;color:#777}
+
+.pwa-skip-btn{
+  width:100%;margin-top:8px;min-height:40px;border:0;
+  background:transparent;color:#76583b;font-size:13px;
+  font-weight:800;cursor:pointer;border-radius:10px;
+}
+.pwa-skip-btn:active{background:rgba(118,88,59,.08)}
+
+
+/* ===== SMALL NON-FORCED INSTALL NOTICE ===== */
+.pwa-install-modal{
+  position:fixed!important;
+  inset:auto 12px 78px auto!important;
+  width:auto!important;
+  height:auto!important;
+  background:transparent!important;
+  display:block!important;
+  padding:0!important;
+  z-index:200000!important;
+}
+.pwa-install-card{
+  width:285px!important;
+  max-width:calc(100vw - 24px)!important;
+  box-sizing:border-box;
+  display:grid!important;
+  grid-template-columns:48px 1fr;
+  grid-template-rows:auto auto;
+  gap:4px 10px;
+  align-items:center;
+  padding:10px 11px!important;
+  background:rgba(255,250,243,.94)!important;
+  border:1px solid rgba(154,118,82,.35)!important;
+  border-radius:16px!important;
+  box-shadow:0 8px 24px rgba(45,25,10,.16)!important;
+  text-align:right!important;
+  position:relative;
+}
+.pwa-install-logo{
+  grid-row:1 / 3;
+  width:44px!important;height:44px!important;
+  border-radius:11px!important;
+  border:1px solid rgba(154,118,82,.45)!important;
+  padding:3px!important;
+}
+.pwa-install-title{
+  margin:0!important;
+  font-size:13px!important;
+  line-height:1.25!important;
+  color:#76583b!important;
+}
+.pwa-install-subtitle{
+  margin:0!important;
+  font-size:10px!important;
+  line-height:1.3!important;
+  color:#806b58!important;
+}
+.pwa-install-btn{
+  grid-column:1 / 3;
+  min-height:34px!important;
+  margin-top:3px!important;
+  border-radius:9px!important;
+  font-size:12px!important;
+  padding:5px 8px!important;
+}
+.pwa-install-help{display:none!important}
+.pwa-skip-btn{
+  position:absolute!important;
+  top:4px!important;
+  left:5px!important;
+  width:22px!important;
+  min-height:22px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:50%!important;
+  background:rgba(118,88,59,.10)!important;
+  color:#76583b!important;
+  font-size:15px!important;
+  line-height:22px!important;
+  z-index:3;
+}
+@media(max-width:420px){
+  .pwa-install-modal{right:9px!important;bottom:72px!important}
+  .pwa-install-card{width:250px!important}
+}
+
+
+/* ===== النسخ الاحتياطي داخل نفس الموقع ===== */
+.backup-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.backup-card{background:#fff8ef;border:1px solid var(--border);border-radius:14px;padding:14px}
+.backup-card strong{display:block;color:var(--primary);margin-bottom:5px}
+.backup-status{margin-top:10px;padding:10px;border-radius:10px;background:#fff;border:1px solid var(--border);font-weight:700;text-align:center}
+.backup-modal{position:fixed;inset:0;background:#0008;z-index:200000;display:none;overflow:auto;padding:18px}
+.backup-modal-card{max-width:980px;margin:20px auto;background:#f5eadb;border:2px solid var(--border);border-radius:20px;box-shadow:0 20px 70px #0007;padding:18px}
+.backup-modal-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;background:#fff8ef;border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
+.backup-read-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+.backup-read-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:13px;text-align:center}
+.backup-read-card b{display:block;font-size:22px;color:var(--primary);margin-top:5px}
+.backup-table-wrap{overflow:auto;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px;margin-top:10px}
+.backup-table{width:100%;border-collapse:collapse;min-width:620px}.backup-table th,.backup-table td{border-bottom:1px solid var(--border);padding:8px;text-align:right;font-size:13px}.backup-table th{background:#fff8ef;color:var(--primary)}
+@media(max-width:700px){.backup-grid,.backup-read-grid{grid-template-columns:1fr}}
+
+    .whatsapp-admin-box{padding:14px;background:#fffdf9;border:1px solid var(--border);border-radius:16px}
+    .whatsapp-products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-top:10px}
+    .whatsapp-product-card{background:#fff;border:2px solid var(--border);border-radius:14px;padding:8px;cursor:pointer;transition:.18s;min-width:0}
+    .whatsapp-product-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+    .whatsapp-product-card.selected{border-color:#25D366;box-shadow:0 0 0 3px #25D36622}
+    .whatsapp-product-card img{width:100%;height:105px;object-fit:cover;border-radius:10px;background:#f3eee8}
+    .whatsapp-product-name{font-weight:900;margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .whatsapp-product-price{font-weight:800;color:var(--primary);font-size:13px;margin-top:3px}
+    .whatsapp-selected-product{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px;background:#eefaf2;border:1px solid #b7e6c8;border-radius:12px}
+    .whatsapp-selected-product img{width:58px;height:58px;border-radius:10px;object-fit:cover}
+    .whatsapp-message-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .whatsapp-customers-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px dashed var(--border)}
+    .whatsapp-customers-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:10px;max-height:420px;overflow:auto}
+    .whatsapp-customer-row{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px}
+    .whatsapp-customer-row input{width:20px;height:20px;flex:0 0 auto}
+    .whatsapp-customer-row .wa-name{font-weight:900;display:block}
+    .whatsapp-customer-row .wa-phone{font-size:13px;color:var(--text-muted);direction:ltr;text-align:right;display:block}
+    .whatsapp-customer-row button{margin-right:auto;padding:6px 9px;border:0;border-radius:9px;background:#25D366;color:#fff;font-weight:900;cursor:pointer}
+    .whatsapp-send-bar{position:sticky;bottom:8px;z-index:5;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding:10px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}
+    .whatsapp-send-one{background:#25D366!important;color:#fff!important}
+    .whatsapp-send-many{background:#128C7E!important;color:#fff!important}
+    .whatsapp-queue{margin-top:10px;padding:10px;background:#f7f2eb;border:1px solid var(--border);border-radius:12px}
+    .whatsapp-queue-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px dashed var(--border)}
+    .whatsapp-queue-item:last-child{border-bottom:0}
+    @media(max-width:600px){
+      .whatsapp-products-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .whatsapp-customers-list{grid-template-columns:1fr}
+      .whatsapp-send-bar{bottom:4px}
+    }
+
+</style>
+
+<link rel="manifest" href="admin-manifest.json"><meta name="theme-color" content="#9a7652"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="لوحة تحكم المدير POINT CAFE"><link rel="apple-touch-icon" href="point-cafe-logo.jpg">
+<style>
+/* POINT CAFE PWA INSTALL */
+.pwa-install-modal{position:fixed;inset:0;z-index:200000;background:rgba(47,27,12,.82);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:18px}.pwa-install-card{width:min(430px,100%);background:linear-gradient(180deg,#fffaf3,#f5eadb);border:2px solid #dfc9ad;border-radius:24px;padding:24px 20px;text-align:center;box-shadow:0 25px 70px #0008}.pwa-install-logo{width:112px;height:112px;object-fit:contain;border-radius:22px;border:2px solid #9a7652;background:#fff;padding:6px}.pwa-install-title{margin:12px 0 5px;color:#76583b;font-size:24px;font-weight:900}.pwa-install-subtitle{margin:0 0 17px;color:#6f5945;font-size:14px;line-height:1.8}.pwa-install-btn{width:100%;min-height:55px;border:0;border-radius:14px;background:#9a7652;color:#fff;font-size:17px;font-weight:900;cursor:pointer}.pwa-install-btn:active{transform:scale(.98)}.pwa-install-help{display:none;margin-top:12px;background:#fff;border:1px solid #dfc9ad;border-radius:12px;padding:10px;color:#5d4b3b;font-size:12px;line-height:1.8}.pwa-install-modal.installed{display:none}.pwa-install-page-btn{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;border:1px solid #dfc9ad!important;background:#fffaf3!important;color:#76583b!important;border-radius:10px!important;font-weight:900!important;cursor:pointer!important}.pwa-install-page-btn:hover{background:#eadbc7!important}
+</style>
+<style>
+/* POINT CAFE PWA INSTALL */
+.pwa-install-modal{position:fixed;inset:0;z-index:200000;background:rgba(35,20,10,.03);display:flex;align-items:center;justify-content:center;padding:16px;animation:pwaFadeIn .3s ease}
+.pwa-install-card{width:min(430px,90vw);background:rgba(255,250,243,.55);border:1.5px solid rgba(154,118,82,.55);border-radius:22px;padding:19px 16px;text-align:center;box-shadow:0 16px 40px rgba(45,25,10,.20);position:relative}
+.pwa-install-logo{width:82px;height:82px;object-fit:contain;border-radius:18px;border:2px solid rgba(154,118,82,.65);background:rgba(255,255,255,.75);padding:5px}
+.pwa-install-title{margin:9px 0 4px;color:#76583b;font-size:21px;font-weight:900}
+.pwa-install-subtitle{margin:0 0 13px;color:#5d4b3b;font-size:13px;line-height:1.7}
+.pwa-install-btn{width:100%;min-height:50px;border:0;border-radius:13px;background:rgba(154,118,82,.92);color:#fff;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 7px 15px rgba(118,88,59,.20)}
+.pwa-install-help{display:none;margin-top:10px;background:rgba(255,255,255,.70);border:1px solid rgba(223,201,173,.85);border-radius:11px;padding:9px;color:#5d4b3b;font-size:12px;line-height:1.7}
+.pwa-install-modal.installed{display:none}
+.pwa-install-page-btn{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;border:1px solid #dfc9ad!important;background:#fffaf3!important;color:#76583b!important;border-radius:10px!important;font-weight:900!important;cursor:pointer!important}
+@keyframes pwaFadeIn{from{opacity:0;transform:scale(.99)}to{opacity:1;transform:scale(1)}}
+</style><style>
+/* POINT CAFE FINAL: installed app uses the exact page/site UI with NO install overlay. */
+html.pwa-standalone #pwa-install-modal,
+html.pwa-standalone .pwa-install-modal,
+html.pwa-standalone .pwa-install-page-btn,
+html.pwa-standalone [data-pwa-install],
+html.pwa-standalone .install-app-button {
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+html.pwa-standalone body {
+  overflow-x:hidden;
+}
+</style>
+<script>
+(function(){
+  function pointCafeStandalone(){
+    try {
+      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+             window.navigator.standalone === true ||
+             document.referrer.indexOf('android-app://') === 0;
+    } catch(e){ return false; }
+  }
+  function applyInstalledMode(){
+    if(!pointCafeStandalone()) return;
+    document.documentElement.classList.add('pwa-standalone');
+    var ids=['pwa-install-modal'];
+    ids.forEach(function(id){ var el=document.getElementById(id); if(el) el.remove(); });
+    document.querySelectorAll('.pwa-install-page-btn,[data-pwa-install],.install-app-button').forEach(function(el){ el.remove(); });
+  }
+  applyInstalledMode();
+  document.addEventListener('DOMContentLoaded',applyInstalledMode);
+  window.addEventListener('load',applyInstalledMode);
+  setTimeout(applyInstalledMode,250);
+  setTimeout(applyInstalledMode,1000);
+})();
+</script>
+
+
+<style id="point-cafe-install-final-fix">
+/* POINT CAFE FINAL INSTALL UI: one horizontal header button + reliable skip */
+.header-actions .pwa-install-page-btn{
+  width:118px!important;height:42px!important;min-width:118px!important;
+  padding:4px 8px!important;box-sizing:border-box!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  white-space:nowrap!important;word-break:keep-all!important;overflow:hidden!important;
+  font-size:10px!important;line-height:1!important;
+  border:1px solid #d9c3a9!important;border-radius:12px!important;
+  background:#fffaf3!important;color:#76583b!important;
+}
+.header-actions .pwa-install-page-btn br{display:none!important}
+.pwa-install-modal.installed{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+.pwa-skip-btn{
+  cursor:pointer!important;touch-action:manipulation!important;
+}
+</style>
+<script>
+(function(){
+  function hidePointCafeInstall(){
+    var modal=document.getElementById('pwa-install-modal');
+    if(modal){
+      modal.classList.add('installed');
+      modal.style.setProperty('display','none','important');
+      modal.style.setProperty('visibility','hidden','important');
+      modal.style.setProperty('pointer-events','none','important');
+    }
+    try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(e){}
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target && e.target.closest ? e.target.closest('#pwa-skip-btn') : null;
+    if(b){ e.preventDefault(); e.stopPropagation(); hidePointCafeInstall(); }
+  },true);
+  window.hidePointCafeInstall=hidePointCafeInstall;
+})();
+</script>
+
+
+
+
+<style id="point-cafe-admin-mobile-width-fix">
+html, body{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow-x:hidden!important;
+}
+body{
+  margin:0!important;
+}
+.admin-container{
+  width:100%!important;
+  max-width:900px!important;
+  min-width:0!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+.section-box,
+.admin-header,
+.order-card,
+#orders-list{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+}
+.order-card{
+  overflow:hidden!important;
+}
+.order-card img{
+  max-width:100%!important;
+  height:auto!important;
+}
+@media(max-width:700px){
+  body{padding:10px!important;}
+  .admin-container{width:100%!important;margin:0 auto!important;}
+  .admin-header,.section-box{padding:14px!important;}
+  .order-filters{grid-template-columns:repeat(2,1fr)!important;}
+  .order-actions{grid-template-columns:1fr!important;}
+  .order-head{align-items:flex-start!important;}
+  .delivery-proof-admin img{max-width:100%!important;height:auto!important;}
+}
+</style>
+
+</head>
+<body>
+<div id="admin-sound-permission-modal" class="sound-permission-modal" style="display:none">
+  <div class="sound-permission-card">
+    <div class="sound-permission-icon">🔔</div>
+    <h2>السماح بنغمة وصول الطلب</h2>
+    <p>فعّل الصوت حتى يسمع المدير تنبيهًا عند وصول طلب جديد. اضغط السماح وتشغيل النغمة مرة واحدة.</p>
+    <button class="sound-permission-main" onclick="enableAdminSound()">🔊 السماح وتشغيل النغمة</button>
+    <button class="sound-permission-test" onclick="previewAdminSound()">🎵 سماع النغمة أولاً</button>
+    <button class="sound-permission-later" onclick="closeAdminSoundPermission()">لاحقًا</button>
+  </div>
+</div>
+
+
+<div id="login-overlay">
+  <div class="login-card">
+    <h2>☕ تسجيل الدخول لمدير كوفيه POINT CAFE</h2>
+    <p style="margin:10px 0 14px;color:var(--text-muted)">الدخول محمي بحساب Firebase الخاص بالمدير.</p>
+    <input type="email" id="admin-email" placeholder="بريد المدير الإلكتروني" autocomplete="username">
+    <input type="password" id="admin-password" placeholder="كلمة مرور المدير" autocomplete="current-password">
+    <button class="btn" onclick="checkPassword()">🔐 دخول آمن</button>
+    <div id="admin-login-error" style="display:none;margin-top:12px;color:#b91c1c;font-weight:700"></div>
+  </div>
+</div>
+
+<div class="admin-container" id="admin-content">
+  <div class="admin-header">
+    <div>
+      <h1>☕ ☕ POINT CAFE — لوحة مدير الكوفيه</h1>
+      <div class="admin-sound-controls"><button class="sound-btn pwa-install-page-btn" onclick="openPointCafeInstall()">📲 تثبيت التطبيق</button>
+        <button class="sound-btn" id="admin-sound-permission" onclick="enableAdminSound()">🔊 السماح بالصوت</button>
+        <button class="sound-btn" onclick="previewAdminSound()">🎵 سماع النغمة</button>
+      </div>
+      <div id="admin-sound-status" class="admin-sound-status">🔇 تنبيه الطلبات الصوتي غير مفعّل</div>
+    </div>
+    <div id="sync-badge" class="sync-status">جاري الاتصال بالسحابة...</div>
+  </div>
+
+  <div class="section-box" id="admin-nav" style="background:#fff8ef;">
+    <div class="section-title">📋 أقسام الإدارة</div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+      <button class="btn" onclick="goSection('store-section')">🏪 المتجر</button>
+      <button class="btn" onclick="goSection('products-section')">📦 المنتجات</button>
+      <button class="btn" onclick="goSection('ai-section')">🤖 تعليم المساعد الذكي</button>
+      <button class="btn" onclick="goSection('banks-section')">🏦 البنوك</button>
+      <button class="btn" onclick="goSection('drivers-section')">🚗 السائقون</button>
+      <button class="btn" onclick="goSection('whatsapp-section'); renderWhatsAppCenter();">📲 واتساب العملاء</button>
+      <button class="btn" onclick="goSection('orders-section')">🧾 الطلبات</button>
+      <button class="btn" onclick="goSection('returns-section'); renderReturnRequests();">↩️ الاسترجاعات</button>
+      <button class="btn" onclick="goSection('reports-section'); renderReports();">📊 صفحة التقارير</button>
+      <button class="btn" onclick="goSection('slider-section')">🖼️ الإعلانات</button>
+      <button class="btn" onclick="goSection('basic-section')">⚙️ إعدادات المتجر</button>
+      <button class="btn" onclick="goSection('backup-section')">💾 النسخ الاحتياطي والاستعادة</button>
+    </div>
+  </div>
+
+  <div class="section-box admin-section" id="store-section" style="border-right: 6px solid var(--danger);">
+    <div class="section-title">
+      <span>🔒 حالة المتجر (إغلاق / فتح)</span>
+      <span id="store-status-badge" class="status-badge status-open">المتجر مفتوح</span>
+    </div>
+
+    <label>سبب الإغلاق (سيظهر للعملاء في الشريط بالمتجر):</label>
+    <input type="text" id="store-close-reason" placeholder="مثال: مغلق حالياً للصيانة وسنعاود الفتح قریباً">
+
+    <button id="btn-toggle-store" class="btn btn-danger" onclick="toggleStoreStatus()">🔒 إغلاق المتجر الآن</button>
+  </div>
+
+  <div class="section-box admin-section" id="basic-section">
+    <div class="section-title">📌 البيانات الأساسية للمتجر</div>
+    
+    <label>📱 رقم جوال المدير / البائع للواتساب:</label>
+    <input type="tel" id="store-phone" placeholder="مثال: 0551234567 أو 966551234567" inputmode="tel">
+    <small class="note">سيتم استخدام هذا الرقم لفتح واتساب وإرسال طلبات العملاء إليه.</small>
+
+    <div style="margin-top:12px;padding:12px;background:#fff7ed;border:1px solid var(--border);border-radius:12px;">
+      <label style="display:flex;align-items:center;gap:8px;font-weight:900;cursor:pointer;">
+        <input type="checkbox" id="return-enabled" style="width:19px;height:19px;accent-color:#9a7652;">
+        🔄 السماح للعملاء بطلب استرجاع المنتجات
+      </label>
+      <small class="note">عند إلغاء التفعيل يختفي زر الاسترجاع من «طلباتي» عند العملاء، وتبقى الطلبات السابقة قيد المعالجة.</small>
+    </div>
+
+    <label>📍 موقع المتجر على الخريطة:</label>
+    <input type="url" id="store-location-url" placeholder="الصق رابط Google Maps لموقع المتجر هنا">
+    <small class="note">بعد الحفظ سيظهر زر <strong>📍 موقع المتجر</strong> داخل سلة كل عميل، ويمكنه فتح الخريطة مباشرة.</small>
+
+    <div style="margin-top:15px;padding:14px;background:#fbf5ed;border:1px solid var(--border);border-radius:12px;">
+      <label style="font-weight:800;">🚚 سعر التوصيل:</label>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <input type="checkbox" id="delivery-free" onchange="toggleDeliveryPriceFields()" style="width:18px;height:18px;">
+        <span>التوصيل مجاني</span>
+      </label>
+      <div id="delivery-price-fields" style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:10px;">
+        <div><label>قيمة التوصيل:</label><input type="number" id="delivery-price" min="0" step="0.01" placeholder="مثال: 5"></div>
+        <div><label>العملة:</label><select id="delivery-currency"><option value="ر.س">ريال سعودي (ر.س)</option><option value="ر.ي">ريال يمني (ر.ي)</option><option value="$">دولار ($)</option><option value="ر.ع">ريال عماني (ر.ع)</option></select></div>
+      </div>
+      <small class="note">يمكن للمدير جعل التوصيل مجانياً أو تحديد قيمته، وستظهر القيمة للعميل قبل الإجمالي النهائي.</small>
+    </div>
+
+    <label>🖼️ شعار المتجر — إضافة أو تغيير من المعرض:</label>
+    <input type="file" id="logo-file" accept="image/*" onchange="uploadLogo(event)">
+    <img id="logo-preview" class="preview-img" src="" alt="معاينة شعار المتجر">
+    <small class="note">عند اختيار شعار جديد سيتم تصغيره وضغطه تلقائياً ثم حفظه في السحابة.</small>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+      <button class="btn" onclick="saveBasicSettings()">💾 حفظ الإعدادات</button>
+      <button class="btn" type="button" onclick="openSavedStoreLocation()">🗺️ فتح موقع المتجر</button>
+    </div>
+    <button class="btn" type="button" style="margin-top:8px;background:#25D366;" onclick="openSavedWhatsApp()">💬 اختبار واتساب المتجر</button>
+  </div>
+
+  <div class="section-box admin-section" id="slider-section">
+    <div class="section-title">
+      <span>🖼️ السلايدر المتحرك (الإعلانات)</span>
+      <span style="font-size:12px; color:var(--text-muted);" id="slider-count">0 / 10</span>
+    </div>
+    <p class="note">📏 المقاس الموصى به لصور الإعلانات: <strong>1200 × 500 بكسل</strong></p>
+
+    <label style="margin-top:15px;">إضافة صورة إعلان جديدة:</label>
+    <input type="file" id="slider-file" accept="image/*" onchange="addSliderImage(event)">
+
+    <div id="sliders-list" style="margin-top:15px;"></div>
+  </div>
+
+  <div class="section-box admin-section" id="products-section">
+    <div class="section-title">📦 إدارة المنتجات</div>
+    
+    <label>اسم المنتج:</label>
+    <input type="text" id="prod-name" placeholder="مثال: لاتيه / كابتشينو / كيك">
+
+    <div class="flex-row">
+      <div style="flex:2;">
+        <label>السعر:</label>
+        <input type="number" id="prod-price" placeholder="مثال: 500">
+      </div>
+      <div>
+        <label>العملة:</label>
+        <select id="prod-currency">
+          <option value="ر.س">ريال سعودي (ر.س)</option>
+          <option value="$">دولار ($)</option>
+          <option value="ر.ي">ريال يمني (ر.ي)</option>
+          <option value="ر.ع">ريال عماني (ر.ع)</option>
+        </select>
+      </div>
+    </div>
+
+    <label>تكلفة المنتج:</label>
+    <input type="number" id="prod-cost" placeholder="مثال: 300" min="0" step="0.01">
+
+    <label>صورة المنتج:</label>
+    <input type="file" id="prod-file" accept="image/*" multiple onchange="previewProductImg(event)">
+    <small class="note">يمكنك اختيار أكثر من 5 صور للمنتج، واختر العدد الذي تريده.</small>
+    <div id="prod-previews" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
+    <label>مواصفات المنتج (اختياري):</label>
+    <textarea id="prod-specs" rows="3" placeholder="اكتب وصف ومواصفات المنتج إذا أردت"></textarea>
+
+    <label style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:12px;border:2px solid #e53935;border-radius:12px;background:#fff5f5;color:#c62828;font-weight:800;cursor:pointer;">
+      <input type="checkbox" id="prod-special-offer" style="width:20px;height:20px;accent-color:#e53935;">
+      🔥 عرض خاص — يظهر باللون الأحمر في المتجر
+    </label>
+    <img id="prod-preview" class="preview-img" style="display:none;" alt="معاينة صورة المنتج">
+
+    <button class="btn" onclick="addProduct()" style="margin-top:15px;">إضافة المنتج للسحابة 📦</button>
+
+    <h4 style="margin-top:20px; font-size:15px;">المنتجات الحالية:</h4>
+    <div id="products-list" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="section-box admin-section" id="ai-section">
+    <div class="section-title"><span>🤖 تعليم مساعد POINT CAFE</span><span class="sync-status">يظهر للعملاء مباشرة</span></div>
+    <p class="note">اكتب للذكاء الاصطناعي معلومات وتعليمات خاصة بالمتجر. بعد الحفظ تصل التحديثات للعملاء تلقائياً بدون تعديل صفحة العميل.</p>
+    <label>👋 رسالة الترحيب:</label>
+    <textarea id="ai-welcome" rows="3" placeholder="مثال: أهلاً بك في POINT CAFE، كيف أساعدك؟"></textarea>
+    <label>🧠 تعليمات المساعد:</label>
+    <textarea id="ai-instructions" rows="4" placeholder="مثال: أجب بالعربية، واذكر الأسعار بالريال السعودي، ولا تخترع معلومات غير موجودة."></textarea>
+    <label>💬 الرد الافتراضي عند عدم معرفة الإجابة:</label>
+    <textarea id="ai-fallback" rows="3" placeholder="مثال: لم أفهم سؤالك، اكتب اسم المنتج وسأساعدك."></textarea>
+    <label>📚 أسئلة وأجوبة يعلّمها المدير:</label>
+    <textarea id="ai-qa" rows="10" dir="rtl" placeholder="اكتب سؤالاً ثم الرد في السطر نفسه بهذا الشكل:\nما وقت الدوام؟ => نعمل يومياً من 8 صباحاً حتى 12 ليلاً.\nهل يوجد توصيل؟ => نعم، يوجد توصيل داخل مناطق الخدمة.\nهل عندكم كيك؟ => نعم، راجع قسم الحلويات في المتجر."></textarea>
+    <small class="note">كل سطر بصيغة: <strong>السؤال =&gt; الرد</strong>. يمكن إضافة أي عدد من الأسئلة. المساعد يطابق السؤال ويجيب بالرد الذي وضعته.</small>
+    <button class="btn" style="margin-top:12px;" onclick="saveAISettings()">💾 حفظ تعليمات الذكاء الاصطناعي</button>
+    <div id="ai-save-status" class="note" style="margin-top:8px;text-align:center"></div>
+  </div>
+
+  <div class="section-box admin-section" id="banks-section">
+    <div class="section-title">
+      <span>💳 حسابات التحويل (الكريمي / البسيري)</span>
+      <span style="font-size:12px; color:var(--text-muted);" id="bank-count">0 / 10</span>
+    </div>
+
+    <label>اسم البنك / المحفظة:</label>
+    <input type="text" id="bank-name" placeholder="مثال: الكريمي / البسيري">
+
+    <label>اسم المستفيد بالكامل:</label>
+    <input type="text" id="bank-acc-name" placeholder="مثال: POINT CAFE">
+
+    <label>رقم الحساب / الايبان:</label>
+    <input type="text" id="bank-acc-num" placeholder="مثال: رقم حساب أو محفظة الكريمي / البسيري">
+
+    <label>شعار البنك / المحفظة من المعرض:</label>
+    <input type="file" id="bank-logo-file" accept="image/*" onchange="previewBankLogo(event)">
+    <div id="bank-logo-preview-wrap" style="display:none;margin-top:10px;">
+      <img id="bank-logo-preview" class="preview-img" src="" alt="معاينة شعار البنك">
+      <p class="note">سيتم تصغير وضغط الشعار تلقائياً قبل حفظه لتقليل حجم البيانات.</p>
+    </div>
+
+    <button class="btn" onclick="addBank()" style="margin-top:15px;">إضافة الحساب البنكي 🏦</button>
+
+    <h4 style="margin-top:20px; font-size:15px;">الحسابات المضافة:</h4>
+    <div id="banks-list" style="margin-top:10px;"></div>
+  </div>
+
+
+  <div class="section-box admin-section" id="drivers-section">
+    <div class="section-title"><span>🚗 إدارة السائقين</span><span id="driver-count" class="sync-status">0 سائق</span></div>
+    <div class="flex-row">
+      <div><label>اسم السائق:</label><input id="driver-name" type="text" placeholder="مثال: أحمد"></div>
+      <div><label>اسم المستخدم:</label><input id="driver-username" type="text" placeholder="مثال: ahmed123" autocomplete="off"></div>
+    </div>
+    <div class="flex-row">
+      <div><label>كلمة المرور:</label><input id="driver-pass" type="password" placeholder="6 أحرف على الأقل" autocomplete="new-password"></div>
+      <div><label>رقم الجوال:</label><input id="driver-phone" type="tel" inputmode="tel" placeholder="+9677xxxxxxxx أو 07xxxxxxxx"></div>
+    </div>
+    <button class="btn" onclick="addDriver()">➕ إضافة سائق</button>
+    
+    <div id="drivers-list"></div>
+  </div>
+
+  <div class="section-box admin-section" id="reports-section">
+    <div class="section-title">📊 تقرير الأرباح والمبيعات</div>
+    <label>نوع التقرير:</label>
+    <select id="report-period" onchange="renderReports()">
+      <option value="day">تقرير يوم</option>
+      <option value="month">تقرير شهر</option>
+    </select>
+    <label>التاريخ:</label>
+    <input type="date" id="report-date" onchange="renderReports()">
+    <label>الشهر:</label>
+    <input type="month" id="report-month" onchange="renderReports()" style="display:none">
+    <div id="report-summary" style="margin-top:16px"></div>
+    <button class="btn" onclick="printProfitReport()">🖨️ طباعة تقرير الربح</button>
+  </div>
+
+  
+  <div class="section-box admin-section" id="returns-section">
+    <div class="section-title"><span>↩️ طلبات الاسترجاع</span><span id="return-count" class="sync-status">0</span></div>
+    <div class="note" style="margin-bottom:10px">راجع الطلب، ثم اختر قبول أو رفض. عند القبول يمكنك تحديد الرسوم وإرسال الاسترجاع إلى سائق.</div>
+    <div id="returns-list"><div class="note">جاري التحميل...</div></div>
+  </div>
+
+  <div class="section-box admin-section" id="whatsapp-section">
+    <div class="section-title">
+      <span>📲 إرسال عروض واتساب للعملاء</span>
+      <span id="whatsapp-customer-count" class="sync-status">0 عميل</span>
+    </div>
+
+    <div class="whatsapp-admin-box">
+      <div class="note" style="margin-bottom:10px;">
+        اختر منتجًا من المنتجات الموجودة في المتجر، ثم اختر عميلًا أو عدة عملاء. عند الضغط على الإرسال
+        يفتح واتساب برسالة جاهزة، والمدير يضغط إرسال بنفسه داخل واتساب.
+      </div>
+
+      <label>📦 حدد منتجًا واحدًا أو عدة منتجات لإرسالها في العرض:</label>
+      <div id="whatsapp-products-grid" class="whatsapp-products-grid"></div>
+
+      <div id="whatsapp-selected-product" class="whatsapp-selected-product" style="display:none;"></div>
+
+      <label style="margin-top:14px;">✉️ نص الرسالة:</label>
+      <textarea id="whatsapp-message" rows="5" placeholder="اكتب رسالة العرض هنا..."></textarea>
+
+      <div class="whatsapp-message-actions">
+        <button class="btn" type="button" onclick="buildWhatsAppMessage()">✨ إنشاء رسالة من المنتج</button>
+        <button class="btn" type="button" onclick="clearWhatsAppSelection()">🧹 مسح الاختيار</button>
+      </div>
+
+      <div class="whatsapp-customers-head">
+        <strong>👥 عملاء واتساب</strong>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <button class="btn" type="button" onclick="selectAllWhatsAppCustomers(true)">☑️ تحديد الكل</button>
+          <button class="btn" type="button" onclick="selectAllWhatsAppCustomers(false)">⬜ إلغاء الكل</button>
+          <button class="btn" type="button" onclick="renderWhatsAppCustomers()">🔄 تحديث الأرقام</button>
+        </div>
+      </div>
+
+      <div id="whatsapp-customers-list" class="whatsapp-customers-list"></div>
+
+      <div class="whatsapp-send-bar">
+        <span id="whatsapp-selected-count">0 محدد</span>
+        <button class="btn whatsapp-send-one" type="button" onclick="sendWhatsAppSelected(false)">📲 إرسال للعميل المحدد</button>
+        <button class="btn whatsapp-send-many" type="button" onclick="sendWhatsAppSelected(true)">👥 إرسال جماعي</button>
+      </div>
+
+      <div id="whatsapp-queue" class="whatsapp-queue" style="display:none;"></div>
+
+      <div class="note" style="margin-top:12px;">
+        ملاحظة: الإرسال الجماعي هنا يفتح محادثات واتساب المحددة واحدة تلو الأخرى، ولا يرسل تلقائيًا بدون ضغط المدير على زر الإرسال داخل واتساب.
+      </div>
+    </div>
+  </div>
+
+<div class="section-box admin-section" id="orders-section">
+    <div class="section-title"><span>📦 الطلبات</span><button class="btn" style="width:auto;margin:0;padding:8px 14px" onclick="loadOrders()">🔄 تحديث</button></div>
+    <div class="order-filters">
+      <button class="order-filter-btn active" data-order-filter="today" onclick="setOrderFilter('today')">📅 طلبات اليوم<span class="order-filter-count" id="count-today">0</span></button>
+      <button class="order-filter-btn" data-order-filter="delivered" onclick="setOrderFilter('delivered')">✅ تم توصيلها<span class="order-filter-count" id="count-delivered">0</span></button>
+      <button class="order-filter-btn" data-order-filter="cancelled" onclick="setOrderFilter('cancelled')">❌ الملغية<span class="order-filter-count" id="count-cancelled">0</span></button>
+      <button class="order-filter-btn" data-order-filter="previous" onclick="setOrderFilter('previous')">📚 الطلبات السابقة جميعها<span class="order-filter-count" id="count-previous">0</span></button>
+    </div>
+    <div id="orders-list"><p class="note">جاري تحميل الطلبات...</p></div>
+  </div>
+
+  <div class="section-box admin-section" id="backup-section">
+    <div class="section-title">💾 النسخ الاحتياطي — نفس بيانات POINT CAFE</div>
+    <div class="backup-card">
+      <strong>🔐 حماية المدير</strong>
+      <span class="note">النسخة الاحتياطية تُشفّر بكلمة مرور المدير التي تدخلها هنا. لا توجد كلمة المرور داخل ملف الموقع.</span>
+    </div>
+    <div class="backup-grid">
+      <button class="btn" onclick="createPointCafeBackup()">💾 إنشاء نسخة احتياطية</button>
+      <button class="btn" onclick="window.location.href='backup-view.html'">👁️ عرض النسخة الاحتياطية</button>
+      <button class="btn" onclick="updateBackupFile()">🔄 تحديث النسخة من السحابة</button>
+      <button class="btn btn-success" onclick="compareAndSyncBackup()">☁️⬅️ مقارنة ومزامنة السحابة</button>
+      <button class="btn" onclick="checkBackupFile()">🧪 فحص النسخة</button>
+      <button class="btn btn-danger" onclick="restoreBackupToCloud()">⚠️ استعادة السحابة من النسخة</button>
+    </div>
+    <div id="backup-status" class="backup-status">جاهز — لا توجد عملية نسخ احتياطي قيد التنفيذ.</div><div id="backup-permission-note" class="note" style="margin-top:8px;text-align:center">صلاحية النسخ تعتمد على حساب المدير وقواعد Firestore. بعد تسجيل الدخول سيظهر UID المدير هنا.</div>
+    <div class="note" style="margin-top:10px">ملاحظة: من المتصفح لا يمكن الكتابة مباشرة إلى كل أقراص USB/HDD دون إذن النظام. عند الحفظ سيظهر لك اختيار مكان الملف، ويمكن اختيار الفلاش أو الهارد. لا يتم حذف الملف القديم تلقائياً.</div>
+  </div>
+  <button onclick="logoutAdmin()" class="btn btn-danger" style="margin-top:10px;">تسجيل الخروج 🚪</button>
+  <a href="driver.html" class="btn" style="background:#3e8b68; text-align:center; display:flex; margin-top:10px;">🚗 صفحة السائق</a>
+  <a href="index.html" class="btn" style="background:#7e22ce; text-align:center; display:flex; margin-top:10px;">العودة للواجهة الرئيسية 🏠</a>
+</div>
+
+<script>
+  // لا توجد كلمة مرور داخل ملف الموقع. كلمة المرور محفوظة في Firebase Authentication.
+  // ضع UID حساب المدير بعد إنشائه في Firebase Authentication.
+  // هذا المعرف ليس كلمة مرور ولا يمنح صلاحية بمفرده؛ Rules في Firestore هي التي تحمي البيانات.
+  const ADMIN_UID = "ضع_UID_المدير_هنا";
+  let firebaseAdminUser = null;
+  let firebaseAuthReady = false;
+
+  let storeData = {
+    name: "POINT CAFE",
+    slogan: "كافيه ومشروبات وحلويات",
+    logo: "",
+    phone: "967771234567",
+    locationUrl: "",
+    isClosed: false,
+    closeReason: "المتجر مغلق حالياً، نسعد بخدمتكم قريباً.",
+    sliders: [],
+    bankAccounts: [],
+    deliveryFree: true,
+    deliveryFee: 0,
+    deliveryCurrency: "ر.س",
+    returnEnabled: true,
+    products: [],
+    drivers: [],
+    aiSettings: { welcome: "أهلاً بك 👋 أنا مساعد POINT CAFE. كيف أساعدك؟", fallback: "أستطيع مساعدتك في منتجات POINT CAFE وأسعارها والتوصيل والدفع وطلباتك. اكتب سؤالك بالتفصيل.", instructions: "أجب بالعربية وباختصار وبأسلوب ودود. اعتمد على بيانات المتجر والأسئلة والأجوبة التي يضيفها المدير.", qa: [] }
+  };
+
+  let tempProductImg = "";
+  let tempProductImgs = [];
+
+  window.addEventListener('firebase-ready', async () => {
+    await loadFromCloud();
+  });
+
+  async function loadFromCloud() {
+    try {
+      const docRef = window.doc(window.db, "settings", "store_config");
+      const docSnap = await window.getDoc(docRef);
+      if (docSnap.exists()) { storeData = { ...storeData, ...docSnap.data() }; }
+      try{
+        const ps=await window.getDocs(window.collection(window.db,'products'));
+        if(!ps.empty) storeData.products=ps.docs.map(d=>({...d.data(),id:d.data().id??(Number(d.id)||d.id)}));
+      }catch(e){console.warn('تحميل المنتجات:',e);}
+      try{const pending=localStorage.getItem('point_cafe_admin_pending');if(pending)pendingCloudSave=JSON.parse(pending);}catch(e){}
+      if (sessionStorage.getItem('admin_logged_in') === 'true') {
+        fillFormFields();
+      }
+
+      document.getElementById('sync-badge').innerText = "✅ متصل بالسحابة";
+      document.getElementById('sync-badge').style.background = "#eadbc7";
+      document.getElementById('sync-badge').style.color = "#7e22ce";
+      startRealtimeAdminSync();
+    } catch(e) {
+      console.error("خطأ في جلب بيانات لوحة التحكم:", e);
+      document.getElementById('sync-badge').innerText = "❌ تعذر الاتصال/الصلاحيات — راجع UID المدير في firestore.rules";
+    }
+  }
+
+  let saveQueue = Promise.resolve();
+  let pendingCloudSave = null;
+  function cacheAdminStore(){try{localStorage.setItem('point_cafe_admin_pending',JSON.stringify(storeData));}catch(e){}}
+  async function syncProductsToCloud(products){
+    if(!firebaseAdminUser) throw new Error('auth-not-ready');
+    const wanted=new Map((products||[]).map(p=>[String(p.id),p]));
+    const snap=await window.getDocs(window.collection(window.db,'products'));
+    for(const d of snap.docs) if(!wanted.has(d.id)) await window.deleteDoc(d.ref);
+    for(const [id,p] of wanted) await window.setDoc(window.doc(window.db,'products',id),p,{merge:true});
+  }
+  function saveToCloud() {
+    const snapshot = JSON.parse(JSON.stringify(storeData));
+    cacheAdminStore();
+    document.getElementById('sync-badge').innerText = '⚡ جارٍ الحفظ...';
+    saveQueue = saveQueue.then(async()=>{
+      if(!firebaseAdminUser || !window.db) throw new Error('auth-not-ready');
+      const settings={...snapshot}; delete settings.products;
+      await window.setDoc(window.doc(window.db,'settings','store_config'),settings,{merge:true});
+      await syncProductsToCloud(snapshot.products||[]);
+      pendingCloudSave=null; try{localStorage.removeItem('point_cafe_admin_pending');}catch(e){}
+      document.getElementById('sync-badge').innerText='✅ تم الحفظ في السحابة';
+      setTimeout(()=>{document.getElementById('sync-badge').innerText='✅ متصل بالسحابة';},1200);
+    }).catch(e=>{
+      pendingCloudSave=snapshot; cacheAdminStore();
+      document.getElementById('sync-badge').innerText=(e?.code==='permission-denied' ? '❌ السحابة رفضت الحفظ — تحقق من UID المدير في firestore.rules' : '🟡 تعذر الحفظ الآن — محفوظ مؤقتاً على الجهاز');
+      console.warn('Cloud save queued:',e);
+      return true;
+    });
+    return saveQueue;
+  }
+  function retryPendingCloudSave(){ if(pendingCloudSave && firebaseAdminUser) saveToCloud(); }
+
+  let realtimeOrdersStarted = false;
+  let realtimeStoreStarted = false;
+  function startRealtimeAdminSync(){
+    if(!window.onSnapshot || !window.db) return;
+    if(!realtimeStoreStarted){
+      realtimeStoreStarted = true;
+      window.onSnapshot(window.doc(window.db,'settings','store_config'), snap => {
+        if(!snap.exists()) return;
+        storeData = { ...storeData, ...snap.data() };
+        if(sessionStorage.getItem('admin_logged_in') === 'true'){
+          renderProducts(); renderSliders(); renderBanks(); renderDrivers(); fillFormFields();
+        }
+      }, e => console.error('Realtime settings:',e));
+    }
+    if(!realtimeOrdersStarted){
+      realtimeOrdersStarted = true;
+      window.onSnapshot(window.collection(window.db,'orders'), snap => {
+        const next=[]; const ids=new Set(); let isNew=false;
+        snap.forEach(d=>{ ids.add(d.id); next.push({docId:d.id,...d.data()}); if(adminKnownOrderIds.size && !adminKnownOrderIds.has(d.id)) isNew=true; });
+        allAdminOrders=next;
+        if(isNew){ playAdminSound(); showAdminNewOrderAlert(); }
+        adminKnownOrderIds=ids;
+        updateOrderCounts(); renderOrderList(); renderDriverDeliveryCounts(); renderReturnRequests();
+      }, e => console.error('Realtime orders:',e));
+    }
+  }
+
+  function parseArabicNumbers(str) {
+    return str.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+  }
+
+  async function checkPassword() {
+    const emailInput = document.getElementById('admin-email').value.trim().toLowerCase();
+    const passwordInput = document.getElementById('admin-password').value.trim();
+    const errorBox = document.getElementById('admin-login-error');
+    errorBox.style.display = 'none';
+
+    if (!emailInput || !passwordInput) {
+      errorBox.textContent = 'أدخل بريد المدير وكلمة المرور.';
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    if (ADMIN_UID && !ADMIN_UID.includes('ضع_UID_المدير')) {
+      // يتم التحقق من UID بعد تسجيل الدخول، ثم تمنع Firestore أي كتابة لغير المدير.
+    }
+
+    try {
+      if (!window.auth || !window.firebaseSignInWithEmailAndPassword) {
+        throw new Error('Firebase Authentication غير جاهز بعد.');
+      }
+      const result = await window.firebaseSignInWithEmailAndPassword(window.auth, emailInput, passwordInput);
+      firebaseAdminUser = result.user;
+      if (ADMIN_UID && !ADMIN_UID.includes('ضع_UID_المدير') && firebaseAdminUser.uid !== ADMIN_UID) {
+        await window.firebaseSignOut(window.auth);
+        errorBox.textContent = 'هذا الحساب ليس حساب مدير POINT CAFE.';
+        errorBox.style.display = 'block';
+        return;
+      }
+      sessionStorage.setItem('admin_logged_in', 'true');
+      sessionStorage.setItem('admin_uid', firebaseAdminUser.uid);
+      showAdminPanel();
+    } catch (e) {
+      console.error('Admin Firebase login:', e);
+      errorBox.textContent = (e?.code==='auth/invalid-credential' ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' : 'فشل تسجيل الدخول. تأكد من تفعيل Email/Password في Firebase Authentication.');
+      errorBox.style.display = 'block';
+    }
+  }
+
+  function showAdminPanel() {
+    const bn=document.getElementById('backup-permission-note'); if(bn && firebaseAdminUser) bn.innerHTML='UID المدير الحالي: <code>'+firebaseAdminUser.uid+'</code> — يجب أن يكون هو نفسه الموجود في firestore.rules.';
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+    updateAdminSoundUI();
+    fillFormFields();
+    startAdminOrderWatcher();
+  }
+
+  async function logoutAdmin() {
+    sessionStorage.removeItem('admin_logged_in');
+    sessionStorage.removeItem('admin_uid');
+    try { if (window.auth && window.firebaseSignOut) await window.firebaseSignOut(window.auth); } catch(e) { console.warn(e); }
+    location.reload();
+  }
+
+  window.addEventListener('firebase-ready', () => {
+    if (!window.auth || !window.firebaseOnAuthStateChanged) return;
+    window.firebaseOnAuthStateChanged(window.auth, user => {
+      firebaseAuthReady = true;
+      firebaseAdminUser = user || null;
+      const savedUid = sessionStorage.getItem('admin_uid');
+      const authorized = !!user && !!savedUid && savedUid === user.uid && sessionStorage.getItem('admin_logged_in') === 'true';
+      if (authorized) {
+        showAdminPanel();
+        loadFromCloud().then(()=>setTimeout(retryPendingCloudSave,300)).catch(()=>{});
+      } else {
+        sessionStorage.removeItem('admin_logged_in');
+        sessionStorage.removeItem('admin_uid');
+        document.getElementById('login-overlay').style.display = 'flex';
+        document.getElementById('admin-content').style.display = 'none';
+      }
+    });
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('admin-password').addEventListener('keyup', (event) => {
+      if (event.key === 'Enter') checkPassword();
+    });
+    document.getElementById('admin-email').addEventListener('keyup', (event) => {
+      if (event.key === 'Enter') checkPassword();
+    });
+  });
+
+  function goSection(id) { document.querySelectorAll('.admin-section').forEach(x=>x.style.display='none'); const el=document.getElementById(id); if(el){el.style.display='block'; el.scrollIntoView({behavior:'smooth',block:'start'});} }
+
+  function fillFormFields() {
+    document.getElementById('store-phone').value = storeData.phone || "967771234567";
+    document.getElementById('store-location-url').value = storeData.locationUrl || "";
+    document.getElementById('store-close-reason').value = storeData.closeReason || "";
+    document.getElementById('return-enabled').checked = storeData.returnEnabled !== false;
+    document.getElementById('delivery-free').checked = storeData.deliveryFree === true || Number(storeData.deliveryFee || 0) <= 0;
+    document.getElementById('delivery-price').value = Number(storeData.deliveryFee || 0);
+    document.getElementById('delivery-currency').value = storeData.deliveryCurrency || 'ر.س';
+    toggleDeliveryPriceFields();
+    if(storeData.logo) document.getElementById('logo-preview').src = storeData.logo;
+    updateStoreStatusUI();
+    renderSliders();
+    renderProducts();
+    renderBanks();
+    renderDrivers();
+    fillAIFields();
+    loadOrders();
+    renderReports();
+  }
+
+  function fillAIFields(){
+    const ai=storeData.aiSettings||{};
+    const w=document.getElementById('ai-welcome'), i=document.getElementById('ai-instructions'), f=document.getElementById('ai-fallback'), q=document.getElementById('ai-qa');
+    if(w)w.value=ai.welcome||''; if(i)i.value=ai.instructions||''; if(f)f.value=ai.fallback||'';
+    if(q)q.value=(Array.isArray(ai.qa)?ai.qa:[]).map(x=>`${x.question||''} => ${x.answer||''}`).join('\n');
+  }
+  function parseAIQA(raw){
+    return String(raw||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(line=>{
+      const parts=line.split('=>'); if(parts.length<2)return null;
+      const question=parts.shift().trim(), answer=parts.join('=>').trim();
+      return question&&answer?{question,answer}:null;
+    }).filter(Boolean).slice(0,200);
+  }
+  async function saveAISettings(){
+    storeData.aiSettings={
+      welcome:(document.getElementById('ai-welcome')?.value||'').trim(),
+      instructions:(document.getElementById('ai-instructions')?.value||'').trim(),
+      fallback:(document.getElementById('ai-fallback')?.value||'').trim(),
+      qa:parseAIQA(document.getElementById('ai-qa')?.value||'')
+    };
+    if(!storeData.aiSettings.welcome)storeData.aiSettings.welcome='أهلاً بك 👋 أنا مساعد POINT CAFE. كيف أساعدك؟';
+    if(!storeData.aiSettings.fallback)storeData.aiSettings.fallback='أستطيع مساعدتك في منتجات POINT CAFE وأسعارها والتوصيل والدفع وطلباتك. اكتب سؤالك بالتفصيل.';
+    const st=document.getElementById('ai-save-status'); if(st)st.textContent='⚡ جارٍ الحفظ...';
+    try{await saveToCloud(); if(st)st.textContent='✅ تم تحديث المساعد. سيصل التغيير للعملاء تلقائياً.';}catch(e){if(st)st.textContent='🟡 تم حفظه على الجهاز وسيُرفع تلقائياً عند توفر الاتصال.';}
+  }
+
+  function updateStoreStatusUI() {
+    const badge = document.getElementById('store-status-badge');
+    const toggleBtn = document.getElementById('btn-toggle-store');
+
+    if (storeData.isClosed) {
+      badge.className = "status-badge status-closed";
+      badge.innerText = "المتجر مغلق 🔒";
+      toggleBtn.className = "btn btn-success";
+      toggleBtn.innerText = "🔓 فتح المتجر الآن";
+    } else {
+      badge.className = "status-badge status-open";
+      badge.innerText = "المتجر مفتوح ✅";
+      toggleBtn.className = "btn btn-danger";
+      toggleBtn.innerText = "🔒 إغلاق المتجر الآن";
+    }
+  }
+
+  async function toggleStoreStatus() {
+    storeData.isClosed = !storeData.isClosed;
+    storeData.closeReason = document.getElementById('store-close-reason').value.trim() || "المتجر مغلق حالياً.";
+    await saveToCloud();
+    updateStoreStatusUI();
+    alert(storeData.isClosed ? "تم إغلاق المتجر وإظهار الرسالة للعملاء." : "تم فتح المتجر بنجاح واستقبال الطلبات!");
+  }
+
+  // ضغط الصور داخل الهاتف/المتصفح قبل حفظها في Firestore.
+  // لا يتم رفع الصورة الأصلية: يتم تصغير الأبعاد وضغط JPEG تلقائياً.
+  function processFile(file, maxWidth = 800, maxBytes = 350 * 1024) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d', {alpha:false});
+          canvas.width = width;
+          canvas.height = height;
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+
+          let quality = 0.78;
+          let dataUrl = canvas.toDataURL('image/jpeg', quality);
+          // خفّض الجودة تدريجياً حتى يصبح الملف صغيراً.
+          while (dataUrl.length * 0.75 > maxBytes && quality > 0.35) {
+            quality -= 0.07;
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+          }
+          // إذا بقي كبيراً، صغّر الأبعاد أيضاً.
+          let attempts = 0;
+          while (dataUrl.length * 0.75 > maxBytes && attempts < 3) {
+            width = Math.max(320, Math.round(width * 0.8));
+            height = Math.max(240, Math.round(height * 0.8));
+            canvas.width = width;
+            canvas.height = height;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+            quality = 0.62;
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+            attempts++;
+          }
+          resolve(dataUrl);
+        };
+        img.onerror = () => reject('فشل قراءة الصورة');
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject('فشل قراءة الملف');
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function uploadLogo(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    try {
+      const base64Img = await processFile(file, 400);
+      storeData.logo = base64Img;
+      document.getElementById('logo-preview').src = base64Img;
+      await saveToCloud();
+      alert("تم تحديث الشعار بنجاح في السحابة!");
+    } catch(e) {
+      alert("تعذر قراءة الصورة، اختر صورة أخرى أصغر حجماً.");
+    }
+  }
+
+  function normalizeWhatsAppPhone(phone){
+    let n=String(phone||'').replace(/\D/g,'');
+    if(n.startsWith('00')) n=n.slice(2);
+    if(n.startsWith('0')) n=n.slice(1);
+    return n.length >= 8 && n.length <= 15 ? n : '';
+  }
+
+  function toggleDeliveryPriceFields(){
+    const free=document.getElementById('delivery-free')?.checked;
+    const box=document.getElementById('delivery-price-fields');
+    if(box) box.style.display=free?'none':'grid';
+  }
+
+  async function saveBasicSettings() {
+    const phoneInput=document.getElementById('store-phone').value.trim();
+    const normalized=normalizeWhatsAppPhone(phoneInput);
+    const location=document.getElementById('store-location-url').value.trim();
+    if(!normalized){alert('أدخل رقم جوال صحيح، مثال: 966551234567 أو 0551234567.');return;}
+    if(location && !/^https?:\/\//i.test(location)){alert('رابط الموقع يجب أن يبدأ بـ https:// أو http://');return;}
+    storeData.phone=normalized;
+    storeData.locationUrl = location;
+    storeData.closeReason = document.getElementById('store-close-reason').value.trim();
+    storeData.returnEnabled = document.getElementById('return-enabled').checked;
+    const deliveryFree=document.getElementById('delivery-free').checked;
+    const deliveryFee=Math.max(0, Number(document.getElementById('delivery-price').value)||0);
+    storeData.deliveryFree=deliveryFree || deliveryFee<=0;
+    storeData.deliveryFee=storeData.deliveryFree ? 0 : deliveryFee;
+    storeData.deliveryCurrency=document.getElementById('delivery-currency').value || 'ر.س';
+    try {
+      await saveToCloud();
+      alert("تم حفظ إعدادات المتجر والتوصيل بنجاح في السحابة!");
+    } catch(e) {
+      console.error(e);
+      alert("تعذر حفظ الإعدادات في السحابة. تحقق من اتصال الإنترنت وقواعد Firebase.");
+    }
+  }
+
+  function openSavedStoreLocation(){
+    const url=document.getElementById('store-location-url').value.trim() || storeData.locationUrl || '';
+    if(!url){alert('أضف رابط موقع المتجر أولاً ثم احفظه.');return;}
+    window.open(url,'_blank');
+  }
+
+  function openSavedWhatsApp(){
+    const phone=normalizeWhatsAppPhone(document.getElementById('store-phone').value.trim() || storeData.phone);
+    if(!phone){alert('أدخل رقم واتساب المتجر أولاً ثم احفظه.');return;}
+    window.open('https://wa.me/'+phone,'_blank');
+  }
+
+  function renderSliders() {
+    const list = document.getElementById('sliders-list');
+    const sliders = storeData.sliders || [];
+    document.getElementById('slider-count').innerText = `${sliders.length} / 10`;
+
+    list.innerHTML = sliders.map((img, i) => `
+      <div class="item-card">
+        <img src="${img}">
+        <div class="item-info"><strong>إعلان #${i+1}</strong></div>
+        <button class="btn btn-danger" style="width:auto; padding:6px 14px;" onclick="removeSlider(${i})">حذف</button>
+      </div>
+    `).join('');
+  }
+
+  async function addSliderImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if ((storeData.sliders || []).length >= 10) {
+      alert("الحد الأقصى للإعلانات هو 10 صور فقط!");
+      return;
+    }
+
+    try {
+      const base64Img = await processFile(file, 1000);
+      if (!storeData.sliders) storeData.sliders = [];
+      storeData.sliders.push(base64Img);
+      await saveToCloud();
+      renderSliders();
+      alert("تمت إضافة الإعلان بنجاح للسحابة!");
+      event.target.value = '';
+    } catch(e) {
+      alert("تعذر رفع الإعلان، يرجى اختيار صورة أخرى.");
+    }
+  }
+
+  async function removeSlider(index) {
+    if (confirm("هل تريد حذف هذا الإعلان؟")) {
+      storeData.sliders.splice(index, 1);
+      await saveToCloud();
+      renderSliders();
+    }
+  }
+
+  async function previewProductImg(event) {
+    const files = Array.from(event.target.files || []);
+    tempProductImgs = [];
+    const box = document.getElementById('prod-previews');
+    box.innerHTML = '';
+    try {
+      for (const file of files) {
+        const img = await processFile(file, 600);
+        tempProductImgs.push(img);
+        const el = document.createElement('img'); el.src = img; el.className='preview-img'; el.style.cssText='width:80px;height:80px;object-fit:cover;display:block';
+        box.appendChild(el);
+      }
+      tempProductImg = tempProductImgs[0] || '';
+    } catch(e) { alert("تعذر معاينة صور المنتج."); }
+  }
+
+  async function addProduct() {
+    const name = document.getElementById('prod-name').value.trim();
+    const price = document.getElementById('prod-price').value.trim();
+    const currency = document.getElementById('prod-currency').value;
+    const cost = Number(document.getElementById('prod-cost').value) || 0;
+    const specs = document.getElementById('prod-specs').value.trim();
+
+    if (!name || !price) {
+      alert("يرجى ملء اسم المنتج والسعر!");
+      return;
+    }
+
+    const newProd = {
+      id: Date.now(),
+      name: name,
+      price: price,
+      currency: currency,
+      cost: cost,
+      img: tempProductImgs[0] || tempProductImg || "https://via.placeholder.com/150?text=متجر",
+      images: tempProductImgs.length ? tempProductImgs : [tempProductImg || "https://via.placeholder.com/150?text=متجر"],
+      specs: specs,
+      specialOffer: document.getElementById('prod-special-offer').checked === true
+    };
+
+    if (!storeData.products) storeData.products = [];
+    storeData.products.push(newProd);
+    renderProducts();
+    await saveToCloud();
+
+    document.getElementById('prod-name').value = '';
+    document.getElementById('prod-price').value = '';
+    document.getElementById('prod-cost').value = '';
+    document.getElementById('prod-file').value = '';
+    document.getElementById('prod-preview').style.display = 'none';
+    document.getElementById('prod-previews').innerHTML = '';
+    document.getElementById('prod-specs').value = '';
+    document.getElementById('prod-special-offer').checked = false;
+    tempProductImg = ""; tempProductImgs = [];
+    alert("تم إضافة المنتج بنجاح إلى السحابة!");
+  }
+
+  function renderProducts() {
+    const list = document.getElementById('products-list');
+    const products = storeData.products || [];
+
+    list.innerHTML = products.map((p, i) => `
+      <div class="item-card">
+        <img src="${p.img}">
+        <div class="item-info">
+          <strong>${p.name}</strong>
+          ${p.specialOffer ? '<span style="display:inline-block;background:#e53935;color:#fff;padding:4px 9px;border-radius:999px;font-weight:900;margin-top:4px;width:max-content">🔥 عرض خاص</span>' : ''}
+          <span>السعر: ${p.price} ${p.currency}</span><span>التكلفة: ${Number(p.cost)||0} ${p.currency}</span><span>المواصفات: ${p.specs||"بدون مواصفات"}</span><span>الصور: ${(p.images||[p.img]).length}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-direction:column;min-width:105px">
+          <button class="btn" style="width:auto;padding:6px 10px;background:#e53935;color:#fff;font-weight:900" onclick="toggleSpecialOffer(${i})">${p.specialOffer ? 'إلغاء العرض' : '🔥 عرض خاص'}</button>
+          <button class="btn btn-danger" style="width:auto; padding:6px 14px;" onclick="removeProduct(${i})">حذف</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function toggleSpecialOffer(index) {
+    const p = (storeData.products || [])[index];
+    if (!p) return;
+    p.specialOffer = p.specialOffer !== true;
+    renderProducts();
+    saveToCloud();
+  }
+
+  async function removeProduct(index) {
+    if (confirm("هل تريد حذف هذا المنتج؟")) {
+      storeData.products.splice(index, 1);
+      await saveToCloud();
+      renderProducts();
+    }
+  }
+
+  let tempBankLogo = "";
+
+  async function previewBankLogo(event) {
+    const file = event.target.files[0];
+    if (!file) {
+      tempBankLogo = "";
+      document.getElementById('bank-logo-preview-wrap').style.display = 'none';
+      return;
+    }
+    try {
+      tempBankLogo = await processFile(file, 300);
+      const preview = document.getElementById('bank-logo-preview');
+      preview.src = tempBankLogo;
+      document.getElementById('bank-logo-preview-wrap').style.display = 'block';
+    } catch (e) {
+      tempBankLogo = "";
+      alert("تعذر قراءة شعار البنك.");
+    }
+  }
+
+  function renderBanks() {
+    const list = document.getElementById('banks-list');
+    const banks = storeData.bankAccounts || [];
+    document.getElementById('bank-count').innerText = `${banks.length} / 10`;
+
+    list.innerHTML = banks.map((b, i) => `
+      <div class="item-card">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;">
+          ${b.logo ? `<img src="${b.logo}" alt="شعار ${b.bankName}" style="width:50px;height:50px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--border);padding:4px;">` : ''}
+          <div class="item-info">
+            <strong>${b.bankName}</strong>
+            <span>المستفيد: ${b.accountName || ''} | رقم: ${b.accountNumber}</span>
+          </div>
+        </div>
+        <button class="btn btn-danger" style="width:auto; padding:6px 14px;" onclick="removeBank(${i})">حذف</button>
+      </div>
+    `).join('');
+  }
+
+  async function addBank() {
+    const bankName = document.getElementById('bank-name').value.trim();
+    const accountName = document.getElementById('bank-acc-name').value.trim();
+    const accountNumber = document.getElementById('bank-acc-num').value.trim();
+
+    if (!bankName || !accountNumber) {
+      alert("يرجى إدخال اسم البنك ورقم الحساب!");
+      return;
+    }
+
+    if ((storeData.bankAccounts || []).length >= 10) {
+      alert("الحد الأقصى هو 10 حسابات بنكية!");
+      return;
+    }
+
+    if (!storeData.bankAccounts) storeData.bankAccounts = [];
+    storeData.bankAccounts.push({ bankName, accountName, accountNumber, logo: tempBankLogo || '' });
+    await saveToCloud();
+    renderBanks();
+    renderDrivers();
+    loadOrders();
+
+    document.getElementById('bank-name').value = '';
+    document.getElementById('bank-acc-name').value = '';
+    document.getElementById('bank-acc-num').value = '';
+    document.getElementById('bank-logo-file').value = '';
+    document.getElementById('bank-logo-preview').src = '';
+    document.getElementById('bank-logo-preview-wrap').style.display = 'none';
+    tempBankLogo = '';
+    alert("تم إضافة الحساب البنكي بنجاح للسحابة!");
+  }
+
+  async function removeBank(index) {
+    if (confirm("هل تريد حذف هذا الحساب؟")) {
+      storeData.bankAccounts.splice(index, 1);
+      await saveToCloud();
+      renderBanks();
+    renderDrivers();
+    loadOrders();
+    }
+  }
+
+  async function addDriver() {
+    const name = document.getElementById('driver-name').value.trim();
+    const username = document.getElementById('driver-username').value.trim().toLowerCase().replace(/\s+/g,'');
+    const password = document.getElementById('driver-pass').value;
+    let phone = document.getElementById('driver-phone').value.trim().replace(/[\s()-]/g,'');
+    if (!name || !username || !password || !phone) { alert('أدخل اسم السائق واسم المستخدم وكلمة المرور ورقم الجوال.'); return; }
+    if (!/^[a-zA-Z0-9._-]{3,30}$/.test(username)) { alert('اسم المستخدم: استخدم 3 إلى 30 حرفاً أو رقماً، ويمكن استخدام النقطة والشرطة فقط.'); return; }
+    if (password.length < 6) { alert('كلمة المرور يجب أن تكون 6 أحرف على الأقل.'); return; }
+    if (/^07\d{8}$/.test(phone)) phone = '+967' + phone.slice(1);
+    else if (/^7\d{8}$/.test(phone)) phone = '+967' + phone;
+    else if (/^009677\d{8}$/.test(phone)) phone = '+' + phone.slice(2);
+    if (!/^\+9677\d{8}$/.test(phone)) { alert('رقم الجوال يجب أن يكون رقماً يمنياً صحيحاً، مثل +9677xxxxxxxx أو 07xxxxxxxx.'); return; }
+    if (!storeData.drivers) storeData.drivers = [];
+    if (storeData.drivers.some(d => d.username === username || d.name === name || d.phone === phone)) { alert('اسم السائق أو اسم المستخدم أو رقم الجوال موجود بالفعل.'); return; }
+    // اسم المستخدم فقط يظهر للسائق. البريد التالي داخلي فقط لربط الحساب مع Firebase Authentication.
+    const email = username + '.' + Date.now().toString(36) + '@drivers.pointcafe.app';
+    try {
+      const cred = await window.firebaseCreateUserWithEmailAndPassword(window.driverAuth, email, password);
+      const uid = cred.user.uid;
+      const driver = { id: uid, uid, name, username, phone, email, createdAt: new Date().toISOString() };
+      await window.setDoc(window.doc(window.db, 'drivers', uid), driver);
+      storeData.drivers.push(driver);
+      await saveToCloud();
+      renderDrivers();
+      ['driver-name','driver-username','driver-pass','driver-phone'].forEach(id => document.getElementById(id).value='');
+      await window.firebaseSignOut(window.driverAuth);
+      alert('تم إنشاء حساب السائق وحفظه في السحابة. يستطيع الآن الدخول واستقبال الطلبات فوراً.');
+    } catch (e) {
+      console.error('Create driver:', e);
+      if (e?.code === 'auth/email-already-in-use') alert('اسم المستخدم مستخدم بالفعل. اختر اسم مستخدم آخر.');
+      else if (e?.code === 'auth/weak-password') alert('كلمة المرور ضعيفة. استخدم 6 أحرف أو أكثر.');
+      else alert('تعذر إنشاء حساب السائق: ' + (e?.message || 'تحقق من اتصال Firebase وصلاحيات المدير.'));
+    }
+  }
+
+  function renderDrivers() {
+    const list=document.getElementById('drivers-list'), drivers=storeData.drivers||[];
+    document.getElementById('driver-count').innerText=`${drivers.length} سائق`;
+    list.innerHTML=drivers.map((d,i)=>`
+      <div class="item-card">
+        <div class="item-info"><strong>🚗 ${d.name}</strong><span>اسم المستخدم: ${d.username||d.name}</span><span>الجوال: ${d.phone||"-"}</span><span class="driver-delivery-count" data-driver-count="${d.id}">تم توصيله: 0 طلب</span></div>
+        <button class="btn btn-danger" style="width:auto;padding:6px 14px" onclick="removeDriver(${i})">حذف</button>
+      </div>`).join('');
+  }
+
+  async function removeDriver(index) {
+    const d=(storeData.drivers||[])[index];
+    if(!d || !confirm(`حذف السائق ${d.name}؟\n\nسيتم حذف سجل السائق من السحابة وإزالته من قائمة السائقين.`)) return;
+    try{
+      // حذف سجل Firestore أولاً حتى يمكن إعادة استخدام اسم المستخدم مباشرة.
+      if(d.id && window.deleteDoc && window.doc && window.db){
+        await window.deleteDoc(window.doc(window.db,'drivers',d.id));
+      }
+      storeData.drivers.splice(index,1);
+      await saveToCloud();
+      renderDrivers();
+      alert('تم حذف السائق من المتجر والسحابة. يمكنك الآن استخدام اسم المستخدم نفسه لإضافة سائق جديد.');
+    }catch(e){
+      console.error('removeDriver:',e);
+      alert(e?.code==='permission-denied' ? 'تم رفض حذف السائق من Firestore. تحقق من صلاحيات المدير.' : 'تعذر حذف السائق حالياً. لم يتم حذف السجل المحلي.');
+    }
+  }
+
+  let adminSoundTimer = null;
+  let adminKnownOrderIds = new Set();
+  let adminAudioContext = null;
+
+  function getAdminSoundEnabled(){ return localStorage.getItem('point_admin_sound') === '1'; }
+  function updateAdminSoundUI(){
+    const status=document.getElementById('admin-sound-status'), btn=document.getElementById('admin-sound-permission');
+    if(!status)return;
+    if(getAdminSoundEnabled()){
+      status.textContent='🔊 تنبيه الطلبات الصوتي مفعّل — المدير سيُنبّه عند وصول طلب جديد';
+      if(btn)btn.textContent='🔊 الصوت مفعّل';
+    }else{
+      status.textContent='🔇 تنبيه الطلبات الصوتي غير مفعّل';
+      if(btn)btn.textContent='🔊 السماح بالصوت';
+    }
+  }
+  async function prepareAdminAudio(){
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) throw new Error('AudioContext غير مدعوم');
+    if(!adminAudioContext) adminAudioContext=new AC();
+    if(adminAudioContext.state==='suspended') await adminAudioContext.resume();
+  }
+  function playAdminSound(){
+    if(!getAdminSoundEnabled())return;
+    prepareAdminAudio().then(()=>{
+      const ctx=adminAudioContext, now=ctx.currentTime;
+      [0,0.20,0.42,0.68].forEach((delay,i)=>{
+        const osc=ctx.createOscillator(), gain=ctx.createGain();
+        osc.type=i%2?'square':'sine';
+        osc.frequency.setValueAtTime(i%2?880:660,now+delay);
+        gain.gain.setValueAtTime(0.0001,now+delay);
+        gain.gain.exponentialRampToValueAtTime(0.24,now+delay+0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001,now+delay+0.15);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(now+delay); osc.stop(now+delay+0.16);
+      });
+    }).catch(()=>{});
+  }
+  async function enableAdminSound(){
+    try{
+      await prepareAdminAudio();
+      localStorage.setItem('point_admin_sound','1'); closeAdminSoundPermission();
+      updateAdminSoundUI();
+      playAdminSound();
+      alert('تم السماح بالصوت. سيصدر تنبيه عند وصول طلب جديد.');
+    }catch(e){alert('تعذر تشغيل الصوت في هذا المتصفح.');}
+  }
+  async function previewAdminSound(){
+    try{ await prepareAdminAudio(); playAdminSound(); }
+    catch(e){ alert('اضغط مرة أخرى على زر سماع النغمة.'); }
+  }
+  function showAdminNewOrderAlert(){
+    const old=document.getElementById('admin-new-order-alert'); if(old)old.remove();
+    const el=document.createElement('div');
+    el.id='admin-new-order-alert'; el.textContent='🔔 وصل طلب جديد إلى المدير';
+    Object.assign(el.style,{position:'fixed',top:'14px',left:'14px',right:'14px',zIndex:99999,background:'#9a7652',color:'#fff',padding:'16px',borderRadius:'14px',textAlign:'center',fontWeight:'800',fontSize:'18px',boxShadow:'0 10px 30px #0004'});
+    document.body.appendChild(el); setTimeout(()=>el.remove(),5000);
+  }
+  function startAdminOrderWatcher(){
+    clearInterval(adminSoundTimer);
+    adminSoundTimer=setInterval(async()=>{
+      try{
+        const snap=await window.getDocs(window.collection(window.db,'orders'));
+        const ids=new Set(); let isNew=false;
+        snap.forEach(d=>{ ids.add(d.id); if(adminKnownOrderIds.size>0 && !adminKnownOrderIds.has(d.id)) isNew=true; });
+        if(isNew){ playAdminSound(); showAdminNewOrderAlert(); }
+        adminKnownOrderIds=ids;
+        allAdminOrders=[]; snap.forEach(d=>allAdminOrders.push({docId:d.id,...d.data()}));
+        updateOrderCounts(); renderOrderList(); renderDriverDeliveryCounts(); renderReturnRequests();
+      }catch(e){}
+    },5000);
+  }
+
+  let allAdminOrders = [];
+  let currentOrderFilter = 'today';
+
+  function isTodayOrder(o){ const d=orderDateValue(o); if(!d)return false; const now=new Date(); return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate(); }
+  function isDeliveredOrder(o){ return ['تم التوصيل','تم التوصيل بنجاح','delivered'].includes(String(o.status||'').trim().toLowerCase()); }
+  function isCancelledOrder(o){ return ['رفض','ملغي','ملغى','ملغية','ملغاة','cancelled','canceled','rejected'].includes(String(o.status||'').trim().toLowerCase()); }
+
+  function setOrderFilter(filter){
+    currentOrderFilter=filter;
+    document.querySelectorAll('.order-filter-btn').forEach(b=>b.classList.toggle('active', b.dataset.orderFilter===filter));
+    renderOrderList();
+  }
+
+  function updateOrderCounts(){
+    document.getElementById('count-today').textContent=allAdminOrders.filter(isTodayOrder).length;
+    document.getElementById('count-delivered').textContent=allAdminOrders.filter(isDeliveredOrder).length;
+    document.getElementById('count-cancelled').textContent=allAdminOrders.filter(isCancelledOrder).length;
+    document.getElementById('count-previous').textContent=allAdminOrders.length;
+  }
+
+  function orderEsc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+  function orderDateText(v){try{const d=new Date(v);return isNaN(d.getTime())?'—':d.toLocaleString('ar-SA')}catch(e){return '—'}}
+  function paymentText(o){return o.paymentMethod==='transfer'?'تحويل بنكي':'كاش'}
+  function renderOrderList(){
+    const list=document.getElementById('orders-list'); if(!list)return;
+    let orders=[...allAdminOrders];
+    if(currentOrderFilter==='today') orders=orders.filter(isTodayOrder);
+    else if(currentOrderFilter==='delivered') orders=orders.filter(isDeliveredOrder);
+    else if(currentOrderFilter==='cancelled') orders=orders.filter(isCancelledOrder);
+    orders.sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+    if(!orders.length){list.innerHTML='<p class="note">لا توجد طلبات في هذا القسم.</p>';return;}
+    const drivers=storeData.drivers||[];
+    const statuses=['جديد','قبول','جاري المعالجة','تم إرسال الطلب للسائق','مع السائق','تم التوصيل','ملغي'];
+    list.innerHTML=orders.map(o=>{
+      const products=(o.items||[]).map((i,n)=>`<div style="padding:7px 0;border-bottom:1px dashed var(--border)"><b>${n+1}. ${orderEsc(i.name||'منتج')}</b> — الكمية: <b>${orderEsc(i.qty??1)}</b> — السعر: ${orderEsc(i.price??'—')} ${orderEsc(i.currency||'ر.س')} — الإجمالي: <b>${orderEsc(i.subtotal??'—')} ${orderEsc(i.currency||'ر.س')}</b>${i.specs?`<div class="note">المواصفات: ${orderEsc(i.specs)}</div>`:''}</div>`).join('') || '<div class="note">لا توجد تفاصيل منتجات.</div>';
+      const status=o.status||'جديد';
+      const driverOptions=drivers.map(d=>`<option value="${orderEsc(d.id)}" ${String(d.id)===String(o.driverId||'')?'selected':''}>${orderEsc(d.name)}</option>`).join('');
+      const statusOptions=statuses.map(x=>`<option value="${orderEsc(x)}" ${x===status?'selected':''}>${orderEsc(x)}</option>`).join('');
+      const location=o.customerLocation||'';
+      const totalProducts=o.totalText||o.totals?.text||'';
+      const grand=o.grandTotalText||o.grandTotals?.text||o.totalText||'';
+      return `<div class="order-card" id="order-card-${orderEsc(o.docId)}">
+        <div class="order-head"><span>🧾 <b>${orderEsc(o.orderId||o.docId)}</b></span><span style="font-weight:900">${orderEsc(status)}</span></div>
+        <div class="note" style="margin-top:5px">🕐 تاريخ الطلب: <b>${orderDateText(o.createdAt)}</b>${o.statusUpdatedAt?` — آخر تحديث: <b>${orderDateText(o.statusUpdatedAt)}</b>`:''}</div>
+        ${o.cancelReason?`<div style="margin-top:8px;padding:9px 11px;background:#fff1f1;border:1px solid #efb0b0;border-radius:10px;color:#8b1e1e;font-weight:800;">❌ سبب الإلغاء: ${orderEsc(o.cancelReason)}</div>`:''}
+        <div style="margin-top:10px;padding:12px;background:#fff;border:1px solid var(--border);border-radius:14px;line-height:2">
+          <div>👤 <b>اسم العميل:</b> ${orderEsc(o.customerName||'—')}</div>
+          <div>📞 <b>رقم العميل:</b> <a href="tel:${orderEsc(o.customerPhone||'')}">${orderEsc(o.customerPhone||'—')}</a></div>
+          ${o.customerEmail?`<div>✉️ <b>البريد:</b> ${orderEsc(o.customerEmail)}</div>`:''}
+          <div>📦 <b>طريقة الاستلام:</b> ${o.deliveryType==='delivery'?'توصيل إلى الموقع':'استلام من الفرع'}</div>
+          ${location?`<div>📍 <b>موقع العميل:</b> <a href="${orderEsc(location)}" target="_blank" rel="noopener">عرض موقع العميل</a></div><div class="note" style="word-break:break-all">${orderEsc(location)}</div>`:'<div>📍 <b>موقع العميل:</b> غير محدد</div>'}
+        </div>
+        <div class="order-products" style="margin-top:10px"><h3 style="margin:0 0 8px">🛒 المنتجات (${(o.items||[]).length})</h3>${products}<hr style="border:0;border-top:1px solid var(--border);margin:10px 0"><div><b>💰 إجمالي المنتجات:</b> ${orderEsc(totalProducts||'—')}</div><div style="margin-top:4px;font-weight:800;color:var(--primary);">🚚 التوصيل: ${Number(o.deliveryFee||0)>0 ? `${orderEsc(o.deliveryFee)} ${orderEsc(o.deliveryCurrency||'')}` : 'مجاني'}</div><div style="margin-top:5px;font-size:17px;font-weight:900;">💰 الإجمالي النهائي: ${orderEsc(grand||'—')}</div></div>
+        <div style="margin-top:10px;padding:12px;background:#fff;border:1px solid var(--border);border-radius:14px;line-height:2">
+          <div>💳 <b>طريقة الدفع:</b> ${paymentText(o)}</div>
+          ${o.paymentBank?`<div>🏦 <b>البنك:</b> ${orderEsc(o.paymentBank.bankName||'—')}</div><div>👤 <b>صاحب الحساب:</b> ${orderEsc(o.paymentBank.accountName||'—')}</div><div>🔢 <b>رقم الحساب:</b> ${orderEsc(o.paymentBank.accountNumber||'—')}</div>`:''}
+        </div>
+        ${o.transferImage?`<div style="margin-top:10px;background:#fff;padding:10px;border:1px solid var(--border);border-radius:12px;text-align:center"><b>📷 صورة الحوالة</b><br><img src="${orderEsc(o.transferImage)}" style="max-width:100%;max-height:260px;object-fit:contain;border-radius:8px;margin-top:8px"><div class="order-actions" style="margin-top:8px"><a class="btn" href="${orderEsc(o.transferImage)}" target="_blank" rel="noopener">👁️ فتحها</a></div></div>`:''}
+        ${o.deliveryProofImage?`<div class="delivery-proof-admin"><b>📷 صورة إثبات التسليم</b><br><img src="${orderEsc(o.deliveryProofImage)}" alt="إثبات التسليم"><div class="delivery-proof-actions"><a class="btn" href="${orderEsc(o.deliveryProofImage)}" target="_blank" rel="noopener">👁️ فتح الصورة</a></div><div class="note" style="margin-top:7px">تم الالتقاط: ${orderDateText(o.deliveryProofTakenAt)}</div></div>`:''}
+        <div style="margin-top:10px;padding:12px;background:#fff;border:1px solid var(--border);border-radius:14px">
+          <div><b>🚗 السائق:</b> ${orderEsc(o.driverName||'لم يتم التعيين')}</div>
+          <div style="margin-top:7px"><label>اختيار/تغيير السائق:</label><select id="driver-${orderEsc(o.docId)}" onchange="assignDriver('${orderEsc(o.docId)}')"><option value="">-- اختر السائق --</option>${driverOptions}</select></div>
+          <div style="margin-top:7px"><label>حالة الطلب:</label><select id="status-${orderEsc(o.docId)}" onchange="setOrderStatus('${orderEsc(o.docId)}',this.value)">${statusOptions}</select></div>
+        </div>
+        <div class="order-actions" style="margin-top:10px">
+          <button class="btn btn-success" onclick="openOrderEditor('${orderEsc(o.docId)}')">✏️ تعديل بيانات الطلب</button>
+          ${o.customerPhone?`<a class="btn" href="tel:${orderEsc(o.customerPhone)}">📞 اتصال بالعميل</a>`:''}
+          ${location?`<a class="btn" href="${orderEsc(location)}" target="_blank" rel="noopener">📍 موقع العميل</a>`:''}
+          <button class="btn btn-danger" onclick="cancelOrder('${orderEsc(o.docId)}')">❌ إلغاء الطلب</button>
+          <button class="btn" onclick="choosePrintType(${JSON.stringify(o).replace(/"/g,'&quot;')},false)">🖨️ طباعة فاتورة الطلب</button>
+          <button class="btn btn-danger" onclick="deleteOrder('${orderEsc(o.docId)}')">🗑️ حذف</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function openOrderEditor(docId){
+    const o=allAdminOrders.find(x=>String(x.docId)===String(docId)); if(!o)return;
+    let m=document.getElementById('order-editor-modal');
+    if(!m){m=document.createElement('div');m.id='order-editor-modal';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:none;align-items:center;justify-content:center;padding:16px';document.body.appendChild(m)}
+    m.innerHTML=`<div style="background:#fffaf3;width:min(680px,100%);max-height:92vh;overflow:auto;border-radius:20px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.25)" dir="rtl">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="margin:0">✏️ تعديل الطلب ${orderEsc(o.orderId||o.docId)}</h2><button class="btn btn-danger" onclick="closeOrderEditor()">إغلاق ✕</button></div>
+      <div class="note" style="margin:8px 0 14px">يمكن للمدير تعديل بيانات العميل والموقع وطريقة الاستلام والدفع والحالة والسائق. المنتجات محفوظة كما أرسلها العميل.</div>
+      <label>اسم العميل</label><input id="edit-order-name" value="${orderEsc(o.customerName||'')}">
+      <label>رقم العميل</label><input id="edit-order-phone" inputmode="tel" value="${orderEsc(o.customerPhone||'')}">
+      <label>البريد الإلكتروني</label><input id="edit-order-email" type="email" value="${orderEsc(o.customerEmail||'')}">
+      <label>موقع العميل / رابط الخريطة</label><input id="edit-order-location" value="${orderEsc(o.customerLocation||'')}" placeholder="https://maps.google.com/...">
+      <label>طريقة الاستلام</label><select id="edit-order-delivery"><option value="delivery" ${o.deliveryType==='delivery'?'selected':''}>توصيل إلى الموقع</option><option value="pickup" ${o.deliveryType!=='delivery'?'selected':''}>استلام من الفرع</option></select>
+      <label>طريقة الدفع</label><select id="edit-order-payment"><option value="cash" ${o.paymentMethod!=='transfer'?'selected':''}>كاش</option><option value="transfer" ${o.paymentMethod==='transfer'?'selected':''}>تحويل بنكي</option></select>
+      <label>حالة الطلب</label><select id="edit-order-status">${['جديد','قبول','جاري المعالجة','تم إرسال الطلب للسائق','مع السائق','تم التوصيل','ملغي'].map(x=>`<option value="${orderEsc(x)}" ${x===(o.status||'جديد')?'selected':''}>${orderEsc(x)}</option>`).join('')}</select>
+      <label>السائق</label><select id="edit-order-driver"><option value="">بدون سائق</option>${(storeData.drivers||[]).map(d=>`<option value="${orderEsc(d.id)}" ${String(d.id)===String(o.driverId||'')?'selected':''}>${orderEsc(d.name)}</option>`).join('')}</select>
+      <label>سبب الإلغاء</label><input id="edit-order-cancel" value="${orderEsc(o.cancelReason||'')}" placeholder="يظهر للعميل إذا كانت الحالة ملغي">
+      <label>ملاحظات الطلب</label><textarea id="edit-order-notes" rows="4">${orderEsc(o.notes||o.customerNotes||'')}</textarea>
+      <div class="order-actions" style="margin-top:14px"><button class="btn btn-success" onclick="saveOrderEditor('${orderEsc(o.docId)}')">💾 حفظ التعديلات</button><button class="btn" onclick="closeOrderEditor()">إلغاء</button></div>
+    </div>`;
+    m.style.display='flex';
+  }
+  function closeOrderEditor(){const m=document.getElementById('order-editor-modal');if(m)m.style.display='none'}
+  async function saveOrderEditor(docId){
+    const driverId=document.getElementById('edit-order-driver').value;
+    const d=(storeData.drivers||[]).find(x=>String(x.id)===String(driverId));
+    const status=document.getElementById('edit-order-status').value;
+    const data={
+      customerName:document.getElementById('edit-order-name').value.trim(),
+      customerPhone:document.getElementById('edit-order-phone').value.trim(),
+      customerEmail:document.getElementById('edit-order-email').value.trim(),
+      customerLocation:document.getElementById('edit-order-location').value.trim(),
+      deliveryType:document.getElementById('edit-order-delivery').value,
+      paymentMethod:document.getElementById('edit-order-payment').value,
+      status,
+      cancelReason:document.getElementById('edit-order-cancel').value.trim(),
+      notes:document.getElementById('edit-order-notes').value.trim(),
+      driverId:d?.id||'', driverName:d?.name||'',
+      statusUpdatedAt:new Date().toISOString()
+    };
+    if(status==='ملغي' && !data.cancelReason){alert('اكتب سبب الإلغاء أولاً.');return}
+    try{await window.updateDoc(window.doc(window.db,'orders',docId),data);closeOrderEditor();await loadOrders();alert('تم حفظ جميع تعديلات الطلب في السحابة.');}
+    catch(e){console.error(e);alert(e?.code==='permission-denied'?'السحابة رفضت التعديل. تحقق من صلاحيات المدير في Firestore.':'تعذر حفظ تعديلات الطلب.');}
+  }
+
+  async function loadOrders() {
+    const list=document.getElementById('orders-list'); if(!list || !window.db) return;
+    try {
+      const snap=await window.getDocs(window.collection(window.db,'orders'));
+      allAdminOrders=[]; snap.forEach(d=>allAdminOrders.push({docId:d.id,...d.data()}));
+      if(adminKnownOrderIds.size===0) snap.forEach(d=>adminKnownOrderIds.add(d.id));
+      updateAdminSoundUI();
+      updateOrderCounts(); renderOrderList(); renderDriverDeliveryCounts(); renderReturnRequests();
+    } catch(e) { console.error(e); list.innerHTML='<p class="note">تعذر تحميل الطلبات. تحقق من صلاحيات Firestore.</p>'; }
+  }
+
+  function renderDriverDeliveryCounts(){
+    (storeData.drivers||[]).forEach(d=>{
+      const el=document.querySelector(`[data-driver-count="${d.id}"]`);
+      if(el) el.textContent=`تم توصيله: ${allAdminOrders.filter(o=>o.driverId===d.id && isDeliveredOrder(o)).length} طلب`;
+    });
+  }
+
+  async function assignDriver(docId) {
+    const sel=document.getElementById('driver-'+docId);
+    const d=(storeData.drivers||[]).find(x=>String(x.id)===String(sel?.value));
+    if(!d){ alert('اختر السائق أولاً.'); return; }
+    try {
+      await window.updateDoc(window.doc(window.db,'orders',docId),{
+        driverId:d.id,
+        driverName:d.name,
+        status:'تم إرسال الطلب للسائق',
+        assignedAt:new Date().toISOString(),
+        driverRequestedAt:new Date().toISOString(),
+        cancelReason:'',
+        statusUpdatedAt:new Date().toISOString()
+      });
+      
+      await loadOrders();
+      alert(`تم إرسال الطلب إلى السائق ${d.name} بنجاح.`);
+    } catch(e){
+      console.error('assignDriver:',e);
+      alert(e?.code==='permission-denied'?'السحابة رفضت التعديل. تحقق من UID المدير في firestore.rules.':'تعذر إرسال الطلب للسائق.');
+    }
+  }
+
+  async function setOrderStatus(docId,status) {
+    try {
+      await window.updateDoc(window.doc(window.db,'orders',docId),{
+        status,
+        cancelReason:'',
+        statusUpdatedAt:new Date().toISOString()
+      });
+      
+      await loadOrders();
+    } catch(e){
+      console.error(e);
+      alert(e?.code==='permission-denied'?'السحابة رفضت التحديث. تحقق من UID المدير في firestore.rules.':'تعذر تحديث حالة الطلب.');
+    }
+  }
+
+  async function cancelOrder(docId,presetReason='') {
+    let reason=String(presetReason||'').trim();
+    if(!reason){
+      reason=prompt('اكتب سبب إلغاء الطلب ليظهر للعميل:', 'سبب الإلغاء');
+      if(reason===null) return;
+      reason=reason.trim();
+    }
+    if(!reason){alert('يجب كتابة سبب الإلغاء.');return;}
+    if(!confirm(`سيظهر للعميل أن الطلب ملغي مع السبب:\n${reason}\n\nهل تريد المتابعة؟`)) return;
+    try{
+      await window.updateDoc(window.doc(window.db,'orders',docId),{
+        status:'ملغي',
+        cancelReason:reason,
+        cancelledAt:new Date().toISOString(),
+        statusUpdatedAt:new Date().toISOString(),
+        driverId:'',
+        driverName:'',
+        assignedAt:''
+      });
+      
+      await loadOrders();
+      alert('تم إلغاء الطلب وسيظهر سبب الإلغاء للعميل.');
+    }catch(e){
+      console.error('cancelOrder:',e);
+      alert(e?.code==='permission-denied'?'السحابة رفضت الإلغاء. تحقق من UID المدير في firestore.rules.':'تعذر إلغاء الطلب.');
+    }
+  }
+
+  async function deleteOrder(docId) {
+    if(!confirm('هل تريد حذف الطلب نهائياً؟')) return;
+    try { await window.deleteDoc(window.doc(window.db,'orders',docId)); await loadOrders(); }
+    catch(e){alert('تعذر حذف الطلب.');}
+  }
+
+  function orderDateValue(o){
+    const raw=o.createdAt || o.date || o.created_at || '';
+    const d=new Date(raw);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  async function getAllOrdersForReport(){
+    if(!window.db) return [];
+    const snap=await window.getDocs(window.collection(window.db,'orders'));
+    const orders=[]; snap.forEach(d=>orders.push({docId:d.id,...d.data()}));
+    return orders;
+  }
+
+  function numericTotal(o){
+    let base=0;
+    if(typeof o.total === 'number') base=o.total;
+    else { const text=String(o.totalText||'').replace(/,/g,''); const m=text.match(/-?\d+(?:\.\d+)?/); base=m ? Number(m[0]) : (o.items||[]).reduce((sum,i)=>sum+(Number(i.subtotal)||Number(i.price||0)*Number(i.qty||0)),0); }
+    if(o.returnStatus==='مكتمل' && o.returnItem) base -= Number(o.returnItem.subtotal)||0;
+    if(o.returnStatus==='مكتمل') base += Number(o.returnFee)||0;
+    return base;
+  }
+
+  async function renderReports(){
+    const box=document.getElementById('report-summary'); if(!box) return;
+    const period=document.getElementById('report-period')?.value || 'day';
+    const dateInput=document.getElementById('report-date'); const monthInput=document.getElementById('report-month');
+    if(period==='day'){ dateInput.style.display='block'; monthInput.style.display='none'; if(!dateInput.value) dateInput.value=new Date().toISOString().slice(0,10); }
+    else { dateInput.style.display='none'; monthInput.style.display='block'; if(!monthInput.value) monthInput.value=new Date().toISOString().slice(0,7); }
+    try{
+      const orders=await getAllOrdersForReport();
+      const key=period==='day'?dateInput.value:monthInput.value;
+      const filtered=orders.filter(o=>{const d=orderDateValue(o); if(!d||!key)return false; const day=d.toISOString().slice(0,10); const month=d.toISOString().slice(0,7); return period==='day'?day===key:month===key;});
+      const totalSales=filtered.reduce((s,o)=>s+numericTotal(o),0);
+      const totalCost=filtered.reduce((s,o)=>{let c=(o.items||[]).reduce((a,i)=>a+(Number(i.cost)||0)*(Number(i.qty)||0),0);if(o.returnStatus==='مكتمل'&&o.returnItem)c-=((Number(o.returnItem.cost)||0)*(Number(o.returnItem.qty)||0));return s+c;},0);
+      const netProfit=totalSales-totalCost;
+      const currency=(filtered.find(o=>o.currency)?.currency)||'ريال';
+      const drivers = storeData.drivers || [];
+      const driverCards = drivers.map(d => {
+        const selectedMonth = period==='month' ? key : new Date().toISOString().slice(0,7);
+        const deliveredToday = allAdminOrders.filter(o => o.driverId===d.id && isDeliveredOrder(o) && isTodayOrder(o)).length;
+        const deliveredMonth = allAdminOrders.filter(o => o.driverId===d.id && isDeliveredOrder(o) && orderDateValue(o)?.toISOString().slice(0,7)===selectedMonth).length;
+        const deliveredAll = allAdminOrders.filter(o=>o.driverId===d.id && isDeliveredOrder(o)).length;
+        return `<div class="report-card"><b>🚗 ${d.name}</b><span>اليوم: ${deliveredToday} طلب</span><span>الشهر: ${deliveredMonth} طلب</span><span>إجمالي التوصيلات: ${deliveredAll} طلب</span></div>`;
+      }).join('');
+      box.innerHTML=`<div class="report-grid"><div class="report-card">إجمالي الطلبات<strong>${filtered.length}</strong></div><div class="report-card">إجمالي مبلغ البيع<strong>${totalSales.toLocaleString('ar-EG')} ${currency}</strong></div><div class="report-card">إجمالي التكلفة<strong>${totalCost.toLocaleString('ar-EG')} ${currency}</strong></div><div class="report-card">صافي الربح<strong>${netProfit.toLocaleString('ar-EG')} ${currency}</strong></div></div><h3 style="margin-top:18px">🚗 إحصائيات السائقين</h3><div class="report-grid">${driverCards || '<div class="report-card">لا يوجد سائقون</div>'}</div>`;
+    }catch(e){box.innerHTML='<p class="note">تعذر تحميل بيانات التقرير.</p>'; console.error(e);}
+  }
+
+  async function printProfitReport(){
+    await renderReports();
+    const period=document.getElementById('report-period')?.value||'day'; const key=period==='day'?document.getElementById('report-date')?.value:document.getElementById('report-month')?.value;
+    const orders=await getAllOrdersForReport(); const filtered=orders.filter(o=>{const d=orderDateValue(o); if(!d)return false; return period==='day'?d.toISOString().slice(0,10)===key:d.toISOString().slice(0,7)===key;});
+    const total=filtered.reduce((s,o)=>s+numericTotal(o),0); const totalCost=filtered.reduce((s,o)=>{let c=(o.items||[]).reduce((a,i)=>a+(Number(i.cost)||0)*(Number(i.qty)||0),0);if(o.returnStatus==='مكتمل'&&o.returnItem)c-=((Number(o.returnItem.cost)||0)*(Number(o.returnItem.qty)||0));return s+c;},0); const netProfit=total-totalCost; const currency=filtered.find(o=>o.currency)?.currency||'ريال';
+    const w=window.open('','_blank','width=800,height=800'); if(!w)return;
+    w.document.write(`<html dir="rtl"><head><title>تقرير الربح ${key||''}</title><style>body{font-family:Arial;padding:25px}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{border:1px solid #aaa;padding:8px;text-align:right}.summary{font-size:18px;font-weight:bold;margin:12px 0}</style></head><body><h1>POINT CAFE</h1><h2>تقرير المبيعات والأرباح</h2><p>الفترة: ${period==='day'?'يوم':'شهر'} — ${key||'—'}</p><div class="summary">إجمالي الطلبات: ${filtered.length}</div><div class="summary">إجمالي مبلغ البيع: ${total.toLocaleString('ar-EG')} ${currency}</div><div class="summary">إجمالي التكلفة: ${totalCost.toLocaleString('ar-EG')} ${currency}</div><div class="summary">صافي الربح: ${netProfit.toLocaleString('ar-EG')} ${currency}</div><table><tr><th>رقم الطلب</th><th>التاريخ</th><th>العميل</th><th>المبلغ</th></tr>${filtered.map(o=>`<tr><td>${o.orderId||o.docId}</td><td>${orderDateValue(o)?.toLocaleString('ar-EG')||'—'}</td><td>${o.customerName||'—'}</td><td>${numericTotal(o).toLocaleString('ar-EG')} ${o.currency||currency}</td></tr>`).join('')}</table><script>window.print()<\/script>
+
+<script>
+  let whatsappSelectedProductIds = new Set();
+  let whatsappCustomersCache = [];
+
+  function whatsappEsc(v){
+    return String(v ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  }
+
+  function renderReturnRequests(){
+    const box=document.getElementById('returns-list'); if(!box)return;
+    const rows=(allAdminOrders||[]).filter(o=>o.returnStatus);
+    const c=document.getElementById('return-count'); if(c)c.textContent=rows.length+' طلب';
+    if(!rows.length){box.innerHTML='<div class="note">لا توجد طلبات استرجاع حالياً.</div>';return;}
+    box.innerHTML=rows.sort((a,b)=>String(b.returnRequestedAt||'').localeCompare(String(a.returnRequestedAt||''))).map(o=>{
+      const ri=o.returnItem||{}; const drivers=storeData.drivers||[]; const id=orderEsc(o.docId);
+      const driverOptions=drivers.map(d=>'<option value="'+orderEsc(d.id)+'" '+(String(d.id)===String(o.returnDriverId||'')?'selected':'')+'>🚗 '+orderEsc(d.name)+'</option>').join('');
+      const sendBtn=(o.returnStatus==='مقبول'||o.returnStatus==='السائق في الطريق'||o.returnStatus==='تم استلام المنتج') ? '<button class="btn" onclick="processReturn(\''+id+'\',\'إرسال للسائق\')">🚗 إرسال للسائق</button>' : ''; const completeBtn=o.returnStatus==='تم استلام المنتج' ? '<button class="btn btn-success" onclick="processReturn(\''+id+'\',\'إكمال الاسترجاع\')">💰 تأكيد الاسترجاع والخصم</button>' : '';
+      return '<div class="order-card" style="margin-bottom:12px"><div class="order-head"><span>↩️ <b>'+orderEsc(o.orderId||o.docId)+'</b></span><span>'+orderEsc(o.returnStatus)+'</span></div>'+
+      '<div style="line-height:2;margin-top:8px"><b>العميل:</b> '+orderEsc(o.customerName||'—')+' — '+orderEsc(o.customerPhone||'—')+'<br><b>المنتج:</b> '+orderEsc(ri.name||'—')+' × '+orderEsc(ri.qty||1)+'<br><b>السبب:</b> '+orderEsc(o.returnReason||'—')+'<br><b>المشكلة:</b> '+orderEsc(o.returnProblem||'—')+(o.returnAdminMessage?'<br><b>رسالة المدير:</b> '+orderEsc(o.returnAdminMessage):'')+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><select id="return-fee-'+id+'"><option value="0">🆓 مجاني</option><option value="1">💰 برسوم</option></select><input id="return-fee-value-'+id+'" type="number" min="0" step="0.01" placeholder="قيمة الرسوم"></div>'+
+      '<textarea id="return-msg-'+id+'" rows="3" style="margin-top:8px" placeholder="رسالة للعميل، مثل: تم قبول الاسترجاع بسبب...">'+orderEsc(o.returnAdminMessage||'')+'</textarea>'+
+      '<select id="return-driver-'+id+'" style="margin-top:8px"><option value="">بدون سائق</option>'+driverOptions+'</select>'+
+      '<div class="order-actions" style="margin-top:8px"><button class="btn btn-success" onclick="processReturn(\''+id+'\',\'قبول\')">✅ قبول</button><button class="btn btn-danger" onclick="processReturn(\''+id+'\',\'رفض\')">❌ رفض</button>'+sendBtn+completeBtn+'<button class="btn" onclick="choosePrintType('+JSON.stringify(o).replace(/\"/g,'&quot;')+',true)">🖨️ طباعة فاتورة المسترجع</button><button class="btn btn-danger" onclick="deleteReturn(\''+id+'\')">🗑️ حذف</button></div></div>';
+    }).join('');
+  }
+  async function processReturn(docId,action){
+    const o=allAdminOrders.find(x=>x.docId===docId); if(!o)return;
+    const msg=document.getElementById('return-msg-'+docId)?.value.trim()||'';
+    const feeMode=document.getElementById('return-fee-'+docId)?.value||'0'; const fee=Math.max(0,Number(document.getElementById('return-fee-value-'+docId)?.value||0));
+    const driverId=document.getElementById('return-driver-'+docId)?.value||''; const d=(storeData.drivers||[]).find(x=>String(x.id)===String(driverId));
+    let data={returnAdminMessage:msg,returnFee:feeMode==='1'?fee:0,returnFeeText:feeMode==='1'?(fee+' ر.س'):'مجاني',returnUpdatedAt:new Date().toISOString()};
+    if(action==='قبول') data.returnStatus='مقبول';
+    if(action==='رفض') data.returnStatus='مرفوض';
+    if(action==='إرسال للسائق'){ if(!d){alert('اختر السائق أولاً.');return;} data.returnStatus='السائق في الطريق'; data.returnDriverId=d.id; data.returnDriverName=d.name; data.returnAssignedAt=new Date().toISOString(); }
+    if(action==='إكمال الاسترجاع'){ data.returnStatus='مكتمل'; data.returnCompletedAt=new Date().toISOString(); data.returnRefunded=true; }
+    if(action==='قبول' && driverId){data.returnDriverId=d.id;data.returnDriverName=d.name;}
+    try{await window.updateDoc(window.doc(window.db,'orders',docId),data);await loadOrders();renderReturnRequests();alert('تم تحديث الاسترجاع.');}catch(e){console.error(e);alert('تعذر تحديث الاسترجاع.');}
+  }
+  async function deleteReturn(docId){if(!confirm('حذف طلب الاسترجاع؟'))return;try{await window.updateDoc(window.doc(window.db,'orders',docId),{returnStatus:'محذوف',returnUpdatedAt:new Date().toISOString()});await loadOrders();renderReturnRequests();}catch(e){alert('تعذر حذف الاسترجاع.');}}
+
+  function getWhatsAppProductImage(p){
+    return p?.img || (Array.isArray(p?.images) ? p.images[0] : '') || 'https://via.placeholder.com/300?text=POINT+CAFE';
+  }
+
+  function getWhatsAppProductById(id){
+    return (storeData.products || []).find(p => String(p.id) === String(id)) || null;
+  }
+
+  function normalizeWhatsAppCustomerPhone(phone){
+    let n = String(phone || '').replace(/\D/g,'');
+    if(n.startsWith('00')) n = n.slice(2);
+    if(n.startsWith('0')) n = n.slice(1);
+    return (n.length >= 8 && n.length <= 15) ? n : '';
+  }
+
+  function collectWhatsAppCustomers(){
+    const map = new Map();
+    (allAdminOrders || []).forEach(o => {
+      const phone = normalizeWhatsAppCustomerPhone(o.customerPhone || o.phone || '');
+      if(!phone) return;
+      const key = phone;
+      const name = String(o.customerName || o.name || 'عميل POINT CAFE').trim() || 'عميل POINT CAFE';
+      const old = map.get(key);
+      if(!old || (old.name === 'عميل POINT CAFE' && name !== old.name)) {
+        map.set(key, {phone:key, name});
+      }
+    });
+    return Array.from(map.values()).sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar'));
+  }
+
+  function renderWhatsAppProducts(){
+    const box = document.getElementById('whatsapp-products-grid');
+    if(!box) return;
+    const products = storeData.products || [];
+    if(!products.length){
+      box.innerHTML = '<div class="note">لا توجد منتجات مضافة في المتجر حالياً.</div>';
+      return;
+    }
+    box.innerHTML = products.map(p => `
+      <div class="whatsapp-product-card ${whatsappSelectedProductIds.has(String(p.id))?'selected':''}"
+           onclick="selectWhatsAppProduct('${whatsappEsc(p.id)}')">
+        <img src="${whatsappEsc(getWhatsAppProductImage(p))}" loading="lazy" decoding="async" alt="">
+        <div class="whatsapp-product-name">${whatsappEsc(p.name || 'منتج')}</div>
+        <div class="whatsapp-product-price">${whatsappEsc(p.price ?? '')} ${whatsappEsc(p.currency || 'ر.س')}</div>
+        ${p.specialOffer ? '<div style="color:#d62828;font-weight:900;font-size:12px;margin-top:3px">🔥 عرض خاص</div>' : ''}
+      </div>
+    `).join('');
+  }
+
+  function selectWhatsAppProduct(id){
+    const key=String(id);
+    if(whatsappSelectedProductIds.has(key)) whatsappSelectedProductIds.delete(key); else whatsappSelectedProductIds.add(key);
+    renderWhatsAppProducts();
+    renderWhatsAppSelectedProducts();
+    buildWhatsAppMessage();
+  }
+
+  function renderWhatsAppSelectedProducts(){
+    const box=document.getElementById('whatsapp-selected-product'); if(!box)return;
+    const ps=Array.from(whatsappSelectedProductIds).map(getWhatsAppProductById).filter(Boolean);
+    if(!ps.length){box.style.display='none';box.innerHTML='';return;}
+    box.style.display='flex';
+    box.innerHTML=ps.map(p=>`<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><img src="${whatsappEsc(getWhatsAppProductImage(p))}" loading="lazy" alt="" style="width:45px;height:45px;object-fit:cover;border-radius:8px"><div><b>${whatsappEsc(p.name||'منتج')}</b><div class="note">${whatsappEsc(p.price??'')} ${whatsappEsc(p.currency||'ر.س')}</div></div></div>`).join('');
+  }
+
+  function buildWhatsAppMessage(){
+    const ps=Array.from(whatsappSelectedProductIds).map(getWhatsAppProductById).filter(Boolean);
+    const input=document.getElementById('whatsapp-message'); if(!input)return;
+    if(!ps.length){input.value='أهلاً بكم 🌷\nلدينا عروض ومنتجات جديدة من POINT CAFE.\nللطلب تواصل معنا عبر المتجر.';return;}
+    const lines=ps.map((p,i)=>{
+      const productUrl=`${location.origin}${location.pathname.replace(/admin\.html?$/i,'index.html')}?product=${encodeURIComponent(p.id)}`;
+      return `${i+1}. ☕ ${p.name||'منتج'}\n💰 السعر: ${p.price??''} ${p.currency||'ر.س'}${p.specialOffer?'\n🔥 عرض خاص متاح الآن':''}${p.specs?`\n✨ ${p.specs}`:''}\n🔗 ${productUrl}`;
+    }).join('\n\n');
+    input.value=`🎉 عرض جديد من POINT CAFE\n\n${lines}\n\n🛒 اطلب الآن من المتجر ❤️`;
+  }
+
+  function clearWhatsAppSelection(){
+    whatsappSelectedProductIds.clear();
+    const box = document.getElementById('whatsapp-selected-product');
+    const input = document.getElementById('whatsapp-message');
+    if(box) { box.style.display='none'; box.innerHTML=''; }
+    if(input) input.value='';
+    renderWhatsAppProducts();
+    document.querySelectorAll('#whatsapp-customers-list input[type="checkbox"]').forEach(x=>x.checked=false);
+    updateWhatsAppSelectedCount();
+  }
+
+  function renderWhatsAppCustomers(){
+    const list = document.getElementById('whatsapp-customers-list');
+    if(!list) return;
+    whatsappCustomersCache = collectWhatsAppCustomers();
+    const count = document.getElementById('whatsapp-customer-count');
+    if(count) count.textContent = `${whatsappCustomersCache.length} عميل`;
+    if(!whatsappCustomersCache.length){
+      list.innerHTML = '<div class="note">لا توجد أرقام عملاء في الطلبات الحالية. ستظهر أرقام العملاء الذين لديهم طلب مسجل برقم جوال.</div>';
+      updateWhatsAppSelectedCount();
+      return;
+    }
+    list.innerHTML = whatsappCustomersCache.map((c,i)=>`
+      <label class="whatsapp-customer-row">
+        <input type="checkbox" data-wa-index="${i}" onchange="updateWhatsAppSelectedCount()">
+        <span style="min-width:0;flex:1">
+          <span class="wa-name">${whatsappEsc(c.name)}</span>
+          <span class="wa-phone">${whatsappEsc(c.phone)}</span>
+        </span>
+        <button type="button" onclick="event.preventDefault();event.stopPropagation();sendWhatsAppToCustomer(${i})">واتساب</button>
+      </label>
+    `).join('');
+    updateWhatsAppSelectedCount();
+  }
+
+  function selectAllWhatsAppCustomers(flag){
+    document.querySelectorAll('#whatsapp-customers-list input[type="checkbox"]').forEach(x=>x.checked=!!flag);
+    updateWhatsAppSelectedCount();
+  }
+
+  function updateWhatsAppSelectedCount(){
+    const n = document.querySelectorAll('#whatsapp-customers-list input[type="checkbox"]:checked').length;
+    const el = document.getElementById('whatsapp-selected-count');
+    if(el) el.textContent = `${n} محدد`;
+  }
+
+  function getWhatsAppSelectedCustomers(){
+    return Array.from(document.querySelectorAll('#whatsapp-customers-list input[type="checkbox"]:checked'))
+      .map(x => whatsappCustomersCache[Number(x.dataset.waIndex)])
+      .filter(Boolean);
+  }
+
+  function getWhatsAppText(){
+    const text = String(document.getElementById('whatsapp-message')?.value || '').trim();
+    if(!text){ alert('اكتب رسالة أو اختر منتجاً أولاً.'); return ''; }
+    return text;
+  }
+
+  function openWhatsAppCustomer(customer, text){
+    const phone = normalizeWhatsAppCustomerPhone(customer?.phone);
+    if(!phone) return false;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return true;
+  }
+
+  function sendWhatsAppToCustomer(index){
+    const customer = whatsappCustomersCache[index];
+    const text = getWhatsAppText();
+    if(!customer || !text) return;
+    openWhatsAppCustomer(customer, text);
+  }
+
+  function sendWhatsAppSelected(group){
+    const text = getWhatsAppText();
+    if(!text) return;
+    const selected = getWhatsAppSelectedCustomers();
+    if(!selected.length){ alert('حدد عميلًا واحدًا على الأقل.'); return; }
+
+    if(!group){
+      openWhatsAppCustomer(selected[0], text);
+      return;
+    }
+
+    // WhatsApp does not provide a normal wa.me URL that sends one message to many different recipients.
+    // Open the selected conversations in a queue; the manager confirms Send inside WhatsApp for each one.
+    const queue = document.getElementById('whatsapp-queue');
+    if(queue){
+      queue.style.display='block';
+      queue.innerHTML = `
+        <div style="font-weight:900;margin-bottom:7px">📨 قائمة الإرسال الجماعي — ${selected.length} عميل</div>
+        ${selected.map((c,i)=>`
+          <div class="whatsapp-queue-item">
+            <span><b>${i+1}.</b> ${whatsappEsc(c.name)} — ${whatsappEsc(c.phone)}</span>
+            <button class="btn" type="button" style="background:#25D366;color:#fff" onclick="openWhatsAppCustomer(whatsappCustomersCache.find(x=>x.phone==='${whatsappEsc(c.phone)}'), document.getElementById('whatsapp-message').value)">📲 فتح واتساب</button>
+          </div>
+        `).join('')}
+      `;
+    }
+
+    // Try to open each selected chat with a small delay. Browsers may block multiple popups;
+    // the queue remains available so the manager can open each one manually.
+    selected.forEach((customer, i) => {
+      setTimeout(() => openWhatsAppCustomer(customer, text), i * 650);
+    });
+  }
+
+  async function renderWhatsAppCenter(){
+    renderWhatsAppProducts();
+    if(!allAdminOrders.length && window.getDocs && window.db){
+      try{
+        const snap = await window.getDocs(window.collection(window.db,'orders'));
+        allAdminOrders = [];
+        snap.forEach(d=>allAdminOrders.push({docId:d.id,...d.data()}));
+      }catch(e){ console.warn('تحميل عملاء واتساب:',e); }
+    }
+    renderWhatsAppCustomers();
+    updateWhatsAppSelectedCount();
+  }
+
+</script>
+</body></html>`); w.document.close();
+  }
+
+  function choosePrintType(o, isReturn=false){
+    const existing=document.getElementById('print-type-modal');
+    if(existing) existing.remove();
+    const m=document.createElement('div');
+    m.id='print-type-modal';
+    m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100000;display:flex;align-items:center;justify-content:center;padding:18px;direction:rtl';
+    const title=isReturn?'🖨️ طباعة فاتورة المسترجع':'🖨️ طباعة فاتورة الطلب';
+    m.innerHTML=`<div style="background:#fffaf3;width:min(430px,100%);border-radius:20px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center">
+      <h2 style="margin:0 0 8px">${title}</h2><p style="margin:0 0 18px;color:#765f49">اختر نوع الطباعة</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button class="btn" style="min-height:58px" onclick="closePrintTypeModal();${isReturn?'printReturnReceipt':'printOrder'}(window._printChoiceOrder,'normal')">🖨️ طباعة عادية<br><small>A4</small></button>
+        <button class="btn btn-success" style="min-height:58px" onclick="closePrintTypeModal();${isReturn?'printReturnReceipt':'printOrder'}(window._printChoiceOrder,'roll')">🧾 طابعة حرارية<br><small>58 / 80 مم</small></button>
+      </div>
+      <button class="btn btn-danger" style="margin-top:10px;width:100%" onclick="closePrintTypeModal()">إلغاء</button>
+    </div>`;
+    document.body.appendChild(m); window._printChoiceOrder=o;
+  }
+  function closePrintTypeModal(){const m=document.getElementById('print-type-modal');if(m)m.remove();window._printChoiceOrder=null;}
+
+  function printReturnReceipt(o, printerType="normal") {
+    const w=window.open('', '_blank', 'width=700,height=800');
+    if(!w){alert('يرجى السماح بفتح النوافذ المنبثقة للطباعة.');return;}
+    const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+    const ri=o.returnItem||{}, qty=Number(ri.qty||1), price=Number(ri.price||0), subtotal=Number(ri.subtotal||price*qty), fee=Number(o.returnFee||0);
+    const dt=o.returnCompletedAt||o.returnUpdatedAt||o.returnRequestedAt||o.createdAt; const dateText=dt?new Date(dt).toLocaleString('ar-SA'):'—'; const isRoll=printerType==='roll';
+    const style=isRoll?`@page{size:80mm auto;margin:0}html,body{width:80mm;margin:0;padding:0;background:#fff}body{font-family:Arial,Tahoma,sans-serif;font-size:11px;color:#000}.invoice{width:72mm;margin:0 auto;padding:4mm 2mm}h1{font-size:18px;text-align:center;margin:0 0 5px}h2{font-size:13px;text-align:center;margin:0 0 8px}.info{font-size:11px;line-height:1.8;margin-bottom:7px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border-bottom:1px dashed #555;padding:4px 1px;text-align:right;vertical-align:top}th{font-weight:800}.total{border-top:2px solid #000;margin-top:8px;padding-top:7px;font-size:12px}.footer{text-align:center;margin-top:12px;font-size:10px}`:`@page{size:A4;margin:10mm}html,body{margin:0;padding:0;background:#fff}body{font-family:Arial,Tahoma,sans-serif;color:#111;font-size:13px}.invoice{max-width:190mm;margin:0 auto;padding:5mm}h1{text-align:center;font-size:25px;margin:0 0 8px}h2{text-align:center;font-size:18px;margin:0 0 18px}.info{line-height:2;margin-bottom:15px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #888;padding:8px;text-align:right}th{background:#f2f2f2}.total{border-top:2px solid #222;margin-top:15px;padding-top:10px;font-size:16px}.footer{text-align:center;margin-top:20px;font-size:12px}`;
+    w.document.open();
+    w.document.write(`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>فاتورة مسترجع ${esc(o.orderId||'')}</title><style>${style}</style></head><body><div class="invoice"><h1>POINT CAFE</h1><h2>فاتورة استرجاع — ${esc(o.orderId||'')}</h2><div class="info"><div>👤 العميل: <b>${esc(o.customerName||'—')}</b></div><div>📞 الجوال: <b>${esc(o.customerPhone||'—')}</b></div><div>📅 التاريخ: <b>${esc(dateText)}</b></div><div>📦 حالة الاسترجاع: <b>${esc(o.returnStatus||'—')}</b></div><div>💬 السبب: <b>${esc(o.returnReason||'—')}</b></div><div>📝 المشكلة: <b>${esc(o.returnProblem||'—')}</b></div><div>💰 رسوم الاسترجاع: <b>${fee>0?esc(fee)+' ر.س':'مجاني'}</b></div></div><table><thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>القيمة</th></tr></thead><tbody><tr><td>${esc(ri.name||'منتج')}</td><td>${esc(qty)}</td><td>${esc(price)} ${esc(ri.currency||'ر.س')}</td><td>${esc(subtotal)} ${esc(ri.currency||'ر.س')}</td></tr></tbody></table><div class="total"><div>↩️ المبلغ المسترجع: <b>${esc(subtotal)} ${esc(ri.currency||o.currency||'ر.س')}</b></div>${fee>0?`<div style="margin-top:6px">💰 رسوم الاسترجاع: <b>${esc(fee)} ر.س</b></div>`:''}<div style="margin-top:6px;font-weight:900">📊 صافي الاسترجاع: <b>${esc(Math.max(0,subtotal-fee))} ${esc(ri.currency||o.currency||'ر.س')}</b></div></div><div class="footer">تم إصدار فاتورة استرجاع من POINT CAFE ☕</div></div><script>window.onload=function(){setTimeout(function(){window.print()},150)};<\\/script></body></html>`);
+    w.document.close();
+  }
+
+  function printOrder(o, printerType="normal") {
+    const w = window.open('', '_blank', 'width=700,height=800');
+    if (!w) {
+      alert('يرجى السماح بفتح النوافذ المنبثقة للطباعة.');
+      return;
+    }
+
+    const esc = v => String(v ?? '').replace(/[&<>"']/g, m => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[m]));
+
+    const products = (o.items || []).map(i => `
+      <tr>
+        <td>${esc(i.name)}</td>
+        <td>${esc(i.qty)}</td>
+        <td>${esc(i.price)} ${esc(i.currency)}</td>
+        <td>${esc(i.subtotal)} ${esc(i.currency)}</td>
+      </tr>
+    `).join('');
+
+    const totals = o.totals && typeof o.totals === 'object'
+      ? Object.entries(o.totals).map(([currency,total]) => `<div><b>${esc(total)} ${esc(currency)}</b></div>`).join('')
+      : `<div><b>${esc(o.totalText || '')}</b></div>`;
+
+    const dateText = o.createdAt ? new Date(o.createdAt).toLocaleString('ar-SA') : '—';
+    const isRoll = printerType === 'roll';
+
+    const style = isRoll ? `
+      @page{size:80mm auto;margin:0}
+      html,body{width:80mm;margin:0;padding:0;background:#fff}
+      body{font-family:Arial,Tahoma,sans-serif;font-size:11px;color:#000}
+      .invoice{width:72mm;margin:0 auto;padding:4mm 2mm}
+      h1{font-size:18px;text-align:center;margin:0 0 5px}
+      h2{font-size:13px;text-align:center;margin:0 0 8px}
+      .info{font-size:11px;line-height:1.8;margin-bottom:7px}
+      table{width:100%;border-collapse:collapse;font-size:10px}
+      th,td{border-bottom:1px dashed #555;padding:4px 1px;text-align:right;vertical-align:top}
+      th{font-weight:800}
+      .total{border-top:2px solid #000;margin-top:8px;padding-top:7px;font-size:12px}
+      .footer{text-align:center;margin-top:12px;font-size:10px}
+    ` : `
+      @page{size:A4;margin:10mm}
+      html,body{margin:0;padding:0;background:#fff}
+      body{font-family:Arial,Tahoma,sans-serif;color:#111;font-size:13px}
+      .invoice{max-width:190mm;margin:0 auto;padding:5mm}
+      h1{text-align:center;font-size:25px;margin:0 0 8px}
+      h2{text-align:center;font-size:18px;margin:0 0 18px}
+      .info{line-height:2;margin-bottom:15px}
+      table{width:100%;border-collapse:collapse}
+      th,td{border:1px solid #888;padding:8px;text-align:right}
+      th{background:#f2f2f2}
+      .total{border-top:2px solid #222;margin-top:15px;padding-top:10px;font-size:16px}
+      .footer{text-align:center;margin-top:20px;font-size:12px}
+    `;
+
+    w.document.open();
+    w.document.write(`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>فاتورة ${esc(o.orderId)}</title><style>${style}</style></head><body>
+      <div class="invoice">
+        <h1>POINT CAFE</h1>
+        <h2>فاتورة طلب ${esc(o.orderId || '')}</h2>
+        <div class="info">
+          <div>👤 العميل: <b>${esc(o.customerName || '—')}</b></div>
+          <div>📞 الجوال: <b>${esc(o.customerPhone || '—')}</b></div>
+          <div>📅 التاريخ: <b>${esc(dateText)}</b></div>
+          <div>💳 طريقة الدفع: <b>${o.paymentMethod === 'transfer' ? 'تحويل' : 'كاش'}</b></div>
+          ${o.paymentBank ? `<div>🏦 البنك: <b>${esc(o.paymentBank.bankName || '—')}</b></div><div>👤 المستفيد: <b>${esc(o.paymentBank.accountName || '—')}</b></div><div>🔢 الحساب: <b>${esc(o.paymentBank.accountNumber || '—')}</b></div>` : ''}
+          <div>🚚 طريقة الاستلام: <b>${o.deliveryType === 'delivery' ? 'توصيل' : 'استلام من الفرع'}</b></div>
+          ${o.customerLocation ? `<div>📍 الموقع: <b>${esc(o.customerLocation)}</b></div>` : ''}
+          <div>📌 الحالة: <b>${esc(o.status || 'جديد')}</b></div>
+        </div>
+        <table>
+          <thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
+          <tbody>${products}</tbody>
+        </table>
+        <div class="total">
+          <div>💰 الإجمالي: ${esc(o.totalText || '')}</div>
+          ${o.deliveryType === 'delivery' ? `<div style="margin-top:6px;">🚚 التوصيل: ${Number(o.deliveryFee || 0) > 0 ? `${esc(o.deliveryFee)} ${esc(o.deliveryCurrency || '')}` : 'مجاني'}</div>
+          <div style="margin-top:6px;font-weight:900;font-size:18px;border-top:1px solid #888;padding-top:6px;">💰 الإجمالي مع التوصيل: ${esc(o.grandTotalText || o.totalText || '')}</div>` : ''}
+          ${o.deliveryType !== 'delivery' ? `<div style="margin-top:6px;">🚚 التوصيل: مجاني (استلام من الفرع)</div>` : ''}
+        </div>
+        <div class="footer">شكراً لطلبكم من POINT CAFE ☕</div>
+      </div>
+      <script>
+        window.onload=function(){
+          setTimeout(function(){window.print();},150);
+        };
+      <\/script>
+    </body></html>`);
+    w.document.close();
+  }
+
+
+function openAdminSoundPermission(){
+  if(localStorage.getItem('point_admin_sound') !== '1'){
+    const m=document.getElementById('admin-sound-permission-modal');
+    if(m)m.style.display='flex';
+  }
+}
+function closeAdminSoundPermission(){
+  const m=document.getElementById('admin-sound-permission-modal');
+  if(m)m.style.display='none';
+}
+setTimeout(()=>openAdminSoundPermission(),700);
+</script>
+
+<script>
+(function(){
+const APP_NAME='لوحة تحكم المدير POINT CAFE';
+let deferredInstallPrompt=null,installModal=null,installBtn=null,helpBox=null;
+function isStandalone(){return(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true}
+function createInstallUI(){
+ if(document.getElementById('pwa-install-modal'))return;
+ const m=document.createElement('div');m.id='pwa-install-modal';m.className='pwa-install-modal';
+ m.innerHTML='<div class="pwa-install-card"><img class="pwa-install-logo" src="./point-cafe-logo.jpg" alt="POINT CAFE"><div class="pwa-install-title">'+APP_NAME+'</div><p class="pwa-install-subtitle">ثبّت التطبيق على هاتفك للوصول إليه بسرعة مثل أي تطبيق عادي.</p><button id="pwa-install-btn" class="pwa-install-btn">📲 تثبيت التطبيق</button><button id="pwa-skip-btn" class="pwa-skip-btn" type="button">تخطي</button><div id="pwa-install-help" class="pwa-install-help"></div></div>';
+ document.body.appendChild(m);installModal=m;installBtn=m.querySelector('#pwa-install-btn');helpBox=m.querySelector('#pwa-install-help');installBtn.addEventListener('click',installApp);
+const skipBtn=m.querySelector('#pwa-skip-btn');
+if(skipBtn) skipBtn.addEventListener('click',function(){
+  try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(e){}
+  m.classList.add('installed');
+  m.style.setProperty('display','none','important');
+  m.style.setProperty('visibility','hidden','important');
+  m.style.setProperty('pointer-events','none','important');
+});
+
+}
+function showInstallModal(){if(isStandalone()||document.documentElement.classList.contains('pwa-standalone'))return;createInstallUI();installModal.classList.remove('installed')}
+async function installApp(){
+ if(deferredInstallPrompt){const p=deferredInstallPrompt;deferredInstallPrompt=null;try{await p.prompt();const choice=await p.userChoice;if(choice&&choice.outcome==='accepted'){installBtn.textContent='✅ تم اختيار تثبيت التطبيق';setTimeout(()=>installModal&&installModal.classList.add('installed'),500)}else installBtn.textContent='📲 اضغط لتثبيت التطبيق'}catch(e){showHelp()}return}
+ showHelp();
+}
+function showHelp(){if(!helpBox)return;helpBox.style.display='block';helpBox.innerHTML='إذا لم تظهر نافذة التثبيت تلقائياً، افتح قائمة المتصفح <b>⋮</b> ثم اختر <b>تثبيت التطبيق</b> أو <b>إضافة إلى الشاشة الرئيسية</b>.';installBtn.textContent='📲 حاول التثبيت مرة أخرى'}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;createInstallUI()});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;if(installModal)installModal.classList.add('installed')});
+window.addEventListener('load',()=>{createInstallUI();if(!isStandalone() && localStorage.getItem('pointCafeInstallSkipped')!=='1')setTimeout(showInstallModal,8000);if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('PWA SW:',err))});
+window.openPointCafeInstall=showInstallModal;
+})();
+</script>
+<style id="point-cafe-install-polish">
+.pwa-install-modal:not(.installed){position:fixed!important;inset:auto 12px 78px auto!important;width:auto!important;height:auto!important;padding:0!important;background:transparent!important;display:block!important;z-index:200000!important}
+.pwa-install-card{direction:rtl!important;width:285px!important;max-width:calc(100vw - 24px)!important;display:grid!important;grid-template-columns:46px 1fr!important;grid-template-rows:auto auto auto!important;gap:5px 10px!important;align-items:center!important;padding:12px!important;background:rgba(255,250,243,.98)!important;border:1px solid #dfc9ad!important;border-radius:16px!important;box-shadow:0 10px 28px rgba(65,43,24,.20)!important;text-align:right!important;position:relative!important}
+.pwa-install-logo{grid-row:1/3!important;width:46px!important;height:46px!important;border-radius:11px!important;padding:3px!important}
+.pwa-install-title{margin:0!important;font-family:'Tajawal',sans-serif!important;font-size:13px!important;line-height:1.35!important;font-weight:800!important;color:#76583b!important}
+.pwa-install-subtitle{margin:0!important;font-family:'Tajawal',sans-serif!important;font-size:10.5px!important;line-height:1.5!important;font-weight:500!important;color:#806b58!important}
+.pwa-install-btn{grid-column:1/3!important;width:100%!important;min-height:38px!important;margin:4px 0 0!important;padding:6px 10px!important;border:0!important;border-radius:10px!important;font-family:'Tajawal',sans-serif!important;font-size:13px!important;line-height:1.2!important;font-weight:800!important;background:#9a7652!important;color:#fff!important}
+.pwa-install-help{grid-column:1/3!important;margin:3px 0 0!important;font-family:'Tajawal',sans-serif!important;font-size:10px!important;line-height:1.6!important}
+.pwa-install-card .pwa-skip-btn{position:absolute!important;top:6px!important;left:6px!important;width:36px!important;height:27px!important;min-height:27px!important;margin:0!important;padding:0!important;border:1px solid #dfc9ad!important;border-radius:8px!important;background:#f1e5d7!important;color:#76583b!important;font-family:'Tajawal',sans-serif!important;font-size:10px!important;line-height:27px!important;font-weight:800!important;cursor:pointer!important;z-index:5!important}
+.header-actions .pwa-install-page-btn{width:auto!important;min-width:118px!important;height:42px!important;padding:5px 10px!important;font-family:'Tajawal',sans-serif!important;font-size:12px!important;line-height:1.2!important;font-weight:800!important;white-space:nowrap!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
+@media(max-width:420px){.pwa-install-modal:not(.installed){right:9px!important;bottom:72px!important}.pwa-install-card{width:260px!important}.header-actions .pwa-install-page-btn{min-width:112px!important;font-size:11px!important}}
+</style>
+<script id="point-cafe-install-polish-js">
+(function(){function hideInstallNotice(){var m=document.getElementById('pwa-install-modal');if(!m)return;m.classList.add('installed');m.style.setProperty('display','none','important');m.style.setProperty('visibility','hidden','important');m.style.setProperty('opacity','0','important');m.style.setProperty('pointer-events','none','important');try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(e){}}document.addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('#pwa-skip-btn'):null;if(b){e.preventDefault();e.stopPropagation();hideInstallNotice()}},true);window.hidePointCafeInstall=hideInstallNotice})();
+
+  /* ===== POINT CAFE BACKUP SYSTEM ===== */
+  const BACKUP_FORMAT = 'POINT-CAFE-BACKUP-V1';
+  let selectedBackupHandle = null;
+  function backupStatus(msg, ok=false){ const el=document.getElementById('backup-status'); if(el){el.textContent=msg;el.style.color=ok?'#047857':'';} }
+  function backupErrorText(e){ const code=e?.code||''; const msg=String(e?.message||e); if(code==='permission-denied'||/Missing or insufficient permissions/i.test(msg)) return 'صلاحيات Firestore تمنع القراءة. تأكد أن UID المدير موجود في firestore.rules ثم انشر القواعد.'; return msg; }
+  function backupAskPassword(){
+    const p=prompt('أدخل كلمة مرور المدير نفسها لحماية/فتح النسخة الاحتياطية:');
+    if(p===null) return null;
+    if(!p) { alert('يجب إدخال كلمة المرور.'); return null; }
+    return p;
+  }
+  function ab64(buf){let s='';const a=new Uint8Array(buf);for(let i=0;i<a.length;i+=0x8000)s+=String.fromCharCode(...a.subarray(i,i+0x8000));return btoa(s)}
+  function de64(s){const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a.buffer}
+  async function deriveBackupKey(password,salt){const enc=new TextEncoder();const base=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:150000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+  async function encryptBackup(obj,password){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));const key=await deriveBackupKey(password,salt);const plain=new TextEncoder().encode(JSON.stringify(obj));const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,plain);return {format:BACKUP_FORMAT,version:1,encrypted:true,salt:ab64(salt),iv:ab64(iv),data:ab64(cipher)}}
+  async function decryptBackup(wrapper,password){if(!wrapper||wrapper.format!==BACKUP_FORMAT)throw new Error('ملف النسخة غير معروف أو قديم.');if(!wrapper.encrypted)return wrapper;const salt=new Uint8Array(de64(wrapper.salt)),iv=new Uint8Array(de64(wrapper.iv));const key=await deriveBackupKey(password,salt);const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,de64(wrapper.data));return JSON.parse(new TextDecoder().decode(plain))}
+  async function getAllCollection(name){
+    try{
+      const snap=await window.getDocs(window.collection(window.db,name));
+      const out={}; snap.forEach(d=>out[d.id]=d.data());
+      return out;
+    }catch(e){
+      const err=new Error(`تعذر قراءة مجموعة ${name}: ${backupErrorText(e)}`); err.code=e?.code||''; throw err;
+    }
+  }
+  async function buildBackupObject(){
+    if(!firebaseAdminUser) throw new Error('يجب أن تكون مسجلاً بحساب المدير.');
+    if(!window.db) throw new Error('Firebase Firestore غير جاهز.');
+    let settingsSnap;
+    try{ settingsSnap=await window.getDoc(window.doc(window.db,'settings','store_config')); }
+    catch(e){ throw new Error(`تعذر قراءة إعدادات المتجر: ${backupErrorText(e)}`); }
+    const data={settings:{store_config:settingsSnap.exists()?settingsSnap.data():{}},collections:{}};
+    for(const name of ['products','orders','reviews']) data.collections[name]=await getAllCollection(name);
+    const counts={}; for(const [k,v] of Object.entries(data.collections)) counts[k]=Object.keys(v).length; counts.settings=settingsSnap.exists()?1:0;
+    return {format:BACKUP_FORMAT,createdAt:new Date().toISOString(),source:'POINT CAFE',firebaseProject:'point-cafe-665e6',backupBy:{uid:firebaseAdminUser.uid,email:firebaseAdminUser.email||''},counts,data};
+  }
+  function downloadText(filename,text){const blob=new Blob([text],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
+  async function createPointCafeBackup(){try{backupStatus('⏳ جاري جمع بيانات الموقع...');const pass=backupAskPassword();if(!pass)return;const obj=await buildBackupObject();const enc=await encryptBackup(obj,pass);const stamp=new Date().toISOString().replace(/[:.]/g,'-');downloadText(`POINT-CAFE-backup-${stamp}.pcbackup`,JSON.stringify(enc));backupStatus('✅ تم إنشاء النسخة كاملة بنجاح. احفظ الملف.',true);localStorage.setItem('pointcafe_last_backup',obj.createdAt)}catch(e){console.error(e);const msg=backupErrorText(e);backupStatus('❌ '+msg);alert('فشل إنشاء النسخة\n\n'+msg+'\n\nإذا ظهرت Missing or insufficient permissions فالمشكلة من Firestore Rules وليست من ملف النسخة. استخدم ملف firestore.rules المرفق ثم انشره.');}}
+  function chooseBackupFile(){return new Promise(resolve=>{const input=document.createElement('input');input.type='file';input.accept='.pcbackup,.json,application/json';input.onchange=()=>resolve(input.files?.[0]||null);input.click()})}
+  async function readBackupFromFile(file){const text=await file.text();let wrapper;try{wrapper=JSON.parse(text)}catch{throw new Error('الملف ليس نسخة احتياطية صحيحة.')}const pass=backupAskPassword();if(!pass)return null;return await decryptBackup(wrapper,pass)}
+  function backupSummary(obj){const c=obj.counts||{};return `<div class="backup-read-grid"><div class="backup-read-card">📦 المنتجات<b>${c.products||0}</b></div><div class="backup-read-card">🧾 الطلبات<b>${c.orders||0}</b></div><div class="backup-read-card">⭐ المراجعات<b>${c.reviews||0}</b></div><div class="backup-read-card">⚙️ الإعدادات<b>${c.settings||1}</b></div><div class="backup-read-card">🕒 تاريخ النسخة<b style="font-size:14px">${obj.createdAt?new Date(obj.createdAt).toLocaleString('ar-SA'):''}</b></div></div>`}
+  function showBackupReadOnly(obj){let m=document.getElementById('backup-view-modal');if(!m){m=document.createElement('div');m.id='backup-view-modal';m.className='backup-modal';document.body.appendChild(m)}const products=Object.values(obj.data?.collections?.products||{});const orders=Object.values(obj.data?.collections?.orders||{});m.innerHTML=`<div class="backup-modal-card"><div class="backup-modal-head"><div><h2>💾 عرض نسخة POINT CAFE</h2><div class="note">وضع قراءة فقط — لن يتم تعديل السحابة</div></div><button class="btn btn-danger" onclick="document.getElementById('backup-view-modal').style.display='none'">إغلاق ✕</button></div>${backupSummary(obj)}<div class="backup-card"><strong>🏪 بيانات المتجر</strong><div>${escapeBackupHtml(JSON.stringify(obj.data?.settings?.store_config||{},null,2))}</div></div><div class="backup-table-wrap"><h3>📦 المنتجات</h3><table class="backup-table"><thead><tr><th>الاسم</th><th>السعر</th><th>المعرف</th></tr></thead><tbody>${products.map((x,i)=>`<tr><td>${escapeBackupHtml(x.name||x.title||'—')}</td><td>${escapeBackupHtml(String(x.price??'—'))}</td><td>${escapeBackupHtml(String(Object.keys(obj.data.collections.products)[i]||'—'))}</td></tr>`).join('')}</tbody></table></div><div class="backup-table-wrap"><h3>🧾 الطلبات</h3><table class="backup-table"><thead><tr><th>رقم الطلب</th><th>الحالة</th><th>الإجمالي</th><th>التاريخ</th></tr></thead><tbody>${orders.slice(0,300).map((x,i)=>`<tr><td>${escapeBackupHtml(String(x.orderNumber||x.id||'—'))}</td><td>${escapeBackupHtml(String(x.status||'—'))}</td><td>${escapeBackupHtml(String(x.total??x.grandTotal??'—'))}</td><td>${escapeBackupHtml(String(x.createdAt||x.date||'—'))}</td></tr>`).join('')}</tbody></table></div></div>`;m.style.display='block'}
+  function escapeBackupHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+  async function openBackupFile(){try{backupStatus('📂 اختر ملف النسخة من الفلاش أو الهارد...');const f=await chooseBackupFile();if(!f)return;const obj=await readBackupFromFile(f);if(!obj)return;showBackupReadOnly(obj);backupStatus('✅ تم فتح النسخة بوضع القراءة فقط.',true)}catch(e){console.error(e);backupStatus('❌ تعذر فتح النسخة: '+(e.message||e));alert('تعذر فتح النسخة. تأكد من كلمة المرور وسلامة الملف.')}}
+  async function updateBackupFile(){try{backupStatus('🔄 اختر النسخة القديمة لتحديثها...');const f=await chooseBackupFile();if(!f)return;const pass=backupAskPassword();if(!pass)return;const old=JSON.parse(await f.text());await decryptBackup(old,pass);const obj=await buildBackupObject();const enc=await encryptBackup(obj,pass);downloadText(`POINT-CAFE-backup-updated-${new Date().toISOString().replace(/[:.]/g,'-')}.pcbackup`,JSON.stringify(enc));backupStatus('✅ تم إنشاء نسخة محدثة. استبدل الملف القديم في الفلاش/الهارد بالملف الجديد.',true)}catch(e){console.error(e);backupStatus('❌ '+backupErrorText(e));alert('فشل تحديث النسخة: '+backupErrorText(e))}}
+  async function checkBackupFile(){try{const f=await chooseBackupFile();if(!f)return;const pass=backupAskPassword();if(!pass)return;const obj=await decryptBackup(JSON.parse(await f.text()),pass);const total=Object.values(obj.counts||{}).reduce((a,b)=>a+Number(b||0),0);alert(`✅ النسخة سليمة وقابلة للفتح.\n\nالتاريخ: ${new Date(obj.createdAt).toLocaleString('ar-SA')}\nعدد العناصر المحفوظة: ${total}`);backupStatus('✅ فحص النسخة نجح.',true)}catch(e){alert('❌ فشل فحص النسخة: '+(e.message||e));backupStatus('❌ النسخة لم تجتز الفحص.')}}
+  async function compareAndSyncBackup(){
+    try{const f=await chooseBackupFile();if(!f)return;const pass=backupAskPassword();if(!pass)return;const backup=await decryptBackup(JSON.parse(await f.text()),pass);const cloud=await buildBackupObject();const b=backup.data?.collections||{},c=cloud.data?.collections||{};let lines=[];for(const name of ['products','orders','reviews']){const bn=Object.keys(b[name]||{}).length,cn=Object.keys(c[name]||{}).length;lines.push(`${name}: النسخة ${bn} / السحابة ${cn}`)}const ok=confirm('مقارنة قبل المزامنة:\n\n'+lines.join('\n')+'\n\nلن يتم تنفيذ شيء الآن. هل تريد الانتقال إلى الاستعادة؟');if(ok)await restoreObjectToCloud(backup,pass)}catch(e){alert('تعذر المقارنة: '+(e.message||e))}}
+  async function restoreBackupToCloud(){try{const f=await chooseBackupFile();if(!f)return;const pass=backupAskPassword();if(!pass)return;const backup=await decryptBackup(JSON.parse(await f.text()),pass);const confirmed=confirm('⚠️ تحذير مهم\n\nسيتم استبدال/تحديث بيانات السحابة بالبيانات الموجودة في النسخة.\nخذ نسخة حالية أولاً قبل الاستعادة.\n\nهل أنت متأكد؟');if(!confirmed)return;await restoreObjectToCloud(backup,pass)}catch(e){alert('❌ فشلت الاستعادة: '+(e.message||e))}}
+  async function restoreObjectToCloud(backup,pass){
+    if(!firebaseAdminUser)throw new Error('يجب تسجيل الدخول بحساب المدير.');
+    backupStatus('🛡️ جارٍ إنشاء نسخة أمان من السحابة قبل الاستعادة...');
+    const safety=await buildBackupObject();downloadText(`POINT-CAFE-before-restore-${new Date().toISOString().replace(/[:.]/g,'-')}.pcbackup`,JSON.stringify(await encryptBackup(safety,pass)));
+    const data=backup.data||{};const settings=data.settings?.store_config||{};await window.setDoc(window.doc(window.db,'settings','store_config'),settings);
+    for(const name of ['orders','reviews','products']){
+      const target=data.collections?.[name]||{};
+      const current=await getAllCollection(name);
+      for(const [id,value] of Object.entries(target)){await window.setDoc(window.doc(window.db,name,id),value)}
+      for(const id of Object.keys(current)){if(!Object.prototype.hasOwnProperty.call(target,id)){await window.deleteDoc(window.doc(window.db,name,id))}}
+    }
+    backupStatus('✅ تمت الاستعادة الكاملة: السحابة أصبحت مطابقة للنسخة.',true);alert('✅ تمت الاستعادة الكاملة. السحابة الآن مطابقة للنسخة الاحتياطية، وتم إنشاء نسخة أمان قبل الاستعادة.')} 
+
+</script>
+
+</body>
+</html>

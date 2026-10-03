@@ -1,0 +1,61 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid == "L6mpnUY9BfMZGZQ1lUCv8M4rObI3";
+    }
+
+    match /drivers/{driverId} {
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == driverId);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow read, update, delete: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+    }
+
+    match /customers/{userId} {
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow read, update, delete: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+    }
+
+    match /orders/{orderId} {
+      allow create: if request.auth != null;
+      allow read: if isAdmin()
+        || (request.auth != null && (
+          resource.data.customerUid == request.auth.uid
+          || resource.data.driverId == request.auth.uid
+        ));
+      allow update: if isAdmin()
+        || (request.auth != null && (
+          resource.data.customerUid == request.auth.uid
+          || resource.data.driverId == request.auth.uid
+        ));
+      allow delete: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /settings/{documentId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if isAdmin()
+        || (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

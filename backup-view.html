@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>عرض النسخة الاحتياطية — POINT CAFE</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#9a7652;--primary-hover:#76583b;--danger:#ef4444;--success:#10b981;--bg-main:#f5eadb;--card-bg:#fff;--text-main:#4b3828;--text-muted:#7b624a;--border:#dfc9ad;--shadow:0 10px 25px -5px rgba(91,66,42,.20);--radius:16px}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Tajawal',sans-serif}
+body{background:var(--bg-main);background-image:radial-gradient(#eadbc7 15%,transparent 16%),radial-gradient(#eadbc7 15%,transparent 16%);background-size:30px 30px;background-position:0 0,15px 15px;color:var(--text-main);padding:20px;line-height:1.5}
+.container{max-width:900px;margin:auto}.header,.section{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.header{padding:20px;margin-bottom:20px;text-align:center}.header h1{color:var(--primary);font-size:22px}.header p{color:var(--text-muted);margin-top:5px;font-size:13px}
+.btn{background:var(--primary);color:#fff;border:0;padding:12px 18px;border-radius:10px;cursor:pointer;font-weight:800;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}.btn:hover{background:var(--primary-hover)}.btn-danger{background:var(--danger)}.btn-success{background:var(--success)}
+.top-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.top-actions .btn{width:100%}
+.loader{padding:30px;text-align:center}.file-box{padding:18px;background:#fff8ef;border:1px solid var(--border);border-radius:14px;margin-top:14px}.file-box input{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;background:#fff;margin-top:8px}.password-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}.password-row input{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;background:#fff}.status{padding:11px;border-radius:10px;margin-top:10px;text-align:center;font-weight:800;background:#fff;border:1px solid var(--border)}
+.nav{background:#fff8ef;border:1px solid var(--border);padding:14px;border-radius:16px;margin-bottom:20px}.nav-title{font-weight:800;color:var(--primary);font-size:18px;border-bottom:2px solid var(--border);padding-bottom:10px;margin-bottom:10px}.nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.nav button{width:100%;background:var(--primary);color:#fff;border:0;border-radius:10px;padding:11px;font-weight:800;text-align:right;cursor:pointer}.nav button:hover{background:var(--primary-hover)}
+.section{padding:20px;margin-bottom:20px;scroll-margin-top:12px}.section-title{font-weight:800;color:var(--primary);font-size:18px;border-bottom:2px solid var(--border);padding-bottom:11px;margin-bottom:15px;display:flex;justify-content:space-between;gap:10px;align-items:center}.badge{padding:6px 12px;border-radius:30px;color:#fff;font-size:12px}.open{background:var(--success)}.closed{background:var(--danger)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.info-card,.item{background:#fbf5ed;border:1px solid var(--border);border-radius:12px;padding:13px}.info-card b{display:block;color:var(--primary);margin-bottom:5px}.muted{color:var(--text-muted);font-size:13px}.value{font-weight:800;word-break:break-word}.img{width:100%;height:150px;object-fit:contain;background:#fff;border:1px solid var(--border);border-radius:10px}.logo{width:130px;height:130px;object-fit:contain;background:#fff;border:1px solid var(--border);border-radius:14px;padding:6px}.slider-grid,.product-grid,.bank-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.product,.bank{background:#fbf5ed;border:1px solid var(--border);border-radius:14px;padding:12px}.product img,.bank img{width:100%;height:150px;object-fit:contain;background:#fff;border-radius:10px;border:1px solid var(--border)}.product h3,.bank h3{margin:8px 0;color:var(--text-main)}.price{font-size:18px;font-weight:900;color:var(--primary)}.specs{white-space:pre-line;margin-top:6px;color:var(--text-muted);font-size:13px}.offer{display:inline-block;background:#e53935;color:#fff;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:900;margin-bottom:5px}
+textarea.read{width:100%;min-height:90px;border:1px solid var(--border);border-radius:10px;background:#fff;padding:12px;color:var(--text-main);resize:vertical}.qa{margin-top:8px}.qa .item{margin-top:8px}.driver{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#fbf5ed;border:1px solid var(--border);padding:12px;border-radius:12px;margin-top:8px}.order{background:#fbf5ed;border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:10px}.order-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--primary);font-weight:900}.order-products{background:#fff;border-radius:10px;padding:10px;margin-top:9px}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.summary .info-card{text-align:center}.summary strong{font-size:23px;color:var(--primary);display:block;margin-top:4px}.json-box{background:#fff8ef;border:1px solid var(--border);border-radius:12px;padding:12px;white-space:pre-wrap;word-break:break-word;direction:ltr;text-align:left;max-height:500px;overflow:auto;font:12px/1.5 monospace}
+.hidden{display:none!important}.empty{text-align:center;padding:20px;color:var(--text-muted)}
+@media(max-width:700px){body{padding:10px}.nav-grid,.grid2,.slider-grid,.product-grid,.bank-grid{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}.summary{grid-template-columns:1fr 1fr}.top-actions{grid-template-columns:1fr}.section{padding:15px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>💾 عرض النسخة الاحتياطية — POINT CAFE</h1>
+    <p>صفحة مستقلة لعرض النسخة الاحتياطية بنفس أقسام لوحة المدير — قراءة فقط، ولا تغيّر السحابة.</p>
+    <div class="top-actions">
+      <a class="btn" href="admin.html">↩️ العودة إلى صفحة المدير</a>
+      <button class="btn" onclick="document.getElementById('file').click()">📂 اختيار نسخة احتياطية</button>
+    </div>
+    <div class="file-box">
+      <b>فتح ملف النسخة</b>
+      <input id="file" type="file" accept=".pcbackup,.json,application/json">
+      <div class="password-row"><input id="password" type="password" placeholder="كلمة مرور المدير للنسخة"><button class="btn btn-success" onclick="openBackup()">🔓 فتح وعرض</button></div>
+      <div id="status" class="status">لم يتم فتح نسخة بعد.</div>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
+    <div class="nav">
+      <div class="nav-title">📋 أقسام الإدارة — عرض النسخة</div>
+      <div class="nav-grid">
+        <button onclick="go('store')">🏪 المتجر</button><button onclick="go('products')">📦 المنتجات</button>
+        <button onclick="go('basic')">📌 البيانات الأساسية</button><button onclick="go('ai')">🤖 تعليم المساعد الذكي</button>
+        <button onclick="go('banks')">🏦 البنوك</button><button onclick="go('drivers')">🚗 السائقون</button>
+        <button onclick="go('orders')">🧾 الطلبات</button><button onclick="go('reports')">📊 صفحة التقارير</button>
+        <button onclick="go('sliders')">🖼️ الإعلانات والسلايدر</button><button onclick="go('backup')">💾 النسخ الاحتياطي</button>
+      </div>
+    </div>
+
+    <section class="section" id="store"><div class="section-title"><span>🔒 حالة المتجر</span><span id="storeBadge" class="badge">—</span></div><div class="grid2"><div class="info-card"><b>اسم المتجر</b><div id="storeName" class="value">—</div></div><div class="info-card"><b>الشعار</b><div id="storeSlogan" class="value">—</div></div></div><div class="info-card" style="margin-top:10px"><b>سبب الإغلاق</b><div id="closeReason" class="value">—</div></div></section>
+
+    <section class="section" id="basic"><div class="section-title">📌 البيانات الأساسية للمتجر</div><div class="grid2"><div class="info-card"><b>📱 هاتف المدير / واتساب</b><div id="phone" class="value">—</div></div><div class="info-card"><b>📍 موقع المتجر</b><div id="location" class="value">—</div></div><div class="info-card"><b>🚚 التوصيل</b><div id="delivery" class="value">—</div></div><div class="info-card"><b>🖼️ شعار المتجر</b><img id="logo" class="logo" alt="شعار المتجر"></div></div></section>
+
+    <section class="section" id="sliders"><div class="section-title">🖼️ السلايدر المتحرك (الإعلانات)<span id="sliderCount" class="muted">0</span></div><div id="sliderGrid" class="slider-grid"></div></section>
+
+    <section class="section" id="products"><div class="section-title">📦 إدارة المنتجات <span id="productCount" class="muted">0 منتج</span></div><div id="productGrid" class="product-grid"></div></section>
+
+    <section class="section" id="ai"><div class="section-title">🤖 تعليم مساعد POINT CAFE</div><div class="info-card"><b>👋 رسالة الترحيب</b><textarea id="aiWelcome" class="read" readonly></textarea></div><div class="info-card" style="margin-top:10px"><b>🧠 تعليمات المساعد</b><textarea id="aiInstructions" class="read" readonly></textarea></div><div class="info-card" style="margin-top:10px"><b>💬 الرد الافتراضي</b><textarea id="aiFallback" class="read" readonly></textarea></div><div class="info-card" style="margin-top:10px"><b>📚 الأسئلة والأجوبة</b><div id="aiQA" class="qa"></div></div></section>
+
+    <section class="section" id="banks"><div class="section-title">💳 حسابات التحويل (الكريمي / البسيري)<span id="bankCount" class="muted">0</span></div><div id="bankGrid" class="bank-grid"></div></section>
+
+    <section class="section" id="drivers"><div class="section-title">🚗 إدارة السائقين<span id="driverCount" class="muted">0</span></div><div id="driverList"></div></section>
+
+    <section class="section" id="reports"><div class="section-title">📊 تقرير الأرباح والمبيعات</div><div id="reportSummary" class="summary"></div><div id="driverReport" style="margin-top:15px"></div></section>
+
+    <section class="section" id="orders"><div class="section-title">🧾 الطلبات <span id="orderCount" class="muted">0</span></div><div id="orderList"></div></section>
+
+    <section class="section" id="backup"><div class="section-title">💾 النسخ الاحتياطي والاستعادة</div><div class="grid2"><div class="info-card"><b>تاريخ النسخة</b><div id="backupDate" class="value">—</div></div><div class="info-card"><b>تم الإنشاء بواسطة</b><div id="backupBy" class="value">—</div></div><div class="info-card"><b>Firebase Project</b><div id="firebaseProject" class="value">—</div></div><div class="info-card"><b>حالة العرض</b><div class="value">👁️ قراءة فقط</div></div></div><h3 style="margin:16px 0 8px;color:var(--primary)">📦 ملخص النسخة</h3><div id="backupCounts" class="summary"></div><h3 style="margin:16px 0 8px;color:var(--primary)">🔎 البيانات الأصلية</h3><div id="rawJson" class="json-box"></div></section>
+  </div>
+</div>
+<script>
+const FORMAT='POINT-CAFE-BACKUP-V1';let backupObj=null;
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+function ab64(s){const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a.buffer}
+async function derive(password,salt){const enc=new TextEncoder();const base=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:150000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt'])}
+async function decrypt(wrapper,password){if(!wrapper||wrapper.format!==FORMAT)throw Error('ملف النسخة غير معروف أو قديم.');if(!wrapper.encrypted)return wrapper;const key=await derive(password,new Uint8Array(ab64(wrapper.salt)));const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(ab64(wrapper.iv))},key,ab64(wrapper.data));return JSON.parse(new TextDecoder().decode(plain))}
+function status(t,ok=false){$('status').textContent=t;$('status').style.color=ok?'#047857':''}
+function go(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'})}
+function arr(v){return Array.isArray(v)?v:[]}
+function money(v,c='ر.س'){return `${Number(v||0).toLocaleString('ar-SA')} ${c}`}
+function render(){
+ const d=backupObj.data||{},s=d.settings?.store_config||{},products=Object.values(d.collections?.products||{}),orders=Object.values(d.collections?.orders||{}),reviews=Object.values(d.collections?.reviews||{});
+ $('app').classList.remove('hidden');
+ $('storeName').textContent=s.name||'POINT CAFE';$('storeSlogan').textContent=s.slogan||'—';$('closeReason').textContent=s.closeReason||'—';const closed=s.isClosed===true;$('storeBadge').textContent=closed?'المتجر مغلق':'المتجر مفتوح';$('storeBadge').className='badge '+(closed?'closed':'open');
+ $('phone').textContent=s.phone||'—';$('location').textContent=s.locationUrl||'غير محفوظ';$('delivery').textContent=s.deliveryFree===true||Number(s.deliveryFee||0)<=0?'مجاني':money(s.deliveryFee,s.deliveryCurrency||'ر.س');$('logo').src=s.logo||'point-cafe-logo.jpg';
+ const sliders=arr(s.sliders);$('sliderCount').textContent=`${sliders.length} / 10`;$('sliderGrid').innerHTML=sliders.length?sliders.map((x,i)=>`<div class="item"><b>إعلان ${i+1}</b><img class="img" src="${esc(x)}" alt="إعلان ${i+1}"></div>`).join(''):'<div class="empty">لا توجد إعلانات محفوظة.</div>';
+ $('productCount').textContent=`${products.length} منتج`;$('productGrid').innerHTML=products.length?products.map((p,i)=>`<div class="product">${p.specialOffer?'<span class="offer">🔥 عرض خاص</span>':''}<img src="${esc(p.img||arr(p.images)[0]||'point-cafe-logo.jpg')}" alt="${esc(p.name||'منتج')}"><h3>${esc(p.name||'بدون اسم')}</h3><div class="price">${esc(p.price??'—')} ${esc(p.currency||'ر.س')}</div><div class="muted">التكلفة: ${esc(p.cost??'—')}</div><div class="specs">${esc(p.specs||'لا توجد مواصفات.')}</div><div class="muted" style="margin-top:6px">المعرف: ${esc(p.id??i)}</div></div>`).join(''):'<div class="empty">لا توجد منتجات في النسخة.</div>';
+ const ai=s.aiSettings||{};$('aiWelcome').value=ai.welcome||'';$('aiInstructions').value=ai.instructions||'';$('aiFallback').value=ai.fallback||'';const qa=arr(ai.qa);$('aiQA').innerHTML=qa.length?qa.map(x=>`<div class="item"><b>السؤال:</b> ${esc(x.question)}<br><b>الرد:</b> ${esc(x.answer)}</div>`).join(''):'<div class="empty">لا توجد أسئلة وأجوبة محفوظة.</div>';
+ const banks=arr(s.bankAccounts);$('bankCount').textContent=`${banks.length} / 10`;$('bankGrid').innerHTML=banks.length?banks.map(b=>`<div class="bank">${b.logo?`<img src="${esc(b.logo)}" alt="${esc(b.bankName||'البنك')}">`:''}<h3>🏦 ${esc(b.bankName||'حساب')}</h3><div><b>المستفيد:</b> ${esc(b.accountName||'—')}</div><div><b>رقم الحساب:</b> ${esc(b.accountNumber||'—')}</div></div>`).join(''):'<div class="empty">لا توجد حسابات تحويل.</div>';
+ const drivers=arr(s.drivers);$('driverCount').textContent=`${drivers.length} سائق`;$('driverList').innerHTML=drivers.length?drivers.map(d=>`<div class="driver"><div><b>🚗 ${esc(d.name||'—')}</b><div class="muted">المعرف: ${esc(d.id||'—')}</div></div><div class="muted">كلمة المرور محفوظة في النسخة: ${d.password?'نعم':'لا'}</div></div>`).join(''):'<div class="empty">لا يوجد سائقون.</div>';
+ renderReports(orders,drivers);renderOrders(orders);$('backupDate').textContent=backupObj.createdAt?new Date(backupObj.createdAt).toLocaleString('ar-SA'):'—';$('backupBy').textContent=backupObj.backupBy?.email||backupObj.backupBy?.uid||'—';$('firebaseProject').textContent=backupObj.firebaseProject||'—';const c=backupObj.counts||{};$('backupCounts').innerHTML=`<div class="info-card">📦 المنتجات<strong>${c.products||products.length}</strong></div><div class="info-card">🧾 الطلبات<strong>${c.orders||orders.length}</strong></div><div class="info-card">⭐ المراجعات<strong>${c.reviews||reviews.length}</strong></div><div class="info-card">⚙️ الإعدادات<strong>${c.settings||1}</strong></div>`;$('rawJson').textContent=JSON.stringify(backupObj,null,2);
+}
+function renderReports(orders,drivers){const delivered=orders.filter(o=>['تم التوصيل','تم التسليم','delivered'].includes(String(o.status||'')));const cancelled=orders.filter(o=>['ملغي','ملغى','ملغية','ملغاة'].includes(String(o.status||'')));const sales=orders.reduce((n,o)=>n+Number(o.total||0),0);const cost=orders.reduce((n,o)=>n+arr(o.items).reduce((x,i)=>x+(Number(i.cost)||0)*(Number(i.qty)||0),0),0);$('reportSummary').innerHTML=`<div class="info-card">إجمالي الطلبات<strong>${orders.length}</strong></div><div class="info-card">إجمالي المبيعات<strong>${sales.toLocaleString('ar-SA')}</strong></div><div class="info-card">التكلفة<strong>${cost.toLocaleString('ar-SA')}</strong></div><div class="info-card">صافي الربح<strong>${(sales-cost).toLocaleString('ar-SA')}</strong></div>`;$('driverReport').innerHTML=`<div class="grid3"><div class="info-card">✅ تم التوصيل<strong>${delivered.length}</strong></div><div class="info-card">❌ الملغاة<strong>${cancelled.length}</strong></div><div class="info-card">🚗 السائقون<strong>${drivers.length}</strong></div></div>`}
+function renderOrders(orders){$('orderCount').textContent=`${orders.length} طلب`;$('orderList').innerHTML=orders.length?orders.slice().reverse().map(o=>`<div class="order"><div class="order-head"><span>🧾 ${esc(o.orderId||o.orderNumber||o.docId||'طلب')}</span><span>${esc(o.status||'جديد')}</span></div><div class="muted" style="margin-top:5px">العميل: ${esc(o.customerName||o.name||'—')} — الهاتف: ${esc(o.customerPhone||o.phone||'—')}</div><div class="order-products">${arr(o.items).length?arr(o.items).map(i=>`<div>${esc(i.name||'منتج')} × ${esc(i.qty||1)} — ${esc(i.subtotal??i.price??'—')}</div>`).join(''):'لا توجد تفاصيل منتجات'}</div><div style="margin-top:8px"><b>الإجمالي:</b> ${esc(o.total??o.grandTotal??'—')} ${esc(o.currency||'')}</div>${o.cancelReason?`<div style="margin-top:8px;color:#9b1c1c;font-weight:800">❌ سبب الإلغاء: ${esc(o.cancelReason)}</div>`:''}${o.driverName?`<div class="muted" style="margin-top:5px">🚗 السائق: ${esc(o.driverName)}</div>`:''}</div>`).join(''):'<div class="empty">لا توجد طلبات في النسخة.</div>'}
+async function openBackup(){const f=$('file').files?.[0];if(!f){status('اختر ملف النسخة أولاً.');return}const pass=$('password').value;if(!pass){status('اكتب كلمة مرور النسخة.');return}try{status('⏳ جاري فك النسخة وعرض جميع الأقسام...');const wrapper=JSON.parse(await f.text());backupObj=await decrypt(wrapper,pass);render();status('✅ تم فتح النسخة بنجاح — كل البيانات معروضة للقراءة فقط.',true)}catch(e){console.error(e);status('❌ تعذر فتح النسخة: '+(e.message||e));alert('تعذر فتح النسخة. تأكد من كلمة المرور وأن الملف صحيح.')}}
+$('file').addEventListener('change',e=>{if(e.target.files?.[0])status('تم اختيار: '+e.target.files[0].name+' — اكتب كلمة المرور ثم اضغط فتح وعرض.')});
+</script>
+</body>
+</html>

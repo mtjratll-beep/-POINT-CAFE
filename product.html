@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>POINT CAFE | تفاصيل المنتج</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import {getFirestore,doc,getDoc,collection,getDocs,onSnapshot,addDoc} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import {getAuth,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+const firebaseConfig={apiKey:"AIzaSyCSjXz47oath2NA6LXAkYk_pNLK1_X3tVU",authDomain:"point-cafe-665e6.firebaseapp.com",projectId:"point-cafe-665e6",storageBucket:"point-cafe-665e6.firebasestorage.app",messagingSenderId:"1078733395604",appId:"1:1078733395604:web:075d8e0f2a3f075bde0681",measurementId:"G-XSPQZK57CN"};
+const app=initializeApp(firebaseConfig),db=getFirestore(app),auth=getAuth(app);
+window.db=db;window.auth=auth;window.doc=doc;window.getDoc=getDoc;window.collection=collection;window.getDocs=getDocs;window.onSnapshot=onSnapshot;window.onAuthStateChanged=onAuthStateChanged;window.addDoc=addDoc;
+window.dispatchEvent(new Event('firebase-ready'));
+</script>
+<style>
+:root{--p:#9a7652;--ph:#76583b;--bg:#f5eadb;--card:#fffaf3;--text:#4b3828;--border:#dfc9ad;--danger:#b94b45}
+*{box-sizing:border-box;font-family:Tajawal,sans-serif}
+body{margin:0;background:var(--bg);color:var(--text);padding:16px}
+.wrap{max-width:900px;margin:auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+button,.back{border:0;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer;text-decoration:none}
+.back{background:#fff;border:1px solid var(--border);color:var(--p)}
+.cart{background:var(--p);color:#fff;position:relative}
+.badge{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:#dc2626;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;box-shadow:0 12px 30px #8c6d4a22}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.main-img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff;border:1px solid var(--border);border-radius:16px;padding:10px}
+h1{margin:0 0 8px;color:var(--p)}
+.price{font-size:24px;font-weight:900;color:var(--p);margin:12px 0}
+.specs{white-space:pre-line;line-height:1.9;color:#6f5945;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;margin:12px 0}
+.add{width:100%;background:var(--p);color:#fff;font-size:17px;min-height:52px}
+.notice{margin-top:10px;padding:10px;border-radius:11px;background:#fff;border:1px solid var(--border);display:none}
+.rating-box{margin-top:14px;padding:14px;background:#fff;border:1px solid var(--border);border-radius:14px}
+.rating-summary{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.rating-summary .stars{color:#e1a52b;letter-spacing:2px;font-size:20px;direction:ltr}
+.rating-summary strong{font-size:18px;color:var(--p)}
+.rating-form{display:flex;flex-direction:column;gap:8px}
+.rating-form input,.rating-form textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--text)}
+.rating-form textarea{min-height:75px;resize:vertical}
+.rating-picker{display:flex;gap:3px;direction:ltr;justify-content:flex-start}
+.rating-picker button{background:transparent;color:#dfc9ad;border:0;padding:0 2px;font-size:25px;line-height:1}
+.rating-picker button.active{color:#e1a52b}
+.review-row{padding:9px 0;border-top:1px solid #eadbc7;line-height:1.7;font-size:12px}
+
+.rec{margin-top:22px}.rec-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.rec-item{background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px;cursor:pointer}
+.rec-item img{width:100%;height:140px;object-fit:contain;border-radius:10px;background:#fbf5ed}
+.rec-item strong{display:block;margin:7px 0}
+@media(max-width:700px){.hero{grid-template-columns:1fr}.rec-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html">← العودة للمتجر</a>
+    <button class="cart" onclick="location.href='index.html?openCart=1'">🛒 السلة <span class="badge" id="cart-count"></span></button>
+  </div>
+  <div id="page" class="card">جاري تحميل المنتج...</div>
+</div>
+<script>
+let storeData={products:[]},product=null,currentCustomer=null,cart=[];
+try{cart=JSON.parse(localStorage.getItem('point_cafe_cart')||'[]').map(x=>({id:x.id,qty:Math.max(1,Number(x.qty)||1)}));}catch(e){cart=[]}
+const pid=new URLSearchParams(location.search).get('id');
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function same(a,b){return String(a)===String(b)}
+function saveCart(){localStorage.setItem('point_cafe_cart',JSON.stringify(cart));updateCount()}
+function updateCount(){const n=cart.reduce((s,x)=>s+(x.qty||0),0);const el=document.getElementById('cart-count');if(el)el.textContent=n||''}
+function addProduct(){
+  if(!product)return;
+  const x=cart.find(i=>same(i.id,product.id));if(x)x.qty++;else cart.push({id:product.id,qty:1});
+  saveCart();const n=document.getElementById('notice');n.style.display='block';n.textContent='✅ تمت إضافة المنتج إلى السلة. افتح السلة من المتجر لإكمال الطلب.';
+}
+function openRec(id){location.href='product.html?id='+encodeURIComponent(String(id))}
+
+let selectedProductRating=5;
+function productReviews(){return (storeData.reviews||[]).filter(r=>r.productId && same(r.productId,product?.id));}
+function renderProductRating(){
+  const rows=productReviews();
+  const avg=rows.length?rows.reduce((a,r)=>a+(Number(r.rating)||0),0)/rows.length:0;
+  const sum=document.getElementById('rating-summary');
+  const list=document.getElementById('product-reviews');
+  if(sum)sum.innerHTML=rows.length
+    ? `<div class="rating-summary"><span class="stars">★★★★★</span><strong>${avg.toFixed(1)}/5</strong><span>(${rows.length} تقييم)</span></div>`
+    : '<div style="color:#8b735d;font-size:12px;margin-bottom:10px">لا توجد تقييمات لهذا المنتج بعد. كن أول من يقيّمه.</div>';
+  if(list)list.innerHTML=rows.slice().reverse().slice(0,8).map(r=>
+    `<div class="review-row"><strong>${esc(r.name||'عميل')}</strong> <span style="color:#e1a52b">${'★'.repeat(Math.max(1,Math.min(5,Number(r.rating)||0)))}</span><br>${esc(r.text||'')}</div>`
+  ).join('');
+  document.querySelectorAll('#rating-picker button').forEach((b,i)=>b.classList.toggle('active',i<selectedProductRating));
+}
+function pickRating(n){selectedProductRating=n;renderProductRating();}
+async function submitProductReview(){
+  const name=document.getElementById('product-review-name')?.value.trim();
+  const text=document.getElementById('product-review-text')?.value.trim();
+  if(!name||!text){alert('اكتب الاسم والتقييم أولاً.');return;}
+  const review={name,rating:selectedProductRating,text,date:new Date().toISOString(),customerUid:currentCustomer?.uid||'',productId:String(product.id)};
+  try{
+    await window.addDoc(window.collection(window.db,'reviews'),review);
+    storeData.reviews=storeData.reviews||[];
+    storeData.reviews.push(review);
+    document.getElementById('product-review-name').value='';
+    document.getElementById('product-review-text').value='';
+    renderProductRating();
+    alert('شكراً لك، تم حفظ تقييم المنتج.');
+  }catch(e){
+    console.error(e);
+    alert(e?.code==='permission-denied'?'السحابة رفضت حفظ التقييم. تحقق من قواعد Firestore.':'تعذر حفظ تقييم المنتج حالياً.');
+  }
+}
+
+function render(){
+  const box=document.getElementById('page');
+  if(!product){box.innerHTML='<h2>المنتج غير موجود</h2><p>قد يكون المنتج حُذف أو لم يتم تحميله من السحابة.</p>';return}
+  const imgs=Array.isArray(product.images)&&product.images.length?product.images:[product.img||'./point-cafe-logo.jpg'];
+  box.innerHTML=`<div class="hero">
+    <div><img class="main-img" src="${esc(imgs[0])}" alt="${esc(product.name)}" onerror="this.onerror=null;this.src='./point-cafe-logo.jpg';"></div>
+    <div><h1>${esc(product.name)}</h1>${product.specialOffer?'<div>🔥 عرض خاص</div>':''}
+      <div class="price">${esc(product.price)} ${esc(product.currency||'ر.س')}</div>
+      <div class="specs">${esc(product.specs||'لا توجد مواصفات إضافية لهذا المنتج.')}</div>
+      <button class="add" onclick="addProduct()">🛒 إضافة إلى السلة</button>
+      <div id="notice" class="notice"></div>
+      <div class="rating-box">
+        <h3 style="margin:0 0 8px;color:var(--p)">⭐ تقييم المنتج</h3>
+        <div id="rating-summary"></div>
+        <div id="product-reviews"></div>
+        <div class="rating-form">
+          <input id="product-review-name" placeholder="اسمك الكريم">
+          <div class="rating-picker" id="rating-picker">
+            <button type="button" onclick="pickRating(1)">★</button>
+            <button type="button" onclick="pickRating(2)">★</button>
+            <button type="button" onclick="pickRating(3)">★</button>
+            <button type="button" onclick="pickRating(4)">★</button>
+            <button type="button" onclick="pickRating(5)">★</button>
+          </div>
+          <textarea id="product-review-text" placeholder="اكتب تقييمك عن هذا المنتج..."></textarea>
+          <button class="add" type="button" onclick="submitProductReview()">إرسال تقييم المنتج ⭐</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="rec"><h2 style="color:var(--p)">✨ قد يعجبك أيضاً</h2><div id="rec-grid" class="rec-grid"></div></div>`;
+  const rec=(storeData.products||[]).filter(p=>!same(p.id,product.id)).sort(()=>Math.random()-.5).slice(0,4);
+  document.getElementById('rec-grid').innerHTML=rec.map(p=>`<div class="rec-item" onclick="openRec(${JSON.stringify(p.id)})"><img src="${esc(p.img||'./point-cafe-logo.jpg')}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src='./point-cafe-logo.jpg';"><strong>${esc(p.name)}</strong><span>${esc(p.price)} ${esc(p.currency||'ر.س')}</span></div>`).join('');
+  renderProductRating();
+}
+async function load(){
+  try{
+    const st=await window.getDoc(window.doc(window.db,'settings','store_config'));
+    if(st.exists())storeData={...storeData,...st.data()};
+    const ps=await window.getDocs(window.collection(window.db,'products'));
+    if(!ps.empty)storeData.products=ps.docs.map(d=>({...d.data(),id:d.data().id??d.id}));
+    const rs=await window.getDocs(window.collection(window.db,'reviews'));
+    storeData.reviews=rs.docs.map(d=>d.data());
+    product=storeData.products.find(p=>same(p.id,pid));
+    render();
+    window.onSnapshot(window.collection(window.db,'products'),snap=>{
+      if(!snap.empty){storeData.products=snap.docs.map(d=>({...d.data(),id:d.data().id??d.id}));product=storeData.products.find(p=>same(p.id,pid));render();}
+    });
+    window.onSnapshot(window.collection(window.db,'reviews'),snap=>{
+      storeData.reviews=snap.docs.map(d=>d.data());
+      if(product) renderProductRating();
+    });
+  }catch(e){console.error(e);document.getElementById('page').innerHTML='<h2>تعذر تحميل المنتج</h2><p>تحقق من الاتصال بالسحابة ثم أعد المحاولة.</p>'}
+}
+window.addEventListener('firebase-ready',()=>{
+  updateCount();
+  window.onAuthStateChanged(window.auth,user=>{currentCustomer=user||null;});
+  load();
+});
+</script>
+</body>
+</html>

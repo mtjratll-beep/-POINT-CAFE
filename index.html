@@ -1,0 +1,2968 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تطبيق متجر POINT CAFE | كافيه POINT CAFE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
+    import { getFirestore, doc, getDoc, collection, getDocs, addDoc, onSnapshot, setDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, deleteUser, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, reauthenticateWithPopup, reauthenticateWithCredential, EmailAuthProvider, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCSjXz47oath2NA6LXAkYk_pNLK1_X3tVU",
+      authDomain: "point-cafe-665e6.firebaseapp.com",
+      projectId: "point-cafe-665e6",
+      storageBucket: "point-cafe-665e6.firebasestorage.app",
+      messagingSenderId: "1078733395604",
+      appId: "1:1078733395604:web:075d8e0f2a3f075bde0681",
+      measurementId: "G-XSPQZK57CN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    // إبقاء تسجيل دخول العميل محفوظًا على الجهاز حتى يختار تسجيل الخروج.
+    setPersistence(auth, browserLocalPersistence).catch(e => console.warn("Auth persistence:", e));
+    const googleProvider = new GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+    window.db = db;
+    window.auth = auth;
+    window.googleProvider = googleProvider;
+    window.firebaseSignInWithPopup = signInWithPopup;
+    window.firebaseSignInWithRedirect = signInWithRedirect;
+    window.firebaseGetRedirectResult = getRedirectResult;
+    window.firebaseSignOut = signOut;
+    window.firebaseDeleteUser = deleteUser;
+    window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
+    window.firebaseCreateUserWithEmailAndPassword = createUserWithEmailAndPassword;
+    window.firebaseUpdateProfile = updateProfile;
+    window.firebaseReauthenticateWithPopup = reauthenticateWithPopup;
+    window.firebaseReauthenticateWithCredential = reauthenticateWithCredential;
+    window.firebaseEmailAuthProvider = EmailAuthProvider;
+    window.doc = doc;
+    window.getDoc = getDoc;
+    window.collection = collection;
+    window.getDocs = getDocs;
+    window.query = query;
+    window.where = where;
+    window.addDoc = addDoc;
+    window.onSnapshot = onSnapshot;
+    window.setDoc = setDoc;
+    window.deleteDoc = deleteDoc;
+    window.onAuthStateChanged = onAuthStateChanged;
+    
+    window.dispatchEvent(new Event('firebase-ready'));
+  </script>
+
+  <style>
+    :root {
+      --primary: #9a7652;
+      --primary-hover: #76583b;
+      --accent: #dc2626;
+      --bg: #f5eadb;
+      --card-bg: #ffffff;
+      --text: #4b3828;
+      --muted: #7b624a;
+      --border: #dfc9ad;
+      --star: #f59e0b;
+      --whatsapp: #25d366;
+      --radius: 16px;
+      --shadow: 0 8px 25px -8px rgba(91, 66, 42, 0.20);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+    
+    body::before{content:"";position:fixed;inset:0;z-index:-1;background:url("coffee_harvest_animated.gif") center/cover no-repeat;background-attachment:fixed;}
+body::after{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(135deg,rgba(245,231,211,.35),rgba(104,72,42,.18),rgba(39,86,58,.12));pointer-events:none;}
+@keyframes coffeeBgZoom{from{transform:scale(1)}to{transform:scale(1.06)}}
+body {
+      background-color: #d9c19f;
+      background-image: url("coffee_harvest_animated.gif");
+      background-position: center center;
+      background-size: cover;
+      background-attachment: fixed;
+      color: var(--text);
+      padding-bottom: 40px;
+    }
+
+    .ticker-wrap {
+      width: 100%;
+      background: var(--bg);
+      color: var(--primary);
+      overflow: hidden;
+      height: 38px;
+      line-height: 38px;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(91, 66, 42, 0.10);
+      border-bottom: 1px solid var(--border);
+    }
+    /* شريط الإعلان المتحرك */
+    .ticker-move {
+      display:inline-block; white-space:nowrap; padding-right:100%; animation:tickerMove 12s linear infinite; will-change:transform;
+    }
+    @keyframes tickerMove { from{transform:translateX(100%)} to{transform:translateX(-100%)} }
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      overflow: hidden;
+      transform: none !important;
+      animation: none !important;
+      position: static !important;
+    }
+    .ticker-move:hover { animation: none !important; transform: none !important; }
+    .ticker-item {
+      display: block;
+      width: 100%;
+      padding: 0 10px;
+      flex: none;
+      text-align: center;
+      line-height: 38px;
+      animation: none !important;
+      transform: none !important;
+      position: static !important;
+    }
+
+    #splash-screen {
+      position: fixed; inset: 0; background: var(--card-bg); z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.2s ease, visibility 0.2s; padding: 20px; text-align: center;
+    }
+    #splash-screen.fade-out { opacity: 0; visibility: hidden; }
+    .splash-logo { width: 130px; height: 130px; object-fit: contain; animation: zoomIn 0.45s ease-out; border-radius: 50%; border: 3px solid var(--primary); }
+    .splash-title { margin-top: 20px; font-size: 22px; font-weight: 800; color: var(--primary); }
+
+    @keyframes zoomIn { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .store-closed-bar {
+      background-color: var(--accent); color: #fff; text-align: center; padding: 12px 20px; font-weight: 700;
+      font-size: 14px; position: sticky; top: 0; z-index: 1001; box-shadow: 0 4px 12px rgba(220,38,38,0.2); display: none;
+    }
+
+    .whatsapp-float {
+      position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px;
+      background-color: var(--whatsapp); color: #FFF; border-radius: 50%;
+      box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+      z-index: 1000; display: flex; align-items: center; justify-content: center;
+      text-decoration: none; animation: pulse 2s infinite; transition: transform 0.2s;
+    }
+    .whatsapp-float:hover { transform: scale(1.1); }
+    .whatsapp-float svg { width: 32px; height: 32px; fill: white; }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+      70% { box-shadow: 0 0 0 18px rgba(37, 211, 102, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+    }
+
+    header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 16px; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid var(--border); box-shadow: 0 2px 10px rgba(91, 66, 42, 0.10); }
+    .header-top { display: flex; justify-content: space-between; align-items: center; max-width: 900px; margin: 0 auto; } .header-actions{display:flex;align-items:center;gap:6px}
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+    .brand img { width: 52px; height: 52px; object-fit: contain; border-radius: 50%; border: 2px solid var(--primary); background: #fff; padding: 2px; }
+    .brand h2 { font-size: 18px; font-weight: 800; color: var(--primary); }
+    
+    .search-container { display: flex; align-items: center; margin: 15px auto 0; gap: 10px; max-width: 900px; }
+    .search-input { flex: 1; padding: 12px 18px; border: 1.5px solid var(--border); border-radius: 12px; outline: none; background: #fbf5ed; transition: 0.2s; font-size: 14px; color: var(--text); }
+    .search-input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.15); }
+    
+    .cart-btn {
+      position: relative; background: #eadbc7; border: 1px solid var(--border);
+      padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 18px; transition: 0.2s; color: var(--primary);
+    }
+    .cart-btn:hover { background: #dfc9ad; }
+    .cart-badge { position: absolute; top: -6px; right: -6px; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+    .slider-container { width: 100%; overflow: hidden; margin: 15px 0 20px; border-radius: var(--radius); aspect-ratio: 12 / 5; max-height: 280px; background: #eadbc7; position: relative; border: 1px solid var(--border); }
+    .slider-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); height: 100%; }
+    .slider-slide { min-width: 100%; height: 100%; }
+    .slider-slide img { width: 100%; height: 100%; object-fit: cover; }
+
+    .container { padding: 0 12px; max-width: 900px; margin: 0 auto; }
+    
+    .products-grid { 
+      display: grid; 
+      grid-template-columns: repeat(2, 1fr); 
+      gap: 12px; 
+    }
+    .product-card {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: var(--shadow); transition: all 0.2s ease;
+      position: relative;
+    }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -10px rgba(147, 51, 234, 0.2); border-color: var(--primary); }
+    
+    .product-img-wrapper {
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #fbf5ed;
+      border: 1px solid var(--border);
+    }
+    .product-img-wrapper img { width: 100%; height: 130px; object-fit: contain; padding: 6px; transition: transform 0.3s ease; }
+    .product-img-wrapper:hover img { transform: scale(1.05); }
+    .zoom-hint {
+      position: absolute; bottom: 6px; left: 6px; background: rgba(147, 51, 234, 0.9); color: #fff;
+      font-size: 10px; padding: 2px 6px; border-radius: 6px; font-weight: 700; pointer-events: none;
+    }
+
+    .product-title { font-size: 14px; margin: 8px 0 4px; font-weight: 800; color: var(--text); line-height: 1.3; }
+    .product-price { color: var(--primary); font-weight: 800; font-size: 15px; margin-bottom: 8px; }
+    .add-to-cart {
+      background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 8px;
+      cursor: pointer; width: 100%; font-size: 13px; font-weight: 700; transition: background 0.2s;
+    }
+    .add-to-cart:hover { background: var(--primary-hover); }
+
+    .reviews-section { margin: 35px 0; background: var(--card-bg); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); }
+    .reviews-section h3 { margin-bottom: 16px; font-size: 18px; color: var(--primary); font-weight: 800; }
+    .reviews-list { max-height: 240px; overflow-y: auto; margin-bottom: 16px; padding-left: 5px; }
+    .review-item { background: #fbf5ed; border: 1px solid var(--border); padding: 12px 16px; border-radius: 12px; margin-bottom: 10px; font-size: 13px; }
+    .review-header { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+    .review-stars { color: var(--star); }
+    .star-rating { display: flex; gap: 6px; margin-bottom: 12px; direction: ltr; justify-content: flex-end; cursor: pointer; }
+    .star-rating span { font-size: 24px; color: #dfc9ad; transition: color 0.2s; }
+    .star-rating span.active { color: var(--star); }
+
+    .review-form-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; outline: none; font-size: 13px; background: #fff; }
+
+    .modal { display: none; position: fixed; inset: 0; background: rgba(59, 7, 100, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: flex-end; }
+    .modal-content { background: var(--card-bg); width: 100%; max-width: 550px; border-radius: 24px 24px 0 0; padding: 24px; max-height: 85vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.15); border-top: 3px solid var(--primary); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 15px; }
+    .modal-header h3 { font-weight: 800; font-size: 18px; color: var(--primary); }
+    
+    .cart-item { display: flex; align-items: center; gap: 12px; margin: 12px 0; font-size: 14px; border-bottom: 1px solid #eadbc7; padding-bottom: 10px; }
+    .cart-item img { width: 50px; height: 50px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); background: #fbf5ed; }
+    .cart-item-info { flex: 1; }
+    .cart-item-title { font-weight: 700; font-size: 14px; }
+    .cart-item-price-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .cart-item-total { color: var(--primary); font-size: 13px; font-weight: 800; margin-top: 2px; }
+
+    .quantity-control { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+    .qty-btn {
+      background: var(--primary); color: white; border: none; width: 26px; height: 26px;
+      border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; transition: 0.2s;
+    }
+    .qty-btn:hover { background: var(--primary-hover); }
+    .qty-input { width: 38px; text-align: center; border: 1px solid var(--border); border-radius: 6px; font-weight: 700; font-size: 13px; padding: 2px 0; }
+    
+    .bank-box { background: #fbf5ed; border: 1px dashed var(--primary); padding: 16px; border-radius: 12px; margin: 15px 0; }
+    .bank-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .bank-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .copy-btn { background: var(--primary); border: none; color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; }
+
+    .shipping-info-box { background: #fbf5ed; border: 1px solid var(--border); padding: 12px; border-radius: 10px; margin-top: 12px; text-align: center; font-size: 13px; color: var(--primary); font-weight: 700; }
+    .cart-summary-box{margin-top:14px;padding:12px 14px;background:#fff;border:2px solid var(--border);border-radius:12px;font-size:15px;line-height:1.9}.cart-summary-row{display:flex;justify-content:space-between;gap:10px;padding:3px 0}.cart-summary-row.grand{border-top:2px solid var(--primary);margin-top:5px;padding-top:8px;font-size:17px;font-weight:900;color:var(--primary)}.cart-summary-row.delivery{font-weight:800;color:var(--primary)}
+
+    .store-location-card { background: #fbf5ed; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 15px; text-align: center; font-size: 13px; }
+    .store-location-card a { color: var(--primary); font-weight: 700; text-decoration: none; }
+
+    .btn-submit-whatsapp { background: var(--whatsapp); color: white; width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; transition: 0.2s; }
+    .btn-submit-whatsapp:hover { background: #1eb956; }
+    .btn-gps { background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+
+    .img-modal {
+      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
+      z-index: 3000; justify-content: center; align-items: center; padding: 20px;
+      backdrop-filter: blur(5px);
+    }
+    .img-modal-content {
+      position: relative; max-width: 90%; max-height: 85vh; background: #fff;
+      border-radius: 16px; padding: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .img-modal-content img {
+      max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 10px;
+    }
+    .img-modal-title { font-weight: 800; color: var(--primary); font-size: 16px; margin-top: 10px; }
+    .close-img-modal {
+      position: absolute; top: -12px; right: -12px; background: var(--accent); color: white;
+      border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; font-weight: bold;
+      cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .toast-notification {
+      position: fixed; bottom: -80px; left: 50%; transform: translateX(-50%);
+      background: var(--text); color: #fff; padding: 10px 20px; border-radius: 30px;
+      display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 9999; transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 14px; font-weight: 700;
+    }
+    .toast-notification.show { bottom: 30px; }
+    .toast-notification img { width: 28px; height: 28px; border-radius: 50%; object-fit: contain; background: #fff; }
+
+    footer { text-align: center; padding: 24px; font-size: 14px; color: var(--muted); background: var(--card-bg); margin-top: 40px; border-top: 1px solid var(--border); line-height: 1.8; }
+    footer strong { color: var(--primary); font-size: 15px; }
+    .dev-link { margin-top: 6px; font-size: 11px; color: #16a34a; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; padding: 4px 9px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; transition: 0.2s; }
+    .dev-link:hover { background: #dcfce7; transform: translateY(-2px); }
+
+
+    .delivery-choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+    .delivery-choice label{margin:0;padding:11px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;text-align:center;color:var(--text)}
+    .delivery-choice input{accent-color:var(--primary);margin-left:5px}
+    .product-card,.reviews-section,.modal-content,.section-box{animation:cardIn .55s ease both}
+    .product-card:hover{transform:translateY(-6px) scale(1.01)}
+    @keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    .store-controls{display:flex;justify-content:center;align-items:center;gap:6px;max-width:760px;margin:8px auto 0;flex-wrap:wrap}.theme-btn,.lang-btn{border:1px solid var(--border);background:#fff;color:var(--primary);padding:5px 8px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;line-height:1.2}.theme-btn:hover,.lang-btn:hover{transform:translateY(-1px);background:#fbf5ed}.language-switcher{display:flex;gap:4px;direction:ltr}.lang-btn.active{background:var(--primary);color:#fff}
+    .coffee-info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0}.coffee-info-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:18px;text-align:center;box-shadow:var(--shadow)}.coffee-info-icon{font-size:30px;margin-bottom:7px}.coffee-info-card h3{color:var(--primary);font-size:16px;margin-bottom:7px}.coffee-info-card p{font-size:12px;color:var(--muted);line-height:1.8}
+    body.dark-mode{--bg:#17211f;--card-bg:#22302c;--text:#f4eadc;--muted:#c9b9a3;--border:#52665e}body.dark-mode header{background:rgba(27,39,36,.95)}body.dark-mode .search-input,body.dark-mode .review-form-input,body.dark-mode .product-img-wrapper,body.dark-mode .cart-item,body.dark-mode .coffee-info-card{background:#263833;color:var(--text)}body.dark-mode .theme-btn,body.dark-mode .lang-btn{background:#263833;color:var(--text)}body.dark-mode .ticker-wrap{background:#1c2926}
+    @media(max-width:700px){.coffee-info-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:430px){.coffee-info-grid{grid-template-columns:1fr 1fr}.store-controls{align-items:stretch}.theme-btn{flex:1}.language-switcher{flex:1}.lang-btn{flex:1;padding:7px 5px;font-size:11px)}}
+
+/* حركة كوفيه POINT CAFE */
+.coffee-hero{position:relative;overflow:hidden;min-height:175px;margin:16px 0 20px;border-radius:24px;background:radial-gradient(circle at 75% 30%,#d9b98f 0 8%,transparent 9%),linear-gradient(135deg,#4b3828 0%,#76583b 48%,#9a7652 100%);border:1px solid #b9946a;box-shadow:0 18px 40px rgba(75,56,40,.24);display:flex;align-items:center;justify-content:space-between;padding:25px 28px;color:#fff;isolation:isolate}
+.coffee-hero:before{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.08);left:-100px;top:-150px;animation:coffeeFloat 7s ease-in-out infinite}
+.coffee-copy{position:relative;z-index:3;max-width:62%;animation:heroText .8s ease both}.coffee-copy h1{font-size:28px;margin:0 0 6px;color:#fff;font-weight:800}.coffee-copy p{font-size:13px;margin:0;color:#f8ead8;line-height:1.8}
+.coffee-cup{position:relative;z-index:2;width:115px;height:85px;background:#fff8ed;border-radius:12px 12px 35px 35px;box-shadow:0 16px 20px rgba(0,0,0,.22);margin-left:12px;animation:cupBob 3s ease-in-out infinite}
+.coffee-cup:before{content:"";position:absolute;left:9px;right:9px;top:8px;height:16px;border-radius:50%;background:#4b3828;box-shadow:inset 0 3px 0 #2d2117}
+.coffee-cup:after{content:"";position:absolute;right:-29px;top:23px;width:35px;height:38px;border:8px solid #fff8ed;border-left:0;border-radius:0 25px 25px 0}
+.steam{position:absolute;top:-45px;width:12px;height:45px;border-left:3px solid rgba(255,255,255,.7);border-radius:50%;filter:blur(.3px);animation:steam 2.3s ease-in-out infinite}.steam.s1{left:30px}.steam.s2{left:55px;animation-delay:.45s}.steam.s3{left:78px;animation-delay:.9s}
+.bean{position:absolute;width:13px;height:20px;border-radius:55% 45%;background:#3a281d;opacity:.75;z-index:1}.bean:after{content:"";position:absolute;left:5px;top:2px;height:16px;border-left:2px solid #9a7652;transform:rotate(12deg)}
+.bean.b1{right:20%;bottom:18px;animation:beanDrift 5s ease-in-out infinite}.bean.b2{right:8%;top:25px;transform:rotate(35deg);animation:beanDrift 6s ease-in-out infinite .8s}.bean.b3{left:47%;top:15px;transform:rotate(-25deg);animation:beanDrift 5.5s ease-in-out infinite 1.2s}
+.hero-glow{position:absolute;right:18%;top:0;width:180px;height:180px;border-radius:50%;background:rgba(255,224,184,.14);filter:blur(8px);animation:glow 4s ease-in-out infinite}
+@keyframes heroText{from{opacity:0;transform:translateX(25px)}to{opacity:1;transform:none}}
+@keyframes cupBob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+@keyframes steam{0%{transform:translateY(10px) scaleX(.7);opacity:0}30%{opacity:.9}100%{transform:translateY(-28px) translateX(10px) scaleX(1.3);opacity:0}}
+@keyframes beanDrift{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-12px) rotate(18deg)}}
+@keyframes coffeeFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,15px)}}
+@keyframes glow{0%,100%{opacity:.5;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+@media(max-width:600px){.coffee-hero{min-height:165px;padding:20px}.coffee-copy{max-width:67%}.coffee-copy h1{font-size:22px}.coffee-copy p{font-size:12px}.coffee-cup{width:92px;height:70px}.coffee-cup:after{right:-24px;width:30px;height:31px;border-width:7px;border-left:0}}
+
+  
+    #order-success-popup{position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);padding:20px}
+    .order-success-card{background:#fff;border-radius:18px;padding:24px 32px;text-align:center;box-shadow:0 15px 45px rgba(0,0,0,.25);min-width:230px;animation:orderSuccessPop .18s ease-out}
+    .order-success-icon{font-size:42px;line-height:1;margin-bottom:10px}
+    .order-success-title{font-size:20px;font-weight:800;color:#3e8b68}
+    .order-success-number{font-size:13px;color:#7b624a;margin-top:6px}
+    @keyframes orderSuccessPop{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+
+    .coffee-harvest-banner{position:relative;width:100%;margin:16px 0 20px;border-radius:20px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow);background:#eadbc7;aspect-ratio:16/7;min-height:190px}
+    .coffee-harvest-banner img{width:100%;height:100%;display:block;object-fit:cover}
+    .coffee-harvest-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(72,43,23,.55),rgba(72,43,23,.05) 65%,rgba(72,43,23,.18));display:flex;align-items:flex-end;padding:18px}
+    .coffee-harvest-text{background:rgba(255,248,238,.88);backdrop-filter:blur(4px);border-radius:14px;padding:10px 16px;color:#5b422a;font-weight:800;max-width:360px}
+    .coffee-harvest-text strong{display:block;font-size:18px}.coffee-harvest-text span{font-size:12px;font-weight:600}
+    @media(max-width:600px){.coffee-harvest-banner{aspect-ratio:1.55;min-height:180px}.coffee-harvest-overlay{padding:10px}.coffee-harvest-text{padding:8px 11px}.coffee-harvest-text strong{font-size:15px}.coffee-harvest-text span{font-size:10px}}
+  
+    html, body { background: #f4e4d0 !important; }
+    main, .container { background: transparent !important; }
+
+
+.pwa-skip-btn{
+  width:100%;margin-top:8px;min-height:40px;border:0;
+  background:transparent;color:#76583b;font-size:13px;
+  font-weight:800;cursor:pointer;border-radius:10px;
+}
+.pwa-skip-btn:active{background:rgba(118,88,59,.08)}
+
+
+/* ===== SMALL NON-FORCED INSTALL NOTICE ===== */
+.pwa-install-modal{
+  position:fixed!important;
+  inset:auto 12px 78px auto!important;
+  width:auto!important;
+  height:auto!important;
+  background:transparent!important;
+  display:block!important;
+  padding:0!important;
+  z-index:200000!important;
+}
+.pwa-install-card{
+  width:285px!important;
+  max-width:calc(100vw - 24px)!important;
+  box-sizing:border-box;
+  display:grid!important;
+  grid-template-columns:48px 1fr;
+  grid-template-rows:auto auto;
+  gap:4px 10px;
+  align-items:center;
+  padding:10px 11px!important;
+  background:rgba(255,250,243,.94)!important;
+  border:1px solid rgba(154,118,82,.35)!important;
+  border-radius:16px!important;
+  box-shadow:0 8px 24px rgba(45,25,10,.16)!important;
+  text-align:right!important;
+  position:relative;
+}
+.pwa-install-logo{
+  grid-row:1 / 3;
+  width:44px!important;height:44px!important;
+  border-radius:11px!important;
+  border:1px solid rgba(154,118,82,.45)!important;
+  padding:3px!important;
+}
+.pwa-install-title{
+  margin:0!important;
+  font-size:13px!important;
+  line-height:1.25!important;
+  color:#76583b!important;
+}
+.pwa-install-subtitle{
+  margin:0!important;
+  font-size:10px!important;
+  line-height:1.3!important;
+  color:#806b58!important;
+}
+.pwa-install-btn{
+  grid-column:1 / 3;
+  min-height:34px!important;
+  margin-top:3px!important;
+  border-radius:9px!important;
+  font-size:12px!important;
+  padding:5px 8px!important;
+}
+.pwa-install-help{display:none!important}
+.pwa-skip-btn{
+  position:absolute!important;
+  top:4px!important;
+  left:5px!important;
+  width:22px!important;
+  min-height:22px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:50%!important;
+  background:rgba(118,88,59,.10)!important;
+  color:#76583b!important;
+  font-size:15px!important;
+  line-height:22px!important;
+  z-index:3;
+}
+@media(max-width:420px){
+  .pwa-install-modal{right:9px!important;bottom:72px!important}
+  .pwa-install-card{width:250px!important}
+}
+
+
+/* ===== POINT CAFE welcome/info category ===== */
+.pca-welcome-card{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin:8px 12px 14px;
+  padding:13px 15px;
+  border:1px solid #ead8c2;
+  border-radius:18px;
+  background:rgba(255,250,243,.92);
+  box-shadow:0 6px 18px rgba(91,66,42,.08);
+  direction:rtl;
+}
+.pca-welcome-icon{
+  flex:0 0 54px;
+  width:54px;height:54px;
+  border-radius:50%;
+  overflow:hidden;
+  border:1px solid #e2cdb3;
+  background:#f7ead9;
+  display:flex;align-items:center;justify-content:center;
+}
+.pca-welcome-icon img{
+  width:100%;height:100%;object-fit:cover;
+}
+.pca-welcome-text{min-width:0;text-align:right}
+.pca-welcome-title{
+  color:#6f4d30;
+  font-size:17px;
+  font-weight:900;
+  margin:0 0 3px;
+}
+.pca-welcome-desc{
+  color:#806b58;
+  font-size:12px;
+  line-height:1.7;
+  margin:0;
+}
+@media(max-width:520px){
+  .pca-welcome-card{margin:7px 9px 12px;padding:11px 12px;gap:11px}
+  .pca-welcome-icon{flex-basis:46px;width:46px;height:46px}
+  .pca-welcome-title{font-size:15px}
+  .pca-welcome-desc{font-size:11px}
+}
+
+
+<style>
+/* FINAL CLEAN INSTALL UI */
+.pwa-install-modal{
+  position:fixed!important; inset:auto 10px 76px auto!important;
+  width:auto!important;height:auto!important;padding:0!important;
+  background:transparent!important;display:block!important;z-index:200000!important;
+}
+.pwa-install-card{
+  direction:rtl!important;width:270px!important;max-width:calc(100vw - 20px)!important;
+  box-sizing:border-box!important;display:grid!important;
+  grid-template-columns:44px 1fr!important;grid-template-rows:auto auto auto!important;
+  gap:3px 9px!important;align-items:center!important;
+  padding:10px!important;background:rgba(255,250,243,.97)!important;
+  border:1px solid #dfc9ad!important;border-radius:15px!important;
+  box-shadow:0 7px 22px rgba(65,43,24,.18)!important;text-align:right!important;
+}
+.pwa-install-logo{
+  grid-row:1/3!important;width:40px!important;height:40px!important;
+  border-radius:10px!important;padding:2px!important;
+}
+.pwa-install-title{margin:0!important;font-size:13px!important;line-height:1.2!important}
+.pwa-install-subtitle{margin:0!important;font-size:10px!important;line-height:1.4!important}
+.pwa-install-btn{
+  grid-column:1/3!important;min-height:34px!important;margin-top:3px!important;
+  border-radius:9px!important;font-size:12px!important;
+}
+.pwa-skip-btn{
+  position:absolute!important;top:4px!important;left:5px!important;
+  width:30px!important;min-height:25px!important;margin:0!important;
+  padding:0!important;border:0!important;border-radius:7px!important;
+  background:#f1e5d7!important;color:#76583b!important;
+  font-family:inherit!important;font-size:10px!important;font-weight:900!important;
+  z-index:4!important;
+}
+.pwa-install-help{display:none!important}
+
+</style>
+
+</style>
+
+<link rel="manifest" href="store-manifest.json"><meta name="theme-color" content="#9a7652"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="تطبيق متجر POINT CAFE"><link rel="apple-touch-icon" href="point-cafe-logo.jpg">
+<style>
+/* POINT CAFE PWA INSTALL */
+.pwa-install-modal{position:fixed;inset:0;z-index:200000;background:rgba(47,27,12,.82);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:18px}.pwa-install-card{width:min(430px,100%);background:linear-gradient(180deg,#fffaf3,#f5eadb);border:2px solid #dfc9ad;border-radius:24px;padding:24px 20px;text-align:center;box-shadow:0 25px 70px #0008}.pwa-install-logo{width:112px;height:112px;object-fit:contain;border-radius:22px;border:2px solid #9a7652;background:#fff;padding:6px}.pwa-install-title{margin:12px 0 5px;color:#76583b;font-size:24px;font-weight:900}.pwa-install-subtitle{margin:0 0 17px;color:#6f5945;font-size:14px;line-height:1.8}.pwa-install-btn{width:100%;min-height:55px;border:0;border-radius:14px;background:#9a7652;color:#fff;font-size:17px;font-weight:900;cursor:pointer}.pwa-install-btn:active{transform:scale(.98)}.pwa-install-help{display:none;margin-top:12px;background:#fff;border:1px solid #dfc9ad;border-radius:12px;padding:10px;color:#5d4b3b;font-size:12px;line-height:1.8}.pwa-install-modal.installed{display:none}.pwa-install-page-btn{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;border:1px solid #dfc9ad!important;background:#fffaf3!important;color:#76583b!important;border-radius:10px!important;font-weight:900!important;cursor:pointer!important}.pwa-install-page-btn:hover{background:#eadbc7!important}
+</style>
+<style>
+/* POINT CAFE PWA INSTALL */
+.pwa-install-modal{position:fixed;inset:0;z-index:200000;background:rgba(35,20,10,.03);display:flex;align-items:center;justify-content:center;padding:16px;animation:pwaFadeIn .3s ease}
+.pwa-install-card{width:min(430px,90vw);background:rgba(255,250,243,.55);border:1.5px solid rgba(154,118,82,.55);border-radius:22px;padding:19px 16px;text-align:center;box-shadow:0 16px 40px rgba(45,25,10,.20);position:relative}
+.pwa-install-logo{width:82px;height:82px;object-fit:contain;border-radius:18px;border:2px solid rgba(154,118,82,.65);background:rgba(255,255,255,.75);padding:5px}
+.pwa-install-title{margin:9px 0 4px;color:#76583b;font-size:21px;font-weight:900}
+.pwa-install-subtitle{margin:0 0 13px;color:#5d4b3b;font-size:13px;line-height:1.7}
+.pwa-install-btn{width:100%;min-height:50px;border:0;border-radius:13px;background:rgba(154,118,82,.92);color:#fff;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 7px 15px rgba(118,88,59,.20)}
+.pwa-install-help{display:none;margin-top:10px;background:rgba(255,255,255,.70);border:1px solid rgba(223,201,173,.85);border-radius:11px;padding:9px;color:#5d4b3b;font-size:12px;line-height:1.7}
+.pwa-install-modal.installed{display:none}
+.pwa-install-page-btn{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;border:1px solid #dfc9ad!important;background:#fffaf3!important;color:#76583b!important;border-radius:10px!important;font-weight:900!important;cursor:pointer!important}
+@keyframes pwaFadeIn{from{opacity:0;transform:scale(.99)}to{opacity:1;transform:scale(1)}}
+</style>
+
+
+
+<style id="point-cafe-install-final-fix">
+/* POINT CAFE FINAL INSTALL UI: one horizontal header button + reliable skip */
+.header-actions .pwa-install-page-btn{
+  width:118px!important;height:42px!important;min-width:118px!important;
+  padding:4px 8px!important;box-sizing:border-box!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  white-space:nowrap!important;word-break:keep-all!important;overflow:hidden!important;
+  font-size:10px!important;line-height:1!important;
+  border:1px solid #d9c3a9!important;border-radius:12px!important;
+  background:#fffaf3!important;color:#76583b!important;
+}
+.header-actions .pwa-install-page-btn br{display:none!important}
+.pwa-install-modal.installed{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+.pwa-skip-btn{
+  cursor:pointer!important;touch-action:manipulation!important;
+}
+</style>
+<script>
+(function(){
+  function hidePointCafeInstall(){
+    var modal=document.getElementById('pwa-install-modal');
+    if(modal){
+      modal.classList.add('installed');
+      modal.style.setProperty('display','none','important');
+      modal.style.setProperty('visibility','hidden','important');
+      modal.style.setProperty('pointer-events','none','important');
+    }
+    try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(e){}
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target && e.target.closest ? e.target.closest('#pwa-skip-btn') : null;
+    if(b){ e.preventDefault(); e.stopPropagation(); hidePointCafeInstall(); }
+  },true);
+  window.hidePointCafeInstall=hidePointCafeInstall;
+})();
+</script>
+
+<style id="point-cafe-header-mini-final">
+/* تصغير رأس المتجر وزر التثبيت بدون تغيير ترتيب العناصر */
+.header-top .brand{gap:7px!important}
+.header-top .brand img{width:40px!important;height:40px!important}
+.header-top .brand h2{font-family:'Tajawal',sans-serif!important;font-size:14px!important;line-height:1.05!important;font-weight:800!important;margin:0!important}
+.header-top .brand span{font-family:'Tajawal',sans-serif!important;font-size:8.5px!important;line-height:1.1!important;font-weight:600!important;display:block!important;margin-top:2px!important}
+.header-actions{gap:4px!important}
+.header-actions .pwa-install-page-btn{width:88px!important;height:34px!important;min-width:88px!important;padding:3px 5px!important;font-family:'Tajawal',sans-serif!important;font-size:8.5px!important;line-height:1.05!important;font-weight:800!important;border-radius:9px!important}
+.header-actions .cart-btn:not(.pwa-install-page-btn){padding:7px 9px!important;font-size:15px!important;border-radius:9px!important}
+.header-actions .cart-badge{width:17px!important;height:17px!important;font-size:9px!important;top:-5px!important;right:-5px!important}
+@media(max-width:380px){
+ .header-top .brand img{width:36px!important;height:36px!important}
+ .header-top .brand h2{font-size:12px!important}
+ .header-top .brand span{font-size:7.5px!important}
+ .header-actions .pwa-install-page-btn{width:78px!important;min-width:78px!important;font-size:7.5px!important}
+}
+</style>
+
+<style id="point-cafe-customer-account">
+.customer-account-actions{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.customer-mini-btn{border:1px solid var(--border);background:#fffaf3;color:var(--primary);border-radius:9px;padding:7px 9px;font-size:11px;font-weight:900;cursor:pointer;white-space:nowrap}
+.customer-mini-btn:hover{background:#eadbc7}
+.customer-avatar{width:25px;height:25px;border-radius:50%;object-fit:cover;vertical-align:middle;border:1px solid var(--border);background:#fff}
+.customer-auth-box{background:#fbf5ed;border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;text-align:center}
+.customer-auth-box .google-btn{background:#fff;color:#333;border:1px solid #d9d9d9;box-shadow:0 2px 7px #0001}
+.customer-auth-box .google-btn:hover{background:#f8f8f8}
+.customer-profile{display:flex;align-items:center;gap:12px;text-align:right;background:#fff;border:1px solid var(--border);padding:12px;border-radius:12px;margin-bottom:12px}
+.customer-profile img{width:58px;height:58px;border-radius:50%;object-fit:cover;border:2px solid var(--primary);background:#fff}
+.customer-profile strong{display:block;color:var(--primary);font-size:16px}
+.customer-profile small{display:block;color:var(--muted);margin-top:2px;word-break:break-all}
+.customer-order-card{background:#fff;border:1px solid var(--border);border-radius:13px;padding:13px;margin:10px 0}
+.customer-order-head{display:flex;justify-content:space-between;gap:8px;align-items:center;font-weight:900;color:var(--primary)}
+.customer-order-status{background:#eadbc7;border-radius:20px;padding:4px 9px;font-size:11px}
+.customer-order-items{background:#fbf5ed;border-radius:9px;padding:9px;margin:9px 0;font-size:12px;line-height:1.8}
+.customer-danger{background:#b94b45!important;color:#fff!important;border-color:#b94b45!important}
+.customer-empty{text-align:center;padding:20px;color:var(--muted)}
+@media(max-width:520px){.customer-account-actions{max-width:100%;justify-content:flex-start}.customer-mini-btn{font-size:10px;padding:6px 7px}.header-actions{max-width:58vw}}
+</style>
+
+
+<style id="point-cafe-header-buttons-final">
+/* POINT CAFE: compact, consistent header buttons on phone/tablet/laptop */
+.header-top{gap:8px!important;}
+.header-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:5px!important;flex-wrap:nowrap!important;min-width:0!important;}
+.customer-account-actions{display:flex!important;align-items:center!important;gap:5px!important;flex-wrap:nowrap!important;}
+.header-actions .customer-mini-btn,
+.header-actions .pwa-install-page-btn,
+.header-actions .cart-btn{
+  box-sizing:border-box!important;
+  height:34px!important;
+  min-height:34px!important;
+  width:auto!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:4px 8px!important;
+  border-radius:9px!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:9px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:3px!important;
+}
+.header-actions #customer-login-btn{width:86px!important;}
+.header-actions #customer-orders-btn{width:64px!important;}
+.header-actions #customer-settings-btn{width:68px!important;}
+.header-actions .pwa-install-page-btn{width:88px!important;}
+.header-actions .cart-btn:not(.pwa-install-page-btn){width:40px!important;padding:4px!important;font-size:15px!important;position:relative!important;}
+.header-actions .cart-badge{width:16px!important;height:16px!important;font-size:9px!important;top:-5px!important;right:-5px!important;}
+.header-top .brand{gap:7px!important;min-width:0!important;}
+.header-top .brand img{width:40px!important;height:40px!important;}
+.header-top .brand h2{font-size:14px!important;line-height:1.05!important;margin:0!important;}
+.header-top .brand span{font-size:8.5px!important;line-height:1.1!important;}
+@media (min-width:700px){
+  .header-top{max-width:1100px!important;}
+  .header-actions .customer-mini-btn,
+  .header-actions .pwa-install-page-btn{height:36px!important;min-height:36px!important;font-size:10px!important;}
+  .header-actions #customer-login-btn{width:96px!important;}
+  .header-actions .pwa-install-page-btn{width:100px!important;}
+}
+@media (max-width:520px){
+  header{padding:9px 7px!important;}
+  .header-top{width:100%!important;}
+  .header-top .brand img{width:36px!important;height:36px!important;}
+  .header-top .brand h2{font-size:12px!important;}
+  .header-top .brand span{font-size:7.5px!important;}
+  .header-actions{gap:3px!important;}
+  .customer-account-actions{gap:3px!important;}
+  .header-actions #customer-login-btn{width:80px!important;}
+  .header-actions .pwa-install-page-btn{width:82px!important;}
+  .header-actions .cart-btn:not(.pwa-install-page-btn){width:36px!important;}
+}
+@media (max-width:380px){
+  .header-top .brand img{width:33px!important;height:33px!important;}
+  .header-top .brand h2{font-size:11px!important;}
+  .header-top .brand span{font-size:7px!important;}
+  .header-actions #customer-login-btn{width:72px!important;font-size:8px!important;}
+  .header-actions .pwa-install-page-btn{width:76px!important;font-size:8px!important;}
+  .header-actions .cart-btn:not(.pwa-install-page-btn){width:34px!important;}
+}
+</style>
+
+
+<style id="point-cafe-bottom-nav">
+/* شريط سفلي أنيق: تسجيل الدخول + طلباتي + السلة + المفضلات */
+.point-bottom-nav{
+  position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:15000;
+  display:flex;align-items:stretch;justify-content:center;gap:6px;
+  width:min(560px,calc(100vw - 150px));min-height:58px;padding:6px;
+  background:rgba(255,250,243,.96);backdrop-filter:blur(14px);
+  border:1px solid var(--border);border-radius:20px;
+  box-shadow:0 12px 35px rgba(77,51,30,.22);
+  direction:rtl;
+  animation:bottomNavIn .45s ease-out both;
+}
+.bottom-nav-btn{position:relative;flex:1;min-width:0;border:1px solid transparent;background:transparent;color:var(--primary);
+  border-radius:14px;padding:7px 9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-family:'Tajawal',sans-serif;font-size:11px;font-weight:900;cursor:pointer;transition:transform .18s ease,background .18s ease,box-shadow .18s ease;white-space:nowrap;}
+.bottom-nav-btn:hover{background:#eadbc7;transform:translateY(-3px);box-shadow:0 7px 16px rgba(118,88,59,.16)}
+.bottom-nav-btn:active{transform:translateY(-1px) scale(.98)}
+.bottom-nav-icon{font-size:21px;line-height:1;height:23px;display:flex;align-items:center;justify-content:center}
+.bottom-nav-cart{background:#fff6e9;border-color:#e5cfb4}
+.bottom-cart-badge{position:absolute;top:3px;right:calc(50% - 22px);min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--accent);color:#fff;
+  font-size:9px;line-height:17px;text-align:center;font-weight:900;box-shadow:0 2px 7px rgba(0,0,0,.15)}
+.favorites-count{background:#b45c72}.favorites-count:empty{display:none}
+@keyframes bottomNavIn{from{opacity:0;transform:translate(-50%,18px)}to{opacity:1;transform:translate(-50%,0)}}
+body{padding-bottom:95px!important}
+@media(max-width:700px){
+  .point-bottom-nav{bottom:12px;width:calc(100vw - 18px);min-height:57px;border-radius:18px;gap:3px;padding:5px;}
+  .bottom-nav-btn{font-size:10px;padding:6px 4px;border-radius:12px;}
+  .bottom-nav-icon{font-size:20px;height:22px}
+  .bottom-cart-badge{right:calc(50% - 19px);top:2px}
+}
+@media(max-width:380px){
+  .point-bottom-nav{width:calc(100vw - 10px);bottom:8px;min-height:54px;padding:4px}
+  .bottom-nav-btn{font-size:9px;padding:5px 2px}
+  .bottom-nav-icon{font-size:18px;height:20px}
+}
+/* نرفع زر واتساب فوق شريط التنقل ليبقى واضحاً ولا يغطي الأزرار */
+.whatsapp-float{bottom:92px!important;right:18px!important}
+@media(min-width:701px){.whatsapp-float{bottom:92px!important;right:25px!important}}
+</style>
+
+<style id="point-cafe-favorites-style">
+.product-card{overflow:hidden}
+.favorite-product-btn{position:absolute;top:8px;left:8px;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:rgba(255,250,243,.94);color:#b45c72;font-size:22px;line-height:1;cursor:pointer;z-index:3;box-shadow:0 4px 10px rgba(77,51,30,.12);transition:.18s}
+.favorite-product-btn:hover{transform:scale(1.08);background:#fff;color:#a33d59}.favorite-product-btn.is-favorite{color:#d6455d;background:#fff0f2}
+.favorite-item{display:flex;align-items:center;gap:10px;background:#fbf5ed;border:1px solid var(--border);border-radius:13px;padding:9px;margin:8px 0}
+.favorite-item img{width:58px;height:58px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--border)}
+.favorite-item-info{flex:1;min-width:0}
+.favorite-item-info strong{display:block;color:var(--text);font-size:13px}
+.favorite-item-info small{display:block;color:var(--primary);font-weight:800;margin-top:3px}
+.favorite-item-actions{display:flex;gap:5px}
+.favorite-item-actions button{border:1px solid var(--border);background:#fffaf3;color:var(--primary);border-radius:8px;padding:6px 8px;font-weight:800;cursor:pointer}
+</style>
+
+<style id="point-cafe-customer-auth-layout">
+/* POINT CAFE customer header/auth layout */
+.customer-account-actions-below{
+  width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:7px!important;
+  flex-wrap:wrap!important;
+  margin:0 0 10px!important;
+  padding:0!important;
+}
+.customer-account-actions-below .customer-mini-btn,
+.customer-account-actions-below .cart-btn{
+  width:auto!important;
+  min-width:92px!important;
+  height:34px!important;
+  min-height:34px!important;
+  margin:0!important;
+  padding:5px 9px!important;
+  font-size:11px!important;
+  border-radius:9px!important;
+  white-space:nowrap!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.customer-account-actions-below .pwa-install-page-btn{min-width:108px!important;}
+.customer-auth-modal-content{overflow-y:auto;}
+.customer-google-btn{
+  width:100%; min-height:48px; border:1px solid #dadce0; border-radius:10px;
+  background:#fff; color:#3c4043; display:flex; align-items:center; justify-content:center;
+  gap:10px; font-size:14px; font-weight:800; cursor:pointer; box-shadow:0 1px 2px #0001;
+}
+.customer-google-btn:hover{background:#f8f9fa;}
+.google-logo{width:22px;height:22px;flex:0 0 22px;}
+.auth-divider{display:flex;align-items:center;gap:9px;margin:16px 0;color:var(--muted);font-size:12px;font-weight:700;}
+.auth-divider:before,.auth-divider:after{content:"";height:1px;background:var(--border);flex:1;}
+.email-auth-form{display:flex;flex-direction:column;gap:9px;}
+.email-auth-form input{margin:0!important;height:44px!important;}
+.email-auth-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px;}
+.email-auth-btn{height:44px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--primary);font-weight:800;cursor:pointer;}
+.email-auth-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+@media(min-width:700px){
+  .customer-account-actions-below{justify-content:flex-start!important;}
+}
+@media(max-width:520px){
+  .customer-account-actions-below{gap:5px!important;margin-bottom:8px!important;}
+  .customer-account-actions-below .customer-mini-btn,
+  .customer-account-actions-below .cart-btn{min-width:82px!important;height:32px!important;font-size:10px!important;padding:4px 7px!important;}
+  .customer-account-actions-below .pwa-install-page-btn{min-width:98px!important;}
+  .email-auth-buttons{grid-template-columns:1fr 1fr;}
+}
+</style>
+
+
+<style id="point-cafe-brand-favorites-final">
+/* تكبير شعار واسم POINT CAFE ووصفه */
+.header-top .brand{gap:12px!important}
+.header-top .brand img{width:62px!important;height:62px!important;border-width:2px!important}
+.header-top .brand h2{font-size:24px!important;line-height:1.08!important;font-weight:900!important;letter-spacing:.2px!important}
+.header-top .brand span{font-size:14px!important;line-height:1.25!important;font-weight:800!important}
+/* قلب المفضلة فوق كل منتج */
+.product-card{overflow:visible!important}
+.favorite-product-btn{top:10px!important;right:10px!important;left:auto!important;width:40px!important;height:40px!important;border-radius:50%!important;font-size:25px!important;display:flex!important;align-items:center!important;justify-content:center!important;background:rgba(255,250,243,.97)!important;box-shadow:0 4px 12px rgba(77,51,30,.18)!important}
+.favorite-product-btn:hover{transform:scale(1.1)!important}
+@media(max-width:700px){
+  .header-top .brand img{width:54px!important;height:54px!important}
+  .header-top .brand h2{font-size:20px!important}
+  .header-top .brand span{font-size:12px!important}
+  .favorite-product-btn{width:38px!important;height:38px!important;font-size:24px!important;top:8px!important;right:8px!important}
+}
+@media(max-width:380px){
+  .header-top .brand img{width:50px!important;height:50px!important}
+  .header-top .brand h2{font-size:18px!important}
+  .header-top .brand span{font-size:11px!important}
+}
+</style>
+
+<style id="point-cafe-ai-final-fix">
+/* ===== POINT CAFE AI - COMPACT HEADER ASSISTANT ===== */
+.point-ai-fab{
+  position:absolute!important;
+  left:0!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:104px!important;
+  height:48px!important;
+  padding:4px 8px 4px 5px!important;
+  border:1.5px solid #d9bea0!important;
+  border-radius:24px!important;
+  background:#fffaf3!important;
+  color:#76583b!important;
+  box-shadow:0 4px 14px rgba(60,40,20,.16)!important;
+  z-index:110!important;
+  cursor:pointer!important;
+  overflow:visible!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:6px!important;
+  direction:ltr!important;
+  transition:transform .18s ease,box-shadow .18s ease!important;
+}
+.point-ai-fab:hover{transform:translateY(-50%) scale(1.03)!important;box-shadow:0 6px 18px rgba(60,40,20,.22)!important}
+.point-ai-fab:active{transform:translateY(-50%) scale(.98)!important}
+.point-ai-fab img{
+  width:36px!important;
+  height:36px!important;
+  min-width:36px!important;
+  object-fit:cover!important;
+  display:block!important;
+  border-radius:50%!important;
+  border:1.5px solid #9a7652!important;
+  background:#fff!important;
+}
+.point-ai-fab span{
+  position:static!important;
+  background:transparent!important;
+  color:#76583b!important;
+  border:0!important;
+  border-radius:0!important;
+  padding:0!important;
+  font-family:inherit!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+}
+.point-ai-fab b{
+  position:absolute!important;
+  left:27px!important;
+  top:2px!important;
+  min-width:17px!important;
+  height:17px!important;
+  padding:0 3px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:10px!important;
+  background:#25d366!important;
+  color:#fff!important;
+  border:1.5px solid #fff!important;
+  font:900 8px/1 Arial,sans-serif!important;
+}
+.point-ai-modal{
+  position:fixed!important;
+  inset:0!important;
+  z-index:15000!important;
+  display:none;
+  align-items:flex-end!important;
+  justify-content:center!important;
+  padding:18px!important;
+  background:rgba(42,27,15,.48)!important;
+  backdrop-filter:blur(3px)!important;
+}
+.point-ai-card{
+  width:min(520px,100%)!important;
+  max-height:min(720px,calc(100vh - 36px))!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  background:#fffaf3!important;
+  border:1px solid #dfc9ad!important;
+  border-radius:24px!important;
+  box-shadow:0 20px 70px rgba(45,25,10,.35)!important;
+  direction:rtl!important;
+}
+.point-ai-head{display:flex!important;align-items:center!important;gap:10px!important;padding:13px 15px!important;background:linear-gradient(135deg,#9a7652,#76583b)!important;color:#fff!important;flex:0 0 auto!important}
+.point-ai-head img{width:48px!important;height:48px!important;min-width:48px!important;object-fit:cover!important;border-radius:50%!important;border:2px solid rgba(255,255,255,.9)!important;background:#fff!important;display:block!important}
+.point-ai-head>div{min-width:0!important;flex:1!important;text-align:right!important}
+.point-ai-head strong{display:block!important;font-size:16px!important;font-weight:900!important;line-height:1.4!important}
+.point-ai-head small{display:block!important;font-size:11px!important;opacity:.9!important;line-height:1.5!important}
+.point-ai-close{width:38px!important;height:38px!important;flex:0 0 38px!important;border:1px solid rgba(255,255,255,.65)!important;border-radius:50%!important;background:rgba(255,255,255,.15)!important;color:#fff!important;font-size:20px!important;cursor:pointer!important}
+.point-ai-messages{flex:1 1 auto!important;min-height:170px!important;max-height:calc(100vh - 330px)!important;overflow-y:auto!important;padding:14px!important;background:#fff!important;direction:rtl!important}
+.point-ai-msg{max-width:88%!important;width:max-content!important;padding:9px 12px!important;margin:0 0 9px!important;border-radius:15px!important;font-size:13px!important;line-height:1.75!important;white-space:pre-wrap!important;overflow-wrap:anywhere!important}
+.point-ai-msg.bot{margin-right:0!important;margin-left:auto!important;background:#f3e7d7!important;color:#4b3828!important;border-bottom-right-radius:5px!important}
+.point-ai-msg.user{margin-left:0!important;margin-right:auto!important;background:#9a7652!important;color:#fff!important;border-bottom-left-radius:5px!important}
+.point-ai-suggestions{display:flex!important;flex-wrap:wrap!important;gap:6px!important;padding:9px 12px!important;background:#fffaf3!important;border-top:1px solid #ead8c2!important;flex:0 0 auto!important}
+.point-ai-suggestions button{border:1px solid #d9bea0!important;background:#fff!important;color:#6f4d30!important;border-radius:10px!important;padding:7px 10px!important;font-family:inherit!important;font-size:11px!important;font-weight:800!important;cursor:pointer!important}
+.point-ai-input{display:flex!important;gap:7px!important;padding:10px 12px 12px!important;background:#fffaf3!important;border-top:1px solid #ead8c2!important;flex:0 0 auto!important}
+.point-ai-input input{min-width:0!important;flex:1!important;height:44px!important;border:1px solid #d9c2a8!important;border-radius:12px!important;background:#fff!important;color:#4b3828!important;padding:0 12px!important;outline:none!important;font-family:inherit!important;font-size:13px!important}
+.point-ai-input input:focus{border-color:#9a7652!important;box-shadow:0 0 0 3px rgba(154,118,82,.12)!important}
+.point-ai-input button{width:76px!important;height:44px!important;border:0!important;border-radius:12px!important;background:#9a7652!important;color:#fff!important;font-family:inherit!important;font-size:13px!important;font-weight:900!important;cursor:pointer!important}
+@media(max-width:700px){
+  .header-top{position:relative!important;padding-left:112px!important;box-sizing:border-box!important}
+  .point-ai-fab{left:4px!important;width:96px!important;height:42px!important;padding:3px 7px 3px 4px!important;gap:5px!important}
+  .point-ai-fab img{width:31px!important;height:31px!important;min-width:31px!important}
+  .point-ai-fab span{font-size:10px!important}
+  .point-ai-fab b{left:24px!important;top:1px!important;min-width:15px!important;height:15px!important;font-size:7px!important}
+  .point-ai-modal{padding:0!important;align-items:flex-end!important}
+  .point-ai-card{width:100%!important;max-height:82vh!important;border-radius:22px 22px 0 0!important}
+  .point-ai-messages{max-height:42vh!important;min-height:150px!important}
+  .point-ai-head{padding:11px 12px!important}
+  .point-ai-head img{width:44px!important;height:44px!important;min-width:44px!important}
+}
+@media(max-width:380px){
+  .header-top{padding-left:103px!important}
+  .point-ai-fab{left:2px!important;width:90px!important;height:40px!important}
+  .point-ai-fab img{width:29px!important;height:29px!important;min-width:29px!important}
+  .point-ai-fab span{font-size:9px!important}
+}
+</style>
+
+<style id="point-cafe-logo-stability">
+#header-logo,#ai-fab-logo,#ai-chat-logo,#splash-img,#toast-img{object-fit:contain;background:#fff;}
+#header-logo{display:block!important;visibility:visible!important;opacity:1!important;}
+.point-ai-fab img{display:block!important;visibility:visible!important;opacity:1!important;}
+</style>
+
+<style id="customer-orders-four-boxes">
+.customer-order-boxes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 16px}
+.customer-order-box{border:1px solid var(--border);background:#fffaf3;border-radius:16px;padding:13px 8px;cursor:pointer;color:var(--primary);font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:5px;min-height:105px;transition:none}
+.customer-order-box.active{border-color:#9a7652;box-shadow:0 0 0 2px rgba(154,118,82,.12);background:#f7ecdf}
+.customer-order-box span{font-size:25px}.customer-order-box b{font-size:13px}.customer-order-box small{font-size:10px;color:var(--muted)}
+.customer-live-tracking-shell{width:min(900px,96vw)!important;max-width:900px!important}
+.customer-track-picker{display:flex;gap:8px;margin:10px 0}.customer-track-picker input{flex:1;border:1px solid var(--border);border-radius:12px;padding:12px;font-family:inherit}
+.customer-live-map{width:100%;height:min(58vh,520px);min-height:320px;border-radius:18px;overflow:hidden;background:#eee;border:1px solid var(--border)}
+.customer-live-driver-info{padding:11px 13px;background:#fffaf3;border:1px solid var(--border);border-radius:13px;margin:10px 0;line-height:1.9;font-weight:800}
+.customer-live-status{padding:10px;text-align:center;font-weight:900;color:var(--primary)}
+@media(max-width:650px){.customer-order-boxes{grid-template-columns:repeat(2,1fr)}.customer-track-picker{flex-direction:column}.customer-live-map{height:55vh;min-height:300px}}
+</style>
+<style id="point-cafe-fixed-ui">
+.recommended-section{margin-bottom:24px}
+.recommended-section .app-section-title{margin-top:0}
+.customer-order-cancelled{margin-top:8px;padding:10px 12px;border-radius:11px;background:#fff1f1;border:1px solid #f0b5b5;color:#8b1e1e;font-weight:800;font-size:13px;line-height:1.7}
+.customer-order-status.status-cancelled{background:#b94b45!important;color:#fff!important}
+</style>
+
+<style id="point-cafe-orders-fullscreen-final">
+/* طلباتي والتتبع: شاشة كاملة على الجوال */
+@media(max-width:700px){
+  #customer-orders-modal, #customer-live-tracking-modal{
+    position:fixed!important; inset:0!important; width:100vw!important; height:100dvh!important;
+    min-height:100dvh!important; padding:0!important; margin:0!important;
+    align-items:stretch!important; justify-content:stretch!important;
+    z-index:50000!important; background:rgba(42,27,15,.48)!important;
+  }
+  #customer-orders-modal .customer-orders-shell,
+  #customer-live-tracking-modal .customer-live-tracking-shell{
+    width:100%!important; max-width:none!important; height:100dvh!important; max-height:none!important;
+    min-height:100dvh!important; margin:0!important; border-radius:0!important;
+    border:0!important; display:flex!important; flex-direction:column!important;
+    overflow:hidden!important; padding:14px 12px calc(88px + env(safe-area-inset-bottom))!important;
+  }
+  #customer-orders-list{flex:1 1 auto!important; overflow-y:auto!important; min-height:0!important; padding-bottom:12px!important;}
+  #customer-live-tracking-modal .customer-live-map{flex:1 1 auto!important; height:auto!important; min-height:0!important; border-radius:14px!important;}
+  #customer-live-tracking-modal .customer-track-picker{flex:0 0 auto!important;}
+  #customer-live-tracking-modal .customer-live-driver-info,
+  #customer-live-tracking-modal .customer-live-status{flex:0 0 auto!important;}
+}
+@keyframes pointAiThinking{0%,100%{transform:translateY(-50%) rotate(0deg) scale(1)}25%{transform:translateY(-50%) rotate(-2deg) scale(1.03)}50%{transform:translateY(-50%) rotate(2deg) scale(1.06)}75%{transform:translateY(-50%) rotate(-1deg) scale(1.03)}}
+@keyframes pointAiMsgIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+.point-ai-fab.ai-thinking{animation:pointAiThinking .8s ease-in-out infinite!important}
+.point-ai-msg{animation:pointAiMsgIn .25s ease-out both!important}
+@media(prefers-reduced-motion:reduce){.point-ai-fab.ai-thinking,.point-ai-msg{animation:none!important}}
+</style>
+
+<style id="point-cafe-fixed-language-layout">
+  /* تغيير اللغة لا يقلب الصفحة ولا يغيّر أماكن الشعار والأيقونات والأقسام */
+  html,body{direction:rtl!important;}
+  header,.header-top,.brand,.header-actions,.customer-account-actions,
+  .products-grid,.coffee-info-grid,.reviews-section,.modal-content,
+  .section-box,.point-bottom-nav{direction:rtl!important;}
+  .language-switcher{direction:ltr!important;}
+  .header-top .brand{flex-direction:row!important;}
+  .header-top .brand img{
+    flex:0 0 auto!important;
+    transform:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+  #header-logo,.brand img{transform:none!important;animation:none!important;transition:none!important;}
+  .ticker-move{transform:none!important;animation:none!important;}
+  /* إبقاء الأيقونات والنجوم في ترتيبها عند تغيير اللغة */
+  .coffee-info-icon,.bottom-nav-icon,.cart-btn,.customer-mini-btn{direction:rtl!important;}
+</style>
+
+<style id="point-cafe-product-rating">
+.product-rating{display:flex;align-items:center;justify-content:flex-start;gap:5px;margin:6px 0 4px;font-size:12px;direction:ltr!important}
+.product-rating .rating-stars{letter-spacing:1px;color:#e1a52b}
+.product-rating strong{color:var(--primary);font-size:12px}
+.product-rating small{color:var(--muted)}
+.product-rating-empty{font-size:11px;color:var(--muted);margin:5px 0}
+</style>
+
+<style id="point-cafe-product-detail-final">
+.product-detail-modal{position:fixed;inset:0;z-index:14000;display:none;align-items:flex-start;justify-content:center;overflow:auto;background:rgba(42,27,15,.52);backdrop-filter:blur(4px);padding:0 0 90px}
+.product-detail-page{width:min(900px,100%);min-height:100vh;background:var(--bg);color:var(--text);position:relative;box-shadow:0 0 45px rgba(0,0,0,.25)}
+.product-detail-top{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:8px 10px}
+.product-detail-toprow{display:flex;align-items:center;gap:7px}
+.product-detail-back{width:40px;height:40px;margin:0;border:1px solid var(--border);border-radius:12px;background:#fffaf3;color:var(--primary);font-size:19px;font-weight:900}
+.product-detail-brand{display:flex;align-items:center;gap:7px;min-width:0;flex:1}
+.product-detail-brand img{width:40px;height:40px;object-fit:contain;border-radius:50%;border:1px solid var(--primary);background:#fff}
+.product-detail-brand b{font-size:15px;color:var(--primary)}
+.product-detail-ai{width:92px!important;height:40px!important;margin:0!important;padding:3px 7px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;border:1px solid var(--border)!important;border-radius:12px!important;background:#fffaf3!important;color:var(--primary)!important;font-weight:900!important;font-size:10px!important}
+.product-detail-search{display:flex;gap:7px;margin-top:7px}
+.product-detail-search input{margin:0;min-width:0}
+.product-detail-controls{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;margin-top:6px}
+.product-detail-hero{margin:10px 10px 0;min-height:105px;border-radius:18px;padding:16px 18px;background:linear-gradient(135deg,#4b3828,#9a7652);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;overflow:hidden}
+.product-detail-hero h2{color:#fff;margin:0 0 4px;font-size:20px}.product-detail-hero p{margin:0;color:#f8ead8;font-size:11px}
+.product-detail-card{margin:10px;background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:14px;box-shadow:var(--shadow)}
+.product-detail-image-wrap{width:100%;height:min(55vh,430px);min-height:240px;border-radius:16px;background:#fbf5ed;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.product-detail-image{width:100%;height:100%;object-fit:contain;padding:12px;image-rendering:auto}
+.product-detail-name{font-size:22px;font-weight:900;color:var(--text);margin-top:13px}
+.product-detail-price{font-size:20px;font-weight:900;color:var(--primary);margin:5px 0}
+.product-detail-rating{margin:5px 0 8px}
+.product-detail-specs{background:#fff8ef;border:1px dashed var(--border);border-radius:12px;padding:10px;margin:8px 0;line-height:1.8;font-size:13px}
+.product-detail-add{min-height:50px!important;font-size:16px!important;margin-top:10px!important}
+.product-detail-recommend{margin:10px}.product-detail-recommend h3{color:var(--primary);margin:8px 0}
+.product-detail-recommend-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.product-detail-mini{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:8px;cursor:pointer}
+.product-detail-mini img{width:100%;height:110px;object-fit:contain;background:#fbf5ed;border-radius:10px}
+.product-detail-mini b{display:block;margin-top:5px;font-size:12px}.product-detail-mini span{font-size:12px;color:var(--primary);font-weight:900}
+@media(min-width:700px){.product-detail-recommend-grid{grid-template-columns:repeat(4,1fr)}.product-detail-mini img{height:125px}}
+</style>
+
+<style id="point-cafe-product-detail-nav-fix">.point-bottom-nav{z-index:14500!important}.product-detail-modal{z-index:14000!important}</style>
+
+<style id="point-cafe-moving-welcome-final">
+/* شريط الترحيب: الحركة الحقيقية يتم تشغيلها بالجافاسكربت حتى لا تتعارض مع أي CSS آخر */
+.ticker-wrap{position:relative!important;overflow:hidden!important;width:100%!important;direction:ltr!important;}
+.ticker-wrap .ticker-move{
+  width:max-content!important;min-width:0!important;height:100%!important;
+  display:flex!important;flex-direction:row!important;align-items:center!important;
+  justify-content:flex-start!important;overflow:visible!important;
+  transform:translate3d(0,0,0)!important;animation:none!important;
+  will-change:transform!important;
+}
+.ticker-wrap .ticker-item{
+  display:block!important;width:max-content!important;min-width:max-content!important;
+  flex:0 0 auto!important;padding:0 35px!important;margin:0!important;
+  white-space:nowrap!important;text-align:center!important;position:static!important;
+  transform:none!important;animation:none!important;
+}
+</style>
+</head>
+<body>
+
+  <div id="closed-banner" class="store-closed-bar">
+    🔒 المتجر مغلق حالياً: <span id="closed-reason-text">سوف نعود قريباً</span>
+  </div>
+
+  <div id="splash-screen">
+    <img id="splash-img" src="https://via.placeholder.com/120?text=متجر+أم+سالم" class="splash-logo" alt="شعار المتجر">
+    <div class="splash-title">POINT CAFE<br><span style="font-size: 14px; color:var(--primary); font-weight:600;">كافيه ومشروبات وحلويات</span></div>
+  </div>
+
+  <a id="whatsapp-float-btn" href="https://wa.me/967771234567" class="whatsapp-float" target="_blank" title="تواصل عبر الواتساب">
+    <svg viewBox="0 0 32 32">
+      <path d="M16 2a13 13 0 0 0-11 20l-2 7 7-2a13 13 0 1 0 6-25zm0 24a11 11 0 0 1-5.6-1.5l-.4-.2-4.1 1.1 1.1-4-.3-.5A11 11 0 1 1 16 26zm6-8c-.3-.2-1.9-1-2.2-1.1s-.5-.2-.7.2-.8 1.1-1 1.3-.4.2-.7 0a9 9 0 0 1-2.6-1.6 10 10 0 0 1-1.8-2.3c-.2-.3 0-.5.1-.7s.3-.4.5-.6l.3-.4c.1-.2.1-.3 0-.5s-.7-1.7-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.2 1.2-1.2 2.9 1.2 3.4 1.4 3.6 2.4 3.7 5.8 5.2c.8.3 1.4.5 1.9.7.8.2 1.5.2 2.1.1.7-.1 2.2-.9 2.5-1.8s.3-1.6.2-1.8c-.1-.1-.3-.2-.6-.4z"/>
+    </svg>
+  </a>
+
+  <div class="point-ai-modal" id="point-ai-modal" onclick="if(event.target===this)closePointCafeAssistant()">
+    <div class="point-ai-card" role="dialog" aria-modal="true" aria-label="مساعد POINT CAFE">
+      <div class="point-ai-head"><img id="ai-chat-logo" src="./point-cafe-logo.jpg" alt="POINT CAFE"><div><strong>🤖 مساعد POINT CAFE</strong><small>اسأل عن المنتجات، الأسعار، الطلبات والتوصيل</small></div><button class="point-ai-close" onclick="closePointCafeAssistant()">✕</button></div>
+      <div class="point-ai-messages" id="point-ai-messages"></div>
+      <div class="point-ai-suggestions">
+        <button onclick="askPointCafeAssistant('ما المنتجات المتوفرة؟')">المنتجات</button><button onclick="askPointCafeAssistant('ما الأسعار؟')">الأسعار</button><button onclick="askPointCafeAssistant('كيف أطلب؟')">طريقة الطلب</button><button onclick="askPointCafeAssistant('أين طلبي؟')">تتبع طلبي</button>
+      </div>
+      <div class="point-ai-input"><input id="point-ai-input" placeholder="اكتب سؤالك هنا..." onkeydown="if(event.key==='Enter')sendPointCafeAssistant()"><button onclick="sendPointCafeAssistant()">إرسال</button></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast-notification">
+    <img id="toast-img" src="" alt="شعار">
+    <span>تمت إضافة المنتج إلى السلة 🛍️</span>
+  </div>
+
+  <!-- شريط التنقل العائم السفلي -->
+  <nav class="point-bottom-nav" id="point-bottom-nav" aria-label="التنقل الرئيسي">
+    <button class="bottom-nav-btn" id="bottom-login-btn" type="button" onclick="closeProductPage();openCustomerAuth()">
+      <span class="bottom-nav-icon">👤</span><span>حسابي</span>
+    </button>
+    <button class="bottom-nav-btn" type="button" onclick="closeProductPage();openCustomerOrders()">
+      <span class="bottom-nav-icon">📦</span><span>طلباتي</span>
+    </button>
+    <button class="bottom-nav-btn bottom-nav-cart" type="button" onclick="closeProductPage();toggleCart()">
+      <span class="bottom-nav-icon">🛒</span><span>السلة</span><b id="bottom-cart-count" class="bottom-cart-badge">0</b>
+    </button>
+    <button class="bottom-nav-btn" type="button" onclick="closeProductPage();openFavorites()">
+      <span class="bottom-nav-icon">♡</span><span>المفضلات</span><b id="favorites-count" class="bottom-cart-badge favorites-count">0</b>
+    </button>
+  </nav>
+
+  
+<script>
+(function(){
+  document.addEventListener('click', function(e){
+    const modal = document.getElementById('product-detail-modal');
+    if(!modal || modal.style.display !== 'flex') return;
+    if(e.target === modal) closeProductPage();
+  });
+})();
+</script>
+<div id="product-detail-modal" class="product-detail-modal" aria-hidden="true">
+  <div class="product-detail-page">
+    <div class="product-detail-top">
+      <div class="product-detail-toprow">
+        <button class="product-detail-back" type="button" onclick="closeProductPage()" aria-label="رجوع">‹</button>
+        <div class="product-detail-brand">
+          <img id="product-detail-logo" src="./point-cafe-logo.jpg" alt="POINT CAFE">
+          <div><b>POINT CAFE</b><div style="font-size:9px;color:var(--muted)">اطلب بكل سهولة</div></div>
+        </div>
+        <button class="product-detail-ai" type="button" onclick="openPointCafeAssistant()">🤖 اسألني <b>AI</b></button>
+      </div>
+      <div class="product-detail-search">
+        <input id="product-detail-search-input" class="search-input" type="search" placeholder="ابحث عن قهوة أو مشروب..." oninput="filterProductDetailRecommendations()">
+      </div>
+      <div class="product-detail-controls">
+        <button type="button" class="theme-btn" onclick="toggleTheme()">🌙 الوضع الليلي</button>
+        <div class="language-switcher">
+          <button type="button" class="lang-btn active" data-lang="ar" onclick="setLanguage('ar')">العربية</button>
+          <button type="button" class="lang-btn" data-lang="en" onclick="setLanguage('en')">English</button>
+          <button type="button" class="lang-btn" data-lang="zh" onclick="setLanguage('zh')">中文</button>
+        </div>
+      </div>
+    </div>
+    <div class="ticker-wrap" aria-label="إعلان المتجر">
+      <div class="ticker-move"><div class="ticker-item" id="product-detail-ticker">🌸 أهلاً بكم في POINT CAFE ☕ نقدم لكم أشهى المشروبات والحلويات 🛍️</div></div>
+    </div>
+    <div class="product-detail-hero">
+      <div><h2>☕ أهلاً بكم في POINT CAFE</h2><p>منتجاتك المفضلة في تجربة كوفيه عصرية ✨</p></div>
+      <div style="font-size:42px">☕</div>
+    </div>
+    <div class="product-detail-card">
+      <div class="product-detail-image-wrap">
+        <img id="product-detail-image" class="product-detail-image" src="./point-cafe-logo.jpg" alt="المنتج" decoding="async">
+      </div>
+      <div id="product-detail-name" class="product-detail-name">المنتج</div>
+      <div id="product-detail-rating" class="product-detail-rating"></div>
+      <div id="product-detail-price" class="product-detail-price"></div>
+      <div id="product-detail-specs" class="product-detail-specs" style="display:none"></div>
+      <button id="product-detail-add" class="add-to-cart product-detail-add" type="button">إضافة للسلة 🛍️</button>
+    </div>
+    <div class="product-detail-recommend">
+      <h3>✨ منتجات يمكن أن تعجبك</h3>
+      <div id="product-detail-recommendations" class="product-detail-recommend-grid"></div>
+    </div>
+  </div>
+</div>
+
+<header>
+    <div class="header-top">
+      <button class="point-ai-fab" type="button" onclick="openPointCafeAssistant()" aria-label="مساعد POINT CAFE">
+        <img id="ai-fab-logo" src="./point-cafe-logo.jpg" alt="POINT CAFE AI">
+        <span>اسألني</span>
+        <b>AI</b>
+      </button>
+      <div class="brand">
+        <img id="header-logo" src="./point-cafe-logo.jpg" alt="شعار POINT CAFE" onerror="this.onerror=null;this.src='./point-cafe-logo.jpg'">
+        <div>
+          <h2>POINT CAFE</h2>
+          <span style="font-size:11px; color:var(--primary); font-weight:700;">اطلب بكل سهولة</span>
+        </div>
+      </div>
+      <div class="header-actions" aria-hidden="true"></div>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="search-input" class="search-input" placeholder="ابحث عن قهوة أو مشروب..." oninput="filterProducts()">
+    </div>
+    <div class="store-controls" aria-label="إعدادات المتجر">
+      <button type="button" class="theme-btn" id="theme-toggle" onclick="toggleTheme()">🌙 الوضع الليلي</button>
+      <div class="language-switcher">
+        <button type="button" class="lang-btn active" data-lang="ar" onclick="setLanguage('ar')">العربية</button>
+        <button type="button" class="lang-btn" data-lang="en" onclick="setLanguage('en')">English</button>
+        <button type="button" class="lang-btn" data-lang="zh" onclick="setLanguage('zh')">中文</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+<div class="ticker-wrap" aria-label="إعلان المتجر">
+      <div class="ticker-move" id="point-cafe-main-ticker-track">
+        <div class="ticker-item" id="point-cafe-ticker-text">🌸 أهلاً بكم في POINT CAFE ☕ نقدم لكم أشهى المشروبات والحلويات 🛍️</div>
+        <div class="ticker-item" id="point-cafe-ticker-text-copy" aria-hidden="true">🌸 أهلاً بكم في POINT CAFE ☕ نقدم لكم أشهى المشروبات والحلويات 🛍️</div>
+      </div>
+    </div>
+
+
+    <section class="coffee-hero" aria-label="ترحيب POINT CAFE">
+      <div class="hero-glow"></div>
+      <span class="bean b1"></span><span class="bean b2"></span><span class="bean b3"></span>
+      <div class="coffee-copy">
+        <h1 id="customer-greeting-title">☕ أهلاً بك في POINT CAFE</h1>
+        <p>قهوتك المفضلة، مشروباتك وحلوياتك في تجربة كوفيه عصرية ✨</p>
+      </div>
+      <div class="coffee-cup" aria-hidden="true">
+        <span class="steam s1"></span><span class="steam s2"></span><span class="steam s3"></span>
+      </div>
+    </section>
+
+    <div class="slider-container" id="slider-box">
+      <div class="slider-track" id="slider-main"></div>
+    </div>
+
+    
+<div id="pwa-app-categories" class="app-categories" aria-label="أقسام المتجر"></div>
+<div class="pca-welcome-card" aria-label="عن POINT CAFE">
+  <div class="pca-welcome-icon">☕</div>
+  <div class="pca-welcome-text">
+    <h3 class="pca-welcome-title">☕ أهلاً بك في POINT CAFE</h3>
+    <p class="pca-welcome-desc">قهوتك المفضلة، مشروباتك وحلوياتك في تجربة كوفيه عصرية ✨</p>
+  </div>
+</div>
+
+
+
+<div class="app-section-title"><span>☕ أحدث المنتجات</span><small>عرض الكل ←</small></div>
+<div class="products-grid" id="products-container"></div>
+
+<div id="recommended-section" class="recommended-section" style="margin-top:24px;">
+  <div class="app-section-title"><span>✨ قد يعجبك أيضاً</span><small>اقتراحات لك</small></div>
+  <div class="products-grid" id="recommended-products"></div>
+</div>
+
+
+
+    <section class="coffee-info-grid" aria-label="معلومات الكوفيه">
+      <article class="coffee-info-card"><div class="coffee-info-icon">☕</div><h3 data-i18n="aboutTitle">من نحن</h3><p data-i18n="aboutText">كوفيه POINT CAFE يقدم القهوة والمشروبات والحلويات بطلب سهل وخدمة ودودة.</p></article>
+      <article class="coffee-info-card"><div class="coffee-info-icon">🚚</div><h3 data-i18n="deliveryTitle">التوصيل</h3><p data-i18n="deliveryText">نوفر التوصيل داخل مناطق الخدمة، ويمكنك إرسال موقعك مع الطلب.</p></article>
+      <article class="coffee-info-card"><div class="coffee-info-icon">💳</div><h3 data-i18n="paymentTitle">دفع تحويل</h3><p data-i18n="paymentText">يمكنك اختيار التحويل وإرفاق صورة الحوالة ليتم التحقق منها.</p></article>
+      <article class="coffee-info-card"><div class="coffee-info-icon">🏪</div><h3 data-i18n="storeTitle">متجر الكوفيه</h3><p data-i18n="storeText">تصفح المنتجات، أضفها إلى السلة، ثم اختر التوصيل أو الاستلام.</p></article>
+    </section>
+
+
+    <div class="reviews-section">
+      <h3>آراء وتقييمات العملاء</h3>
+      <div class="reviews-list" id="reviews-list"></div>
+      
+      <div style="background: #fbf5ed; padding:16px; border-radius:12px; border:1px solid var(--border);">
+        <h4 style="font-size:14px; margin-bottom:10px; color:var(--primary);">أضف رأيك وتقييمك:</h4>
+        <input type="text" id="review-name" class="review-form-input" placeholder="اسمك الكريم">
+        
+        <div class="star-rating" id="star-rating">
+          <span onclick="setRating(5)">★</span>
+          <span onclick="setRating(4)">★</span>
+          <span onclick="setRating(3)">★</span>
+          <span onclick="setRating(2)">★</span>
+          <span onclick="setRating(1)">★</span>
+        </div>
+        
+        <input type="text" id="review-text" class="review-form-input" placeholder="اكتب رأيك حول جودة المنتجات وتجربة المتجر...">
+        <button class="add-to-cart" onclick="addReview()">إرسال التقييم</button>
+      </div>
+    </div>
+  </div>
+
+<footer>
+    جميع الحقوق محفوظة لـ <br>
+    <strong>POINT CAFE</strong> 2026<br>
+    <a href="https://wa.me/0553804010" target="_blank" class="dev-link">
+      <span>مبرمج</span> 
+      <span style="direction:ltr;">0553804010</span>
+      <span>💬</span>
+    </a>
+  </footer>
+
+  <div class="modal" id="cart-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>سلة التسوق</h3>
+        <button onclick="toggleCart()" style="border:none; background:none; font-size:20px; cursor:pointer; color:var(--primary);">✕</button>
+      </div>
+
+      <div id="store-location-box" class="store-location-card" style="display:none;">
+        📍 <strong>موقع المتجر:</strong> <a id="store-location-link" href="#" target="_blank" rel="noopener">فتح موقع المتجر على الخريطة 🗺️</a>
+      </div>
+
+      <div id="cart-items"></div>
+      <div id="cart-total" class="cart-summary-box"><div class="cart-summary-row"><span>الإجمالي:</span><strong>0</strong></div><div class="cart-summary-row delivery"><span>التوصيل:</span><strong>مجاني</strong></div><div class="cart-summary-row grand"><span>الإجمالي مع التوصيل:</span><strong>0</strong></div></div>
+
+      <div style="margin-top: 15px; background: #fbf5ed; padding: 14px; border: 1px solid var(--border); border-radius: 12px;">
+        <label style="font-size: 13px; font-weight: 700; color:var(--primary); display:block; margin-bottom:6px;">👤 اسم العميل (إجباري):</label>
+        <input type="text" id="customer-name" class="review-form-input" placeholder="أدخل اسمك الكامل هنا..." required>
+
+        <label style="font-size: 13px; font-weight: 700; color:var(--primary); display:block; margin-top:8px; margin-bottom:6px;">📞 رقم الجوال للتواصل (إجباري):</label>
+        <input type="tel" id="customer-phone" class="review-form-input" placeholder="مثال: 77xxxxxxx أو 71xxxxxxx" inputmode="tel" required>
+
+        <label style="font-size: 13px; font-weight: 700; color:var(--primary); display:block; margin-top:8px; margin-bottom:6px;">🚚 طريقة الاستلام:</label>
+        <div class="delivery-choice">
+          <label><input type="radio" name="delivery-type" value="delivery" checked onchange="toggleDeliveryFields()"> 🚚 توصيل إلى الموقع</label>
+          <label><input type="radio" name="delivery-type" value="pickup" onchange="toggleDeliveryFields()"> 🏪 استلام من الفرع</label>
+        </div>
+
+        <div id="delivery-fields">
+          <label style="font-size: 13px; font-weight: 700; color:var(--primary); display:block; margin-top:8px; margin-bottom:6px;">📍 موقع التوصيل / العنوان:</label>
+          <input type="text" id="customer-location" class="review-form-input" placeholder="أدخل العنوان أو المنطقة...">
+          <button type="button" class="btn-gps" onclick="getCurrentLocation()">📍 اضغط هنا لتحديد موقعك تلقائياً</button>
+        </div>
+      </div>
+
+      <div class="payment-box" style="background:#fbf5ed;border:1px solid var(--border);padding:14px;border-radius:12px;margin-top:14px;">
+        <label style="font-size:13px;font-weight:700;color:var(--primary);display:block;margin-bottom:7px;">💳 طريقة الدفع (إجباري):</label>
+        <div class="delivery-choice">
+          <label><input type="radio" name="payment-method" value="cash" checked onchange="togglePaymentFields()"> 💵 كاش</label>
+          <label><input type="radio" name="payment-method" value="transfer" onchange="togglePaymentFields()"> 🏦 تحويل</label>
+        </div>
+        <div id="transfer-fields" style="display:none;margin-top:12px;">
+          <p style="font-weight:800;color:var(--primary);margin-bottom:8px;">🏦 اختر البنك الذي ستُحوّل إليه:</p>
+          <select id="selected-bank" class="review-form-input"></select>
+          <label style="margin-top:10px;">📷 صورة الحوالة (إجباري):</label>
+          <input type="file" id="transfer-image" class="review-form-input" accept="image/*" onchange="previewTransferImage(event)">
+          <img id="transfer-preview" style="display:none;width:100%;max-height:220px;object-fit:contain;border:1px dashed var(--border);border-radius:10px;background:#fff;padding:5px;margin-top:8px;" alt="صورة الحوالة">
+          <p class="note">اختر صورة الحوالة من المعرض، وستظهر مع الطلب للمدير.</p>
+        </div>
+      </div>
+
+      <div class="shipping-info-box">
+        🚚 سيتم عرض بيانات التوصيل للمدير ليتم تجهيز الطلب وتسليمه للسائق.
+      </div>
+
+      <div class="bank-box" id="bank-accounts-container">
+        <p style="font-weight:800; margin-bottom:10px; text-align:center; color:var(--primary);">حسابات التحويل المالي المعتمدة:</p>
+        <div id="bank-list-modal"></div>
+      </div>
+
+      <button class="btn-submit-whatsapp" id="btn-submit-order" onclick="sendOrderToWhatsApp()">إتمام الطلب وإرساله ☕</button>
+    </div>
+  </div>
+
+  <div class="modal" id="favorites-modal" style="align-items:center;">
+    <div class="modal-content" style="border-radius:24px;max-width:560px;">
+      <div class="modal-header"><h3>♡ المفضلات</h3><button onclick="closeFavorites()" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--primary);">✕</button></div>
+      <div id="favorites-list"><div class="customer-empty">لا توجد منتجات في المفضلات حالياً.</div></div>
+    </div>
+  </div>
+
+  <div class="modal" id="customer-auth-modal" style="align-items:center;">
+    <div class="modal-content customer-auth-modal-content" style="border-radius:24px;max-width:470px;max-height:92vh;">
+      <div class="modal-header"><h3>👤 حساب العميل</h3><button onclick="closeCustomerModals()" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--primary);">✕</button></div>
+      <div class="customer-auth-box">
+        <div style="font-size:42px;margin-bottom:8px;">☕</div>
+        <h3 style="color:var(--primary);margin-bottom:7px;">تسجيل الدخول أو إنشاء حساب</h3>
+        <p class="note" style="line-height:1.8;margin-bottom:13px;">سجّل الدخول أو أنشئ حسابًا لإضافة المنتجات إلى السلة ومتابعة طلباتك.</p>
+
+        <button class="customer-google-btn" onclick="loginWithGoogle()" type="button">
+          <svg class="google-logo" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.654 31.657 29.22 35 24 35c-6.075 0-11-4.925-11-11s4.925-11 11-11c2.803 0 5.365 1.048 7.311 2.759l5.657-5.657C33.48 7.053 28.977 5 24 5 13.507 5 5 13.507 5 24s8.507 19 19 19c11.493 0 19-8.507 19-19 0-1.341-.138-2.65-.389-3.917z"/>
+            <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 16.108 18.961 13 24 13c2.803 0 5.365 1.048 7.311 2.759l5.657-5.657C33.48 7.053 28.977 5 24 5c-7.29 0-13.604 4.117-17.694 9.691z"/>
+            <path fill="#4CAF50" d="M24 43c4.875 0 9.286-1.866 12.657-4.909l-5.793-4.904C29.041 34.81 26.715 35 24 35c-5.199 0-9.616-3.317-11.288-7.946l-6.522 5.025C10.015 38.719 16.42 43 24 43z"/>
+            <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-1.158 3.264-4.293 5.682-7.439 7.087l5.793 4.904C33.287 40.13 43 34 43 24c0-1.341-.138-2.65-.389-3.917z"/>
+          </svg>
+          <span>تسجيل الدخول / إنشاء حساب عبر Google</span>
+        </button>
+
+        <div class="auth-divider"><span>أو عبر البريد الإلكتروني</span></div>
+
+        <div class="email-auth-form">
+          <input id="customer-email-auth" type="email" inputmode="email" autocomplete="email" placeholder="البريد الإلكتروني">
+          <input id="customer-name-auth" type="text" autocomplete="name" placeholder="الاسم (عند إنشاء حساب)" >
+          <input id="customer-password-auth" type="password" autocomplete="current-password" placeholder="كلمة المرور">
+          <div class="email-auth-buttons">
+            <button class="email-auth-btn primary" onclick="loginWithEmail()" type="button">تسجيل الدخول</button>
+            <button class="email-auth-btn" onclick="createAccountWithEmail()" type="button">إنشاء حساب</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="customer-orders-modal" style="align-items:center;">
+    <div class="modal-content customer-orders-shell" style="border-radius:24px;max-width:760px;">
+      <div class="modal-header"><h3>📦 طلباتي</h3><button onclick="closeCustomerModals()" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--primary);">✕</button></div>
+      <div class="customer-order-boxes">
+        <button class="customer-order-box active" onclick="showCustomerOrderPanel('new',this)"><span>🆕</span><b>طلبات جديدة</b><small id="customer-new-count">0 طلب</small></button>
+        <button class="customer-order-box" onclick="showCustomerOrderPanel('delivered',this)"><span>✅</span><b>تم التوصيل</b><small id="customer-delivered-count">0 طلب</small></button>
+        <button class="customer-order-box" onclick="showCustomerOrderPanel('cancelled',this)"><span>❌</span><b>تم إلغاء الطلب</b><small id="customer-cancelled-count">0 طلب</small></button>
+        <button class="customer-order-box" onclick="openCustomerTrackingPicker()"><span>🗺️</span><b>تتبع الطلب</b><small>خريطة السائق مباشر</small></button>
+      </div>
+      <div id="customer-orders-list"><div class="customer-empty">جاري تحميل الطلبات...</div></div>
+    </div>
+  </div>
+
+  <div class="modal" id="customer-return-modal" style="align-items:center;z-index:1250;">
+    <div class="modal-content" style="border-radius:24px;max-width:620px;max-height:92vh;overflow:auto;">
+      <div class="modal-header"><h3>↩️ طلب استرجاع المنتج</h3><button onclick="closeCustomerReturn()" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--primary);">✕</button></div>
+      <div id="return-order-info" class="note" style="margin-bottom:12px"></div>
+      <label>📦 اختر المنتج المراد استرجاعه:</label>
+      <select id="return-item-select"></select>
+      <label>❓ سبب الاسترجاع:</label>
+      <select id="return-reason"><option value="المنتج فيه مشكلة">المنتج فيه مشكلة</option><option value="المنتج تالف">المنتج تالف</option><option value="المنتج غير مطابق">المنتج غير مطابق</option><option value="سبب آخر">سبب آخر</option></select>
+      <label>📝 اشرح المشكلة:</label>
+      <textarea id="return-problem" rows="4" placeholder="اكتب ما المشكلة بالتفصيل..."></textarea>
+      <div style="margin:10px 0;padding:12px;background:#fff7ed;border:1px solid #ead2b5;border-radius:12px;line-height:1.9;font-weight:800;color:#7c4a18">⚠️ تنبيه: لا يمكن استرجاع المنتج إذا تم فك الغلاف أو فتح العبوة، إلا وفق سياسة المتجر والحالات التي يوافق عليها المدير.</div>
+      <button class="btn" style="width:100%;background:#9a7652;color:#fff" onclick="submitCustomerReturn()">↩️ إرسال طلب الاسترجاع</button>
+    </div>
+  </div>
+
+  <div class="modal" id="customer-live-tracking-modal" style="align-items:center;z-index:1200;">
+    <div class="modal-content customer-live-tracking-shell">
+      <div class="modal-header"><h3>🗺️ تتبع السائق والطلب</h3><div style="display:flex;gap:6px;align-items:center"><button onclick="backToCustomerOrders()" style="border:1px solid var(--border);background:#fffaf3;border-radius:10px;padding:7px 10px;cursor:pointer;color:var(--primary);font-weight:800;">📦 طلباتي</button><button onclick="closeCustomerTracking()" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--primary);">✕</button></div></div>
+      <div class="customer-track-picker">
+        <input id="customer-track-order-input" placeholder="اكتب رقم الطلب مثل 10025">
+        <button class="btn" onclick="trackCustomerOrderByNumber()">🔎 تتبع الطلب</button>
+      </div>
+      <div id="customer-live-driver-info" class="customer-live-driver-info">اختر طلباً أو اكتب رقم الطلب لبدء التتبع.</div>
+      <div id="customer-live-map" class="customer-live-map"></div>
+      <div id="customer-live-status" class="customer-live-status">بانتظار اختيار الطلب...</div>
+    </div>
+  </div>
+
+  <div class="modal" id="customer-settings-modal" style="align-items:center;">
+    <div class="modal-content" style="border-radius:24px;max-width:500px;">
+      <div class="modal-header"><h3>⚙️ إعدادات الحساب</h3><button onclick="closeCustomerModals()" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--primary);">✕</button></div>
+      <div id="customer-profile-box"></div>
+      <label class="customer-email-pref" style="display:flex;align-items:center;gap:9px;background:#fffaf3;border:1px solid var(--border);border-radius:12px;padding:11px 12px;margin-top:9px;font-size:12px;font-weight:800;color:var(--primary);cursor:pointer;">
+        <input id="customer-email-notify" type="checkbox" checked onchange="saveCustomerEmailPreference(this.checked)" style="width:19px;height:19px;accent-color:var(--primary);">
+        <span>📧 استلام تحديثات الطلب والعروض عبر البريد الإلكتروني</span>
+      </label>
+      <button class="customer-mini-btn" style="width:100%;min-height:46px;margin-top:8px;" onclick="loginWithGoogle()">🔐 تسجيل الدخول / التبديل بالحساب</button>
+      <button class="customer-mini-btn customer-danger" style="width:100%;min-height:46px;margin-top:8px;" onclick="logoutCustomer()">🚪 تسجيل الخروج</button>
+      <button class="customer-mini-btn customer-danger" style="width:100%;min-height:46px;margin-top:8px;background:#7f1d1d!important" onclick="deleteCustomerAccount()">🗑️ حذف الحساب نهائياً</button>
+    </div>
+  </div>
+
+  <div class="img-modal" id="image-view-modal" onclick="closeProductImageModal(event)">
+    <div class="img-modal-content" onclick="event.stopPropagation()">
+      <button class="close-img-modal" onclick="closeProductImageModal()">✕</button>
+      <img id="modal-product-img" src="" alt="صورة المنتج مكبرة">
+      <div class="img-modal-title" id="modal-product-title"></div>
+    </div>
+  </div>
+
+  <script>
+    let storeData = {
+      name: "POINT CAFE",
+      slogan: "أشهى القهوة والمشروبات والحلويات",
+      logo: "https://via.placeholder.com/120?text=أم+سالم",
+      phone: "967771234567",
+      locationUrl: "",
+      isClosed: false,
+      closeReason: "المتجر مغلق حالياً، نسعد بخدمتكم قريباً.",
+      sliders: [],
+      bankAccounts: [],
+      deliveryFree: true,
+      deliveryFee: 0,
+      deliveryCurrency: "ر.س",
+      products: [],
+      reviews: [],
+      aiSettings: { welcome: "أهلاً بك 👋 أنا مساعد POINT CAFE. كيف أساعدك؟", fallback: "أستطيع مساعدتك في منتجات POINT CAFE وأسعارها والتوصيل والدفع وطلباتك. اكتب سؤالك بالتفصيل.", instructions: "أجب بالعربية وباختصار وبأسلوب ودود. اعتمد على بيانات المتجر والأسئلة والأجوبة التي يضيفها المدير.", qa: [] }
+    };
+
+    // عرض آخر بيانات محفوظة فوراً من الجهاز ثم تحديثها لحظياً من Firebase.
+    try {
+      const cached = localStorage.getItem('point_cafe_store_cache');
+      if (cached) storeData = { ...storeData, ...JSON.parse(cached) };
+    } catch(e) {}
+
+    let cart = [];
+    try { cart = JSON.parse(localStorage.getItem('point_cafe_cart') || '[]').map(x=>({id:x.id,qty:Math.max(1,Number(x.qty)||1)})).filter(x=>x.id!==undefined&&x.id!==null&&String(x.id)!==''); } catch(e) { cart=[]; }
+    let selectedRating = 5;
+    let transferImage = '';
+    let selectedPayment = 'cash';
+    let currentSlide = 0;
+    let sliderInterval = null;
+    let currentCustomer = null;
+    let customerOrdersUnsub = null;
+    let favorites = [];
+    try { favorites = JSON.parse(localStorage.getItem('point_cafe_favorites') || '[]').map(Number).filter(Boolean); } catch(e) { favorites = []; }
+
+    function saveFavorites(){ try{ localStorage.setItem('point_cafe_favorites', JSON.stringify(favorites)); }catch(e){} updateFavoritesCount(); }
+    function isFavorite(id){ return favorites.includes(Number(id)); }
+    function updateFavoritesCount(){ const el=document.getElementById('favorites-count'); if(el) el.textContent=favorites.length ? favorites.length : ''; }
+    function toggleFavorite(id){
+      id=Number(id);
+      if(isFavorite(id)) favorites=favorites.filter(x=>x!==id); else favorites.push(id);
+      saveFavorites();
+      filterProducts();
+      if(document.getElementById('favorites-modal')?.style.display==='flex') renderFavorites();
+    }
+    function openFavorites(){ renderFavorites(); document.getElementById('favorites-modal').style.display='flex'; }
+    function closeFavorites(){ document.getElementById('favorites-modal').style.display='none'; }
+    function renderFavorites(){
+      const box=document.getElementById('favorites-list');
+      const items=(storeData.products||[]).filter(p=>isFavorite(p.id));
+      if(!items.length){box.innerHTML='<div class="customer-empty">♡ لا توجد منتجات في المفضلات حالياً.</div>';return;}
+      box.innerHTML=items.map(p=>`<div class="favorite-item">
+        <img src="${p.img}" alt="${escCustomer(p.name)}">
+        <div class="favorite-item-info"><strong>${escCustomer(p.name)}</strong><small>${p.price} ${p.currency||'ر.س'}</small></div>
+        <div class="favorite-item-actions"><button type="button" onclick="addToCart(${p.id})">🛒</button><button type="button" onclick="event.stopPropagation(); toggleFavorite(${JSON.stringify(p.id)})">♥</button></div>
+      </div>`).join('');
+    }
+
+
+    function escCustomer(value){return String(value??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+
+    function updateCustomerGreeting(name){
+      const title=document.getElementById('customer-greeting-title');
+      if(!title) return;
+      const clean=String(name||'').trim();
+      title.textContent=clean ? `☕ هلا ${clean} في POINT CAFE` : '☕ أهلاً بك في POINT CAFE';
+    }
+
+    function updateCustomerUI(user){
+      currentCustomer=user||null;
+      updateCustomerGreeting(user?.displayName||'');
+      const loginBtn=document.getElementById('bottom-login-btn');
+      if(user){
+        const customerNameInput=document.getElementById('customer-name');
+        if(customerNameInput && !customerNameInput.value) customerNameInput.value=user.displayName||'';
+        updateCustomerGreeting(user.displayName||customerNameInput?.value||'');
+        if(loginBtn){ loginBtn.querySelector('span:last-child').textContent='حسابي'; loginBtn.classList.add('is-logged'); }
+      }else{
+        if(loginBtn){ loginBtn.querySelector('span:last-child').textContent='تسجيل الدخول'; loginBtn.classList.remove('is-logged'); }
+      }
+    }
+
+    function openCustomerAuth(){
+      // إذا كان Firebase يعرف المستخدم بالفعل، لا نعرض شاشة تسجيل الدخول مرة أخرى.
+      const existingUser = currentCustomer || window.auth?.currentUser || null;
+      if(existingUser){
+        if(!currentCustomer) updateCustomerUI(existingUser);
+        openCustomerSettings();
+        return;
+      }
+      document.getElementById('customer-auth-modal').style.display='flex';
+    }
+    function closeCustomerModals(){document.querySelectorAll('#customer-auth-modal,#customer-orders-modal,#customer-settings-modal').forEach(m=>m.style.display='none');}
+
+    async function loginWithEmail(){
+      const email=(document.getElementById('customer-email-auth')?.value||'').trim();
+      const password=document.getElementById('customer-password-auth')?.value||'';
+      if(!email||!password){alert('أدخل البريد الإلكتروني وكلمة المرور.');return;}
+      if(!window.auth||!window.firebaseSignInWithEmailAndPassword){alert('خدمة البريد الإلكتروني غير جاهزة بعد.');return;}
+      try{
+        const result=await window.firebaseSignInWithEmailAndPassword(window.auth,email,password);
+        const user=result.user;
+        currentCustomer=user;
+        updateCustomerUI(user);
+        closeCustomerModals();
+        showOneTimeMessage('تم تسجيل الدخول بنجاح.');
+      }catch(e){
+        console.error('Email login:',e);
+        const msg=(e&&e.code==='auth/invalid-credential')?'البريد الإلكتروني أو كلمة المرور غير صحيحة.':
+                 (e&&e.code==='auth/too-many-requests')?'تمت محاولات كثيرة. حاول لاحقًا.':
+                 'تعذر تسجيل الدخول بالبريد الإلكتروني. تأكد من البيانات وحاول مرة أخرى.';
+        alert(msg);
+      }
+    }
+
+    async function createAccountWithEmail(){
+      const email=(document.getElementById('customer-email-auth')?.value||'').trim();
+      const name=(document.getElementById('customer-name-auth')?.value||'').trim();
+      const password=document.getElementById('customer-password-auth')?.value||'';
+      if(!email||!password){alert('أدخل البريد الإلكتروني وكلمة المرور.');return;}
+      if(password.length<6){alert('كلمة المرور يجب أن تكون 6 أحرف على الأقل.');return;}
+      if(!window.auth||!window.firebaseCreateUserWithEmailAndPassword){alert('خدمة البريد الإلكتروني غير جاهزة بعد.');return;}
+      try{
+        const result=await window.firebaseCreateUserWithEmailAndPassword(window.auth,email,password);
+        const user=result.user;
+        if(name && window.firebaseUpdateProfile) await window.firebaseUpdateProfile(user,{displayName:name});
+        const updatedUser=window.auth.currentUser||user;
+        if(window.setDoc&&window.doc&&window.db){
+          await window.setDoc(window.doc(window.db,'customers',updatedUser.uid),{
+            uid:updatedUser.uid,name:name||updatedUser.displayName||'',email:updatedUser.email||'',photoURL:updatedUser.photoURL||'',updatedAt:new Date().toISOString()
+          },{merge:true});
+        }
+        updateCustomerUI(updatedUser);
+        closeCustomerModals();
+        showOneTimeMessage('تم إنشاء الحساب بنجاح.');
+      }catch(e){
+        console.error('Email signup:',e);
+        const msg=(e&&e.code==='auth/email-already-in-use')?'هذا البريد مسجل مسبقًا، استخدم تسجيل الدخول.':
+                 (e&&e.code==='auth/invalid-email')?'البريد الإلكتروني غير صحيح.':
+                 (e&&e.code==='auth/weak-password')?'كلمة المرور ضعيفة، استخدم 6 أحرف أو أكثر.':
+                 'تعذر إنشاء الحساب بالبريد الإلكتروني.';
+        alert(msg);
+      }
+    }
+
+    async function loginWithGoogle(){
+      // إذا كان المستخدم مسجلاً بالفعل، لا نعيد فتح Google ولا نعرض أي رسالة خطأ.
+      if(window.auth?.currentUser){
+        currentCustomer=window.auth.currentUser;
+        updateCustomerUI(currentCustomer);
+        closeCustomerModals();
+        showOneTimeMessage('تم تسجيل الدخول بالفعل ✅');
+        return;
+      }
+      if(!window.auth||!window.googleProvider){alert('خدمة تسجيل الدخول غير جاهزة بعد، حاول مرة أخرى.');return;}
+      try{
+        await window.firebaseSetPersistence?.(window.auth, window.firebaseBrowserLocalPersistence);
+        const result=await window.firebaseSignInWithPopup(window.auth,window.googleProvider);
+        const user=result.user;
+        // نجاح Firebase Authentication هو نجاح تسجيل الدخول.
+        currentCustomer=user;
+        updateCustomerUI(user);
+        try{
+          if(window.setDoc&&window.doc&&window.db){
+            await window.setDoc(window.doc(window.db,'customers',user.uid),{
+              uid:user.uid,name:user.displayName||'',email:user.email||'',photoURL:user.photoURL||'',
+              emailNotifications:true,updatedAt:new Date().toISOString()
+            },{merge:true});
+          }
+        }catch(profileError){
+          // فشل مزامنة ملف العميل لا يعني فشل تسجيل Google.
+          console.warn('Google login succeeded, customer profile sync skipped:',profileError);
+        }
+        closeCustomerModals();
+        showOneTimeMessage('تم تسجيل الدخول بنجاح ✅');
+      }catch(e){
+        console.error('Google login:',e);
+        // قد يكون Google نجح قبل أن رجع حدث/استثناء من النافذة؛ تحقق من الحالة أولاً.
+        if(window.auth?.currentUser){
+          currentCustomer=window.auth.currentUser;
+          updateCustomerUI(currentCustomer);
+          closeCustomerModals();
+          showOneTimeMessage('تم تسجيل الدخول بنجاح ✅');
+          return;
+        }
+        const code=e?.code||'';
+        if(code==='auth/popup-closed-by-user') return;
+        if(code==='auth/popup-blocked'){
+          try{await window.firebaseSignInWithRedirect(window.auth,window.googleProvider);return;}catch(er){
+            console.error('Google redirect start:',er);
+            if(window.auth?.currentUser) return;
+          }
+        }
+        const msg=code==='auth/operation-not-allowed'
+          ? 'تسجيل Google غير مفعّل في Firebase Authentication.'
+          : code==='auth/unauthorized-domain'
+            ? 'هذا النطاق غير مضاف إلى Authorized domains في Firebase Authentication.'
+            : code==='auth/account-exists-with-different-credential'
+              ? 'هذا البريد مرتبط بطريقة تسجيل دخول أخرى. استخدم طريقة الدخول المرتبطة بالحساب.'
+              : 'تعذر بدء تسجيل الدخول عبر Google. حاول مرة أخرى.';
+        alert(msg);
+      }
+    }
+
+    async function saveCustomerEmailPreference(enabled){
+      if(!currentCustomer||!window.setDoc||!window.doc||!window.db)return;
+      try{
+        await window.setDoc(window.doc(window.db,'customers',currentCustomer.uid),{
+          emailNotifications:!!enabled,updatedAt:new Date().toISOString()
+        },{merge:true});
+        showOneTimeMessage(enabled?'تم تفعيل رسائل البريد 📧':'تم إيقاف رسائل البريد');
+      }catch(e){
+        console.warn('email preference:',e);
+        showOneTimeMessage('تعذر حفظ إعداد البريد حالياً.');
+      }
+    }
+
+    let customerActionBusy=false; let customerMessageTimer=null;
+    function showOneTimeMessage(msg){ if(customerMessageTimer)clearTimeout(customerMessageTimer); const old=document.getElementById('customer-one-message'); if(old)old.remove(); const el=document.createElement('div'); el.id='customer-one-message'; el.textContent=msg; Object.assign(el.style,{position:'fixed',top:'18px',left:'50%',transform:'translateX(-50%)',zIndex:999999,background:'#3e8b68',color:'#fff',padding:'11px 18px',borderRadius:'999px',fontWeight:'800',boxShadow:'0 8px 25px #0003'}); document.body.appendChild(el); customerMessageTimer=setTimeout(()=>el.remove(),2200); }
+    async function logoutCustomer(){
+      if(customerActionBusy)return; customerActionBusy=true;
+      try{if(window.auth)await window.firebaseSignOut(window.auth); currentCustomer=null; updateCustomerUI(null); closeCustomerModals(); showOneTimeMessage('تم تسجيل الخروج.');}
+      catch(e){console.error(e);showOneTimeMessage('تعذر تسجيل الخروج حالياً.');}
+      finally{customerActionBusy=false;}
+    }
+
+    async function deleteCustomerAccount(){
+      if(!currentCustomer || customerActionBusy)return;
+      if(!confirm('هل أنت متأكد من حذف حسابك وجميع بيانات حساب العميل نهائياً؟ لا يمكن التراجع عن هذا الإجراء.'))return;
+      customerActionBusy=true;
+      try{
+        const user=currentCustomer;
+        const uid=user.uid;
+
+        // نتحقق من حداثة تسجيل الدخول قبل حذف أي بيانات حتى لا تبقى بيانات ناقصة.
+        const lastSignIn=new Date(user.metadata?.lastSignInTime||0).getTime();
+        const needsRecent=!lastSignIn || (Date.now()-lastSignIn > 4*60*1000);
+        if(needsRecent){
+          if(user.providerData?.some(p=>p.providerId==='google.com') && window.firebaseReauthenticateWithPopup){
+            await window.firebaseReauthenticateWithPopup(user,window.googleProvider);
+          }else{
+            const email=document.getElementById('customer-email-auth')?.value||user.email||'';
+            let password=document.getElementById('customer-password-auth')?.value||'';
+            if(!password) password=prompt('لأمان الحساب، أدخل كلمة المرور مرة واحدة لتأكيد حذف الحساب:')||'';
+            if(!email||!password||!window.firebaseReauthenticateWithCredential){
+              throw Object.assign(new Error('recent login required'),{code:'auth/requires-recent-login'});
+            }
+            const cred=window.firebaseEmailAuthProvider.credential(email,password);
+            await window.firebaseReauthenticateWithCredential(user,cred);
+          }
+        }
+
+        // بعد تأكيد الهوية نحذف بيانات الحساب التي يملكها العميل.
+        if(window.db&&window.getDocs&&window.collection&&window.query&&window.where&&window.deleteDoc){
+          const orderSnap=await window.getDocs(window.query(window.collection(window.db,'orders'),window.where('customerUid','==',uid)));
+          for(const d of orderSnap.docs) await window.deleteDoc(d.ref);
+          const reviewSnap=await window.getDocs(window.query(window.collection(window.db,'reviews'),window.where('customerUid','==',uid)));
+          for(const d of reviewSnap.docs) await window.deleteDoc(d.ref);
+          try{ await window.deleteDoc(window.doc(window.db,'customers',uid)); }catch(_){ }
+        }
+
+        // وأخيراً نحذف حساب Firebase Authentication نفسه.
+        await window.firebaseDeleteUser(user);
+        currentCustomer=null;
+        updateCustomerUI(null);
+        closeCustomerModals();
+        cart=[];
+        saveCartLocal();
+        updateCartUI();
+        showOneTimeMessage('تم حذف الحساب نهائياً.');
+      }catch(e){
+        console.error('Delete customer account:',e);
+        showOneTimeMessage(
+          e?.code==='auth/requires-recent-login'
+            ? 'سجّل الدخول من جديد ثم أعد حذف الحساب.'
+            : (e?.code==='permission-denied'
+              ? 'تمت حماية الحساب. تحقق من صلاحيات Firestore ثم أعد المحاولة.'
+              : 'تعذر حذف الحساب حالياً.')
+        );
+      }finally{customerActionBusy=false;}
+    }
+    async function openCustomerSettings(){
+      if(!currentCustomer){openCustomerAuth();return;}
+      const box=document.getElementById('customer-profile-box');
+      const photo=currentCustomer.photoURL||'./point-cafe-logo.jpg';
+      box.innerHTML=`<div class="customer-profile"><img src="${escCustomer(photo)}" alt="صورة الحساب"><div><strong>${escCustomer(currentCustomer.displayName||'بدون اسم')}</strong><small>${escCustomer(currentCustomer.email||'')}</small></div></div>`;
+      const pref=document.getElementById('customer-email-notify');
+      if(pref) pref.checked=true;
+      try{
+        const snap=await window.getDoc(window.doc(window.db,'customers',currentCustomer.uid));
+        if(pref && snap.exists()) pref.checked=snap.data()?.emailNotifications!==false;
+      }catch(e){console.warn('load email preference:',e);}
+      document.getElementById('customer-settings-modal').style.display='flex';
+    }
+
+    let customerOrdersCache=[];
+    function showCustomerOrderPanel(panel,button){
+      document.querySelectorAll('.customer-order-box').forEach(b=>b.classList.remove('active'));
+      if(button)button.classList.add('active');
+      let rows=customerOrdersCache.slice();
+      if(panel==='delivered') rows=rows.filter(o=>String(o.status||'')==='تم التوصيل');
+      else if(panel==='cancelled') rows=rows.filter(o=>['ملغي','ملغى','ملغية','ملغاة','تم إلغاء الطلب'].includes(String(o.status||'')));
+      else rows=rows.filter(o=>!['تم التوصيل','ملغي','ملغى','ملغية','ملغاة','تم إلغاء الطلب'].includes(String(o.status||'')));
+      renderCustomerOrderRows(rows);
+    }
+
+    function renderCustomerOrderRows(rows){
+      const list=document.getElementById('customer-orders-list');
+      if(!rows.length){list.innerHTML='<div class="customer-empty">لا توجد طلبات في هذا القسم.</div>';return;}
+      list.innerHTML=rows.map(o=>{
+        const items=(o.items||[]).map(i=>`<div>☕ ${escCustomer(i.name)} × ${i.qty} — ${i.subtotal} ${escCustomer(i.currency||'')}</div>`).join('');
+        const delivered=String(o.status||'')==='تم التوصيل';
+        const cancelled=['ملغي','ملغى','ملغية','ملغاة','تم إلغاء الطلب'].includes(String(o.status||''));
+        return `<div class="customer-order-card"><div class="customer-order-head"><span>🧾 ${escCustomer(o.orderId||o.docId)}</span><span class="customer-order-status ${cancelled?'status-cancelled':''}">${escCustomer(o.status||'جديد')}</span></div>
+        ${o.cancelReason?`<div class="customer-order-cancelled">❌ سبب الإلغاء: ${escCustomer(o.cancelReason)}</div>`:''}
+        <div style="margin-top:7px;font-size:12px;line-height:1.8">${items||'لا توجد تفاصيل'}</div>
+        <div class="customer-order-items"><b>💰 الإجمالي:</b> ${escCustomer(o.grandTotalText||o.totalText||'')}<br><b>💳 الدفع:</b> ${o.paymentMethod==='transfer'?'تحويل':'كاش'}<br><b>📍 الاستلام:</b> ${o.deliveryType==='delivery'?'توصيل':'استلام من الفرع'}${o.driverName?`<br><b>🚗 السائق:</b> ${escCustomer(o.driverName)} ${o.driverPhone?` — 📞 ${escCustomer(o.driverPhone)}`:''}`:''}</div>
+        ${!delivered&&!cancelled&&o.deliveryType==='delivery'?`<button class="btn" style="margin-top:10px" onclick="openCustomerTrackingForOrder('${escCustomer(o.docId)}')">🗺️ تتبع السائق الآن</button>`:''}
+        ${delivered && storeData.returnEnabled!==false && !['مكتمل','مرفوض','ملغي'].includes(String(o.returnStatus||'')) ? `<button class="btn" style="margin-top:10px;background:#8b5e34;color:#fff" onclick="openCustomerReturn('${escCustomer(o.docId)}')">↩️ طلب استرجاع المنتج</button>` : ''}
+        ${o.returnStatus?`<div style="margin-top:9px;padding:10px;background:#fff7ed;border:1px solid #ead2b5;border-radius:10px;line-height:1.8"><b>↩️ حالة الاسترجاع:</b> ${escCustomer(o.returnStatus)}${o.returnAdminMessage?`<br>💬 رسالة المتجر: ${escCustomer(o.returnAdminMessage)}`:''}${o.returnFeeText?`<br>💰 الرسوم: ${escCustomer(o.returnFeeText)}`:''}</div>`:''}
+        </div>`;
+      }).join('');
+    }
+
+    let currentReturnOrderId='';
+    function closeCustomerReturn(){ const m=document.getElementById('customer-return-modal'); if(m)m.style.display='none'; }
+    async function openCustomerReturn(docId){
+      if(!currentCustomer){openCustomerAuth();return;}
+      if(storeData.returnEnabled===false){alert('الاسترجاع مغلق حالياً من إدارة المتجر.');return;}
+      const o=customerOrdersCache.find(x=>String(x.docId)===String(docId)); if(!o)return;
+      if(String(o.status||'')!=='تم التوصيل'){alert('يمكن طلب الاسترجاع بعد اكتمال التوصيل فقط.');return;}
+      currentReturnOrderId=o.docId;
+      const sel=document.getElementById('return-item-select');
+      sel.innerHTML=(o.items||[]).map((i,n)=>`<option value="${n}">${escCustomer(i.name||'منتج')} × ${escCustomer(i.qty||1)}</option>`).join('');
+      document.getElementById('return-order-info').textContent=`الطلب: ${o.orderId||o.docId}`;
+      document.getElementById('return-problem').value='';
+      document.getElementById('return-reason').value='المنتج فيه مشكلة';
+      document.getElementById('customer-return-modal').style.display='flex';
+    }
+    async function submitCustomerReturn(){
+      if(!currentCustomer||!currentReturnOrderId)return;
+      const o=customerOrdersCache.find(x=>x.docId===currentReturnOrderId); if(!o)return;
+      const idx=Number(document.getElementById('return-item-select').value); const item=(o.items||[])[idx];
+      const reason=document.getElementById('return-reason').value; const problem=document.getElementById('return-problem').value.trim();
+      if(!item){alert('اختر المنتج أولاً.');return;} if(!problem){alert('اكتب شرح المشكلة أولاً.');return;}
+      try{
+        await window.updateDoc(window.doc(window.db,'orders',currentReturnOrderId),{
+          returnStatus:'بانتظار مراجعة المدير', returnRequestedAt:new Date().toISOString(), returnReason:reason, returnProblem:problem,
+          returnItem:{id:item.id,name:item.name,qty:item.qty,price:item.price,cost:item.cost||0,currency:item.currency,subtotal:item.subtotal}, returnFee:0, returnFeeText:'بانتظار تحديد الرسوم'
+        });
+        closeCustomerReturn(); await openCustomerOrders(); alert('تم إرسال طلب الاسترجاع للمدير بنجاح.');
+      }catch(e){console.error(e);alert(e?.code==='permission-denied'?'لا يمكن إرسال الاسترجاع. تحقق من تسجيل الدخول وصلاحيات Firebase.':'تعذر إرسال طلب الاسترجاع.');}
+    }
+
+    async function openCustomerOrders(){
+      if(!currentCustomer){openCustomerAuth();return;}
+      document.getElementById('customer-orders-modal').style.display='flex';
+      const list=document.getElementById('customer-orders-list'); list.innerHTML='<div class="customer-empty">جاري تحميل الطلبات...</div>';
+      try{
+        const q=window.query(window.collection(window.db,'orders'),window.where('customerUid','==',currentCustomer.uid));
+        const snap=await window.getDocs(q); customerOrdersCache=[]; snap.forEach(d=>customerOrdersCache.push({docId:d.id,...d.data()}));
+        customerOrdersCache.sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+        const delivered=customerOrdersCache.filter(o=>String(o.status||'')==='تم التوصيل').length;
+        const cancelled=customerOrdersCache.filter(o=>['ملغي','ملغى','ملغية','ملغاة','تم إلغاء الطلب'].includes(String(o.status||''))).length;
+        const fresh=customerOrdersCache.length-delivered-cancelled;
+        document.getElementById('customer-new-count').textContent=fresh+' طلب';
+        document.getElementById('customer-delivered-count').textContent=delivered+' طلب';
+        document.getElementById('customer-cancelled-count').textContent=cancelled+' طلب';
+        showCustomerOrderPanel('new',document.querySelector('.customer-order-box'));
+      }catch(e){console.error(e);list.innerHTML='<div class="customer-empty">تعذر تحميل طلباتك حالياً. تحقق من صلاحيات Firestore.</div>';}
+    }
+
+    function openCustomerTrackingPicker(){
+      document.getElementById('customer-orders-modal').style.display='none';
+      document.querySelectorAll('.customer-order-box').forEach(b=>b.classList.remove('active'));
+      document.getElementById('customer-live-tracking-modal').style.display='flex';
+      const input=document.getElementById('customer-track-order-input'); input.value='';
+      document.getElementById('customer-live-driver-info').textContent='اختر طلباً أو اكتب رقم الطلب لبدء التتبع.';
+      document.getElementById('customer-live-status').textContent='بانتظار اختيار الطلب...';
+      setTimeout(()=>{input.focus(); if(window.customerLiveTrackingMap) window.customerLiveTrackingMap.invalidateSize();},120);
+    }
+    function openCustomerTrackingForOrder(docId){
+      const o=customerOrdersCache.find(x=>x.docId===docId); if(!o)return;
+      document.getElementById('customer-orders-modal').style.display='none';
+      document.getElementById('customer-live-tracking-modal').style.display='flex';
+      document.getElementById('customer-track-order-input').value=o.orderId||o.docId;
+      startCustomerLiveTracking(o);
+      setTimeout(()=>window.customerLiveTrackingMap?.invalidateSize?.(),150);
+    }
+    function backToCustomerOrders(){
+      closeCustomerTracking();
+      openCustomerOrders();
+    }
+    function closeCustomerTracking(){
+      const el=document.getElementById('customer-live-tracking-modal'); if(el)el.style.display='none';
+      if(window.customerLiveTrackingUnsub){try{window.customerLiveTrackingUnsub();}catch(e){} window.customerLiveTrackingUnsub=null;}
+      if(window.customerLiveTrackingMap){try{window.customerLiveTrackingMap.remove();}catch(e){} window.customerLiveTrackingMap=null;}
+    }
+    function trackCustomerOrderByNumber(){
+      const key=String(document.getElementById('customer-track-order-input').value||'').trim();
+      const o=customerOrdersCache.find(x=>String(x.orderId||'')===key||String(x.docId||'')===key);
+      if(!o){document.getElementById('customer-live-status').textContent='لم يتم العثور على هذا الطلب في حسابك.';return;}
+      startCustomerLiveTracking(o);
+    }
+    function startCustomerLiveTracking(order){
+      if(!order||order.customerUid!==currentCustomer?.uid)return;
+      if(window.customerLiveTrackingUnsub){try{window.customerLiveTrackingUnsub();}catch(e){}}
+      if(window.customerLiveTrackingMap){try{window.customerLiveTrackingMap.remove();}catch(e){}}
+      const mapEl=document.getElementById('customer-live-map'); if(!mapEl||typeof L==='undefined')return;
+      const map=L.map(mapEl,{zoomControl:true}).setView([24,45],5); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map); window.customerLiveTrackingMap=map;
+      let driverMarker=null,customerMarker=null,firstFit=false,driverUnsub=null;
+      const info=document.getElementById('customer-live-driver-info'),status=document.getElementById('customer-live-status');
+      window.customerLiveTrackingUnsub=window.onSnapshot(window.doc(window.db,'orders',order.docId),snap=>{
+        if(!snap.exists()){status.textContent='تم حذف الطلب.';return;} const o={docId:order.docId,...snap.data()};
+        const phone=o.driverPhone||o.driverMobile||o.driverNumber||'';
+        info.innerHTML=`🧾 الطلب: <b>${escCustomer(o.orderId||o.docId)}</b><br>🚗 السائق: <b>${escCustomer(o.driverName||'لم يتم تعيين سائق')}</b><br>📞 رقم السائق: <b>${phone?escCustomer(phone):'غير متوفر حالياً'}</b>`;
+        status.textContent='الحالة: '+(o.status||'جديد');
+        const c=parseLatLonFromLocation(o.customerLocation); if(c){if(!customerMarker)customerMarker=L.marker(c).addTo(map).bindPopup('📍 موقع التسليم');else customerMarker.setLatLng(c);}
+        if(driverUnsub){try{driverUnsub();}catch(e){} driverUnsub=null;}
+        if(o.driverId){driverUnsub=window.onSnapshot(window.doc(window.db,'driver_locations',String(o.driverId)),ds=>{const x=ds.data()||{};if(typeof x.lat!=='number'||typeof x.lon!=='number'){status.textContent='الحالة: '+(o.status||'جديد')+' — بانتظار موقع السائق';return;} if(!driverMarker)driverMarker=L.marker([x.lat,x.lon]).addTo(map).bindPopup('🚗 موقع السائق الآن');else driverMarker.setLatLng([x.lat,x.lon]);status.textContent='🟢 السائق متصل — آخر موقع: '+new Date().toLocaleTimeString();const pts=[[x.lat,x.lon]];if(customerMarker)pts.push(customerMarker.getLatLng());if(!firstFit){map.fitBounds(pts,{padding:[40,40]});firstFit=true;}});}else{status.textContent='لم يتم تعيين سائق لهذا الطلب بعد.';}
+      });
+    }
+
+    function startCustomerAuth(){
+      const nameField=document.getElementById('customer-name');
+      if(nameField){
+        nameField.addEventListener('input',()=>updateCustomerGreeting(nameField.value));
+        if(nameField.value.trim()) updateCustomerGreeting(nameField.value);
+      }
+      if(!window.auth||!window.onAuthStateChanged)return;
+      window.onAuthStateChanged(window.auth,async user=>{
+        updateCustomerUI(user);
+        if(user){
+          closeCustomerModals();
+          if(window.setDoc&&window.doc&&window.db){
+            try{await window.setDoc(window.doc(window.db,'customers',user.uid),{uid:user.uid,name:user.displayName||'',email:user.email||'',photoURL:user.photoURL||'',updatedAt:new Date().toISOString()},{merge:true});}
+            catch(e){console.warn('customer profile save skipped:',e);}
+          }
+        }
+      });
+      if(window.firebaseGetRedirectResult){window.firebaseGetRedirectResult(window.auth).then(async result=>{
+        if(result?.user){
+          currentCustomer=result.user;
+          updateCustomerUI(result.user);
+          closeCustomerModals();
+          showOneTimeMessage('تم تسجيل الدخول بنجاح ✅');
+        }
+      }).catch(e=>{
+        // لا نعرض رسالة خطأ للمستخدم هنا؛ حالة المصادقة هي المصدر الحقيقي.
+        if(window.auth?.currentUser){
+          currentCustomer=window.auth.currentUser;
+          updateCustomerUI(currentCustomer);
+          closeCustomerModals();
+        } else console.warn('Google redirect result:',e);
+      });}
+    }
+
+    // دخول سريع: إخفاء شاشة البداية بعد ثانية واحدة كحد أقصى،
+    // بدون انتظار تحميل بيانات Firebase حتى لا يتأخر فتح المتجر.
+    setTimeout(() => {
+      const splash = document.getElementById('splash-screen');
+      if (splash) splash.classList.add('fade-out');
+    }, 1000);
+
+    let realtimeStoreStarted = false;
+    let realtimeProductsStarted = false;
+    updateFavoritesCount();
+    window.addEventListener('firebase-ready', async () => {
+      // اعرض الكاش فوراً، ثم حدّثه من السحابة بدون انتظار الصور/التقييمات.
+      initUI();
+      startCustomerAuth();
+      await fetchStoreDataFromCloud();
+      startRealtimeStoreSync();
+      startRealtimeProductsSync();
+    });
+
+    function startRealtimeStoreSync(){
+      if(realtimeStoreStarted || !window.onSnapshot || !window.db) return;
+      realtimeStoreStarted = true;
+      const ref = window.doc(window.db, 'settings', 'store_config');
+      window.onSnapshot(ref, snap => {
+        if(!snap.exists()) return;
+        storeData = { ...storeData, ...snap.data() };
+        try { localStorage.setItem('point_cafe_store_cache', JSON.stringify(storeData)); } catch(e) {}
+        renderStoreInfo();
+        checkStoreStatus();
+        renderSliders();
+        renderProducts(storeData.products || []);
+        renderCartBankAccounts();
+        toggleDeliveryFields();
+      }, err => console.error('Realtime store sync:', err));
+    }
+
+    function startRealtimeProductsSync(){
+      if(realtimeProductsStarted || !window.onSnapshot || !window.db) return;
+      realtimeProductsStarted = true;
+      window.onSnapshot(window.collection(window.db, 'products'), snap => {
+        if(snap.empty) return;
+        const cloudProducts = snap.docs.map(d => ({ ...d.data(), id:d.data().id ?? (Number(d.id)||d.id) }));
+        if(!cloudProducts.length) return;
+        storeData.products = cloudProducts.sort((a,b)=>Number(a.id||0)-Number(b.id||0));
+        try { localStorage.setItem('point_cafe_store_cache', JSON.stringify(storeData)); } catch(e) {}
+        renderProducts(storeData.products);
+      }, err => console.warn('Realtime products:', err));
+    }
+
+    async function fetchStoreDataFromCloud() {
+      try {
+        const docRef = window.doc(window.db, "settings", "store_config");
+        const docSnap = await window.getDoc(docRef);
+        if (docSnap.exists()) {
+          storeData = { ...storeData, ...docSnap.data() };
+          try { localStorage.setItem('point_cafe_store_cache', JSON.stringify(storeData)); } catch(e) {}
+        }
+        try{const ps=await window.getDocs(window.collection(window.db,'products')); if(!ps.empty){storeData.products=ps.docs.map(d=>({...d.data(),id:d.data().id??(Number(d.id)||d.id)}));}}catch(e){console.warn('products collection:',e);}
+
+        renderStoreInfo();
+        checkStoreStatus();
+        renderSliders();
+        renderProducts(storeData.products || []);
+        renderCartBankAccounts();
+        toggleDeliveryFields();
+        // التقييمات تُحمّل في الخلفية حتى لا تتأخر المنتجات.
+        window.getDocs(window.collection(window.db, "reviews")).then(reviewsSnap => {
+          const cloudReviews = [];
+          reviewsSnap.forEach(d => cloudReviews.push(d.data()));
+          if(cloudReviews.length > 0){ storeData.reviews = cloudReviews; renderReviews(); renderProducts(storeData.products || []); }
+        }).catch(()=>{});
+      } catch(e) {
+        console.error("خطأ في جلب بيانات السحابة:", e);
+      }
+    }
+
+    function maybeOpenCartFromUrl(){
+      try{
+        const params=new URLSearchParams(location.search);
+        if(params.get('openCart')==='1'){
+          setTimeout(()=>{ if(typeof toggleCart==='function') toggleCart(); },350);
+          history.replaceState({},document.title,'index.html');
+        }
+      }catch(e){}
+    }
+
+    function initUI() {
+      initAppearance();
+      checkStoreStatus();
+      renderStoreInfo();
+      renderSliders();
+      renderProducts(storeData.products);
+      renderReviews();
+      renderCartBankAccounts();
+      toggleDeliveryFields();
+      maybeOpenCartFromUrl();
+
+      // إذا كانت بيانات السحابة جاهزة مبكراً، لا ننتظر أكثر من ثانية.
+      const splash = document.getElementById('splash-screen');
+      if (splash) splash.classList.add('fade-out');
+    }
+
+    function checkStoreStatus() {
+      const closedBanner = document.getElementById('closed-banner');
+      if (storeData.isClosed) {
+        closedBanner.style.display = 'block';
+        document.getElementById('closed-reason-text').innerText = storeData.closeReason || "المتجر مغلق حالياً.";
+      } else {
+        closedBanner.style.display = 'none';
+      }
+    }
+
+    function renderStoreInfo() {
+      const logoFallback = './point-cafe-logo.jpg';
+      const logoSrc = String(storeData.logo || '').trim() || logoFallback;
+      ['splash-img','header-logo','toast-img','ai-fab-logo','ai-chat-logo'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(!el)return;
+        el.onerror=()=>{el.onerror=null;el.src=logoFallback;};
+        el.src=logoSrc;
+      });
+      const whatsappPhone = normalizeWhatsAppPhone(storeData.phone) || '967771234567';
+      document.getElementById('whatsapp-float-btn').href = `https://wa.me/${whatsappPhone}`;
+
+      const storeLocBox = document.getElementById('store-location-box');
+      const storeLocLink = document.getElementById('store-location-link');
+      if (storeData.locationUrl) {
+        storeLocLink.href = storeData.locationUrl;
+        storeLocBox.style.display = 'block';
+      } else {
+        storeLocBox.style.display = 'none';
+      }
+    }
+
+    function renderSliders() {
+      const track = document.getElementById('slider-main');
+      const box = document.getElementById('slider-box');
+      if(!track || !box) return;
+      let sliders = Array.isArray(storeData.sliders) ? storeData.sliders.filter(Boolean) : [];
+      try {
+        const cached = JSON.parse(localStorage.getItem('point_cafe_sliders_cache') || '[]');
+        if (!sliders.length && Array.isArray(cached)) sliders = cached.filter(Boolean);
+        if (sliders.length) localStorage.setItem('point_cafe_sliders_cache', JSON.stringify(sliders));
+      } catch(e) {}
+      if (sliderInterval) { clearInterval(sliderInterval); sliderInterval=null; }
+      currentSlide=0; track.style.transform='translateX(0)';
+      if (!sliders.length) { box.style.display='none'; track.innerHTML=''; return; }
+      box.style.display='block';
+      track.innerHTML = sliders.map((img,i)=>`<div class="slider-slide"><img src="${String(img).replace(/"/g,'&quot;')}" alt="إعلان POINT CAFE" loading="eager" onerror="this.parentElement.remove(); const b=document.getElementById('slider-box'); if(b && !document.querySelector('#slider-main .slider-slide')) b.style.display='none';"></div>`).join('');
+      if (sliders.length > 1) {
+        sliderInterval=setInterval(()=>{ const count=track.querySelectorAll('.slider-slide').length; if(count<2)return; currentSlide=(currentSlide+1)%count; track.style.transform=`translateX(${currentSlide*100}%)`; },3000);
+      }
+    }
+
+    function renderProducts(items) {
+      const container = document.getElementById('products-container');
+      if(!container) return;
+      container.innerHTML = '';
+      if(!items || items.length === 0) {
+        container.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted);">لا توجد منتجات حالياً</p>';
+        renderRecommendations();
+        return;
+      }
+      items.forEach((p) => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.style.cursor = 'pointer';
+        const pid = JSON.stringify(p.id);
+        const safeImg = String(p.img || './point-cafe-logo.jpg').replace(/"/g,'&quot;');
+        const safeName = String(p.name || 'منتج').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        card.onclick = (e) => {
+          if (!e.target.closest('.favorite-product-btn,.add-to-cart')) openProductPage(p.id);
+        };
+        card.innerHTML = `
+          <div class="product-img-wrapper">
+            <img src="${safeImg}" alt="${safeName}" loading="lazy" decoding="async">
+            <span class="zoom-hint">👁️ عرض المنتج</span>
+          </div>
+          <button class="favorite-product-btn ${isFavorite(p.id) ? 'is-favorite' : ''}" type="button" aria-label="إضافة للمفضلات" onclick="event.stopPropagation();toggleFavorite(${pid})">${isFavorite(p.id) ? '♥' : '♡'}</button>
+          <div>
+            ${p.specialOffer ? '<div style="display:inline-block;background:#e53935;color:#fff;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:900;margin-bottom:6px;">🔥 عرض خاص</div>' : ''}
+            <div class="product-title">${safeName}</div>
+            ${productRatingHTML(p.id)}
+            <div class="product-price">${p.price} ${p.currency || 'ر.س'}</div>${p.specs ? `<div class="product-specs">${String(p.specs).replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : ''}
+          </div>
+          <button class="add-to-cart" onclick="event.stopPropagation();addToCart(${pid})">إضافة للسلة 🛍️</button>
+        `;
+        container.appendChild(card);
+      });
+      renderRecommendations();
+    }
+
+    function renderRecommendations() {
+      const box = document.getElementById('recommended-products');
+      const section = document.getElementById('recommended-section');
+      if(!box || !section) return;
+      const products = Array.isArray(storeData.products) ? storeData.products.filter(Boolean) : [];
+      if(products.length < 2){ section.style.display='none'; box.innerHTML=''; return; }
+      const pool = products.slice().sort(() => Math.random() - 0.5).slice(0, Math.min(4, products.length));
+      section.style.display='block';
+      box.innerHTML = '';
+      pool.forEach(p => {
+        const card=document.createElement('div');
+        card.className='product-card';
+        card.style.cursor='pointer';
+        const pid=JSON.stringify(p.id);
+        const img=String(p.img||'./point-cafe-logo.jpg').replace(/"/g,'&quot;');
+        const name=String(p.name||'منتج').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        card.onclick=(e)=>{if(!e.target.closest('.add-to-cart'))openProductPage(p.id);};
+        card.innerHTML=`<div class="product-img-wrapper"><img src="${img}" alt="${name}" loading="lazy"><span class="zoom-hint">👁️ عرض المنتج</span></div>
+          <div><div class="product-title">${name}</div>${productRatingHTML(p.id)}<div class="product-price">${p.price} ${p.currency||'ر.س'}</div></div>
+          <button class="add-to-cart" onclick="event.stopPropagation();addToCart(${pid})">إضافة للسلة 🛍️</button>`;
+        box.appendChild(card);
+      });
+    }
+
+    function openProductPage(id) {
+      const p=(storeData.products||[]).find(x=>String(x.id)===String(id));
+      if(!p)return;
+      const modal=document.getElementById('product-detail-modal'); if(!modal)return;
+      const logo=document.getElementById('product-detail-logo');
+      const img=document.getElementById('product-detail-image');
+      const name=document.getElementById('product-detail-name');
+      const price=document.getElementById('product-detail-price');
+      const specs=document.getElementById('product-detail-specs');
+      const rating=document.getElementById('product-detail-rating');
+      const add=document.getElementById('product-detail-add');
+      const src=String(p.img||'./point-cafe-logo.jpg');
+      if(logo){logo.src=String(storeData.logo||'./point-cafe-logo.jpg');logo.onerror=()=>{logo.onerror=null;logo.src='./point-cafe-logo.jpg';};}
+      img.src=src; img.alt=String(p.name||'منتج');
+      img.onerror=()=>{img.onerror=null;img.src='./point-cafe-logo.jpg';};
+      name.textContent=String(p.name||'منتج');
+      price.textContent=String(p.price??'')+' '+String(p.currency||'ر.س');
+      rating.innerHTML=productRatingHTML(p.id);
+      if(p.specs){specs.style.display='block';specs.textContent=String(p.specs);}else{specs.style.display='none';specs.textContent='';}
+      add.onclick=()=>addToCart(p.id);
+      document.getElementById('product-detail-search-input').value='';
+      renderProductDetailRecommendations(p.id);
+      modal.style.display='flex'; modal.setAttribute('aria-hidden','false');
+      document.body.style.overflow='hidden';
+      window.scrollTo({top:0,behavior:'instant'});
+      setTimeout(()=>img.scrollIntoView({block:'center',behavior:'smooth'}),30);
+    }
+    function closeProductPage(){
+      const modal=document.getElementById('product-detail-modal'); if(!modal)return;
+      modal.style.display='none';modal.setAttribute('aria-hidden','true');document.body.style.overflow='';
+    }
+    function renderProductDetailRecommendations(excludeId){
+      const box=document.getElementById('product-detail-recommendations');if(!box)return;
+      const q=String(document.getElementById('product-detail-search-input')?.value||'').trim().toLowerCase();
+      let items=(storeData.products||[]).filter(p=>String(p.id)!==String(excludeId));
+      if(q)items=items.filter(p=>String(p.name||'').toLowerCase().includes(q));
+      items=items.slice(0,4);
+      box.innerHTML=items.map(p=>{
+        const src=String(p.img||'./point-cafe-logo.jpg').replace(/"/g,'&quot;');
+        return `<div class="product-detail-mini" onclick="openProductPage(${JSON.stringify(p.id)})">
+          <img src="${src}" alt="${escCustomer(p.name)}" loading="lazy" decoding="async">
+          <b>${escCustomer(p.name)}</b><span>${escCustomer(p.price)} ${escCustomer(p.currency||'ر.س')}</span>
+        </div>`;
+      }).join('') || '<div class="customer-empty">لا توجد منتجات أخرى حالياً.</div>';
+    }
+    function filterProductDetailRecommendations(){
+      const modal=document.getElementById('product-detail-modal'); if(!modal)return;
+      const imgName=document.getElementById('product-detail-name')?.textContent||'';
+      const p=(storeData.products||[]).find(x=>String(x.name)===String(imgName));
+      renderProductDetailRecommendations(p?.id);
+    }
+
+    function openProductImageModal(imgSrc, title) {
+      document.getElementById('modal-product-img').src = imgSrc;
+      document.getElementById('modal-product-title').innerText = title;
+      document.getElementById('image-view-modal').style.display = 'flex';
+    }
+
+    function closeProductImageModal() {
+      document.getElementById('image-view-modal').style.display = 'none';
+    }
+
+    function filterProducts() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const filtered = (storeData.products || []).filter(p => p.name.toLowerCase().includes(query));
+      renderProducts(filtered);
+    }
+
+    function saveCartLocal(){ try { localStorage.setItem('point_cafe_cart', JSON.stringify(cart)); } catch(e) {} }
+    function sameId(a,b){ return String(a)===String(b); }
+    function addToCart(id) {
+      if (storeData.isClosed) { alert("عذراً، المتجر مغلق حالياً: " + (storeData.closeReason || "")); return; }
+      const existing = cart.find(item => sameId(item.id,id));
+      if (existing) existing.qty += 1; else cart.push({id,qty:1});
+      saveCartLocal(); updateCartUI(); showToast();
+    }
+    function updateQuantity(id, delta) {
+      const item = cart.find(i => sameId(i.id,id)); if (!item) return;
+      item.qty += delta; if (item.qty <= 0) cart = cart.filter(i => !sameId(i.id,id));
+      saveCartLocal(); updateCartUI();
+    }
+    function setQuantity(id, value) {
+      const val=parseInt(value);
+      if(isNaN(val)||val<=0) cart=cart.filter(i=>!sameId(i.id,id));
+      else {const item=cart.find(i=>sameId(i.id,id)); if(item)item.qty=val;}
+      saveCartLocal(); updateCartUI();
+    }
+    function removeFromCart(id) { cart=cart.filter(i=>!sameId(i.id,id)); saveCartLocal(); updateCartUI(); }
+
+    function showToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 2000);
+    }
+
+    function getDeliveryInfo() {
+      const type = document.querySelector('input[name="delivery-type"]:checked')?.value || 'delivery';
+      if (type !== 'delivery') return { fee: 0, currency: storeData.deliveryCurrency || 'ر.س', free: true, pickup: true };
+      const free = storeData.deliveryFree === true || Number(storeData.deliveryFee || 0) <= 0;
+      return { fee: free ? 0 : Number(storeData.deliveryFee || 0), currency: storeData.deliveryCurrency || 'ر.س', free, pickup: false };
+    }
+
+    function buildTotalText(totals) {
+      return Object.keys(totals).map(curr => `${totals[curr]} ${curr}`).join(' | ');
+    }
+
+    function updateCartUI() {
+      const bottomCount = document.getElementById('bottom-cart-count');
+      if (bottomCount) { const n=cart.reduce((sum,i)=>sum+(i.qty||0),0); bottomCount.textContent=n ? n : ''; bottomCount.style.display=n ? 'block' : 'none'; }
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      const topCartCount = document.getElementById('cart-count');
+      if (topCartCount) topCartCount.innerText = totalCount;
+      const cartItems = document.getElementById('cart-items');
+      const cartTotal = document.getElementById('cart-total');
+
+      if (cart.length === 0) {
+        cartItems.innerHTML = '<p style="text-align:center; padding:20px; color:var(--muted);">السلة فارغة</p>';
+        cartTotal.innerHTML = '<div class="cart-summary-row"><span>الإجمالي:</span><strong>0</strong></div><div class="cart-summary-row delivery"><span>التوصيل:</span><strong>مجاني</strong></div><div class="cart-summary-row grand"><span>الإجمالي مع التوصيل:</span><strong>0</strong></div>';
+        return;
+      }
+
+      let totals = {};
+      cartItems.innerHTML = cart.map(cartItem => {
+        const p = (storeData.products || []).find(prod => sameId(prod.id, cartItem.id));
+        if(!p) return '';
+        let curr = p.currency || 'ر.س';
+        let itemTotal = Number(p.price) * cartItem.qty;
+        totals[curr] = (totals[curr] || 0) + itemTotal;
+
+        return `
+          <div class="cart-item">
+            <img src="${p.img}">
+            <div class="cart-item-info">
+              <div class="cart-item-title">${p.name}</div>
+              <div class="cart-item-price-detail">السعر الفردي: ${p.price} ${curr}</div>
+              <div class="quantity-control">
+                <button class="qty-btn" onclick="updateQuantity(${p.id}, -1)">-</button>
+                <input type="number" class="qty-input" value="${cartItem.qty}" min="1" onchange="setQuantity(${p.id}, this.value)">
+                <button class="qty-btn" onclick="updateQuantity(${p.id}, 1)">+</button>
+              </div>
+              <div class="cart-item-total">الإجمالي: ${itemTotal} ${curr}</div>
+            </div>
+            <button onclick="removeFromCart(${p.id})" style="color:var(--accent); border:none; background:none; cursor:pointer; font-weight:700; font-size:13px;">حذف 🗑️</button>
+          </div>
+        `;
+      }).join('');
+
+      const delivery = getDeliveryInfo();
+      const productsText = buildTotalText(totals) || '0';
+      const grandTotals = { ...totals };
+      if (delivery.fee > 0) grandTotals[delivery.currency] = (grandTotals[delivery.currency] || 0) + delivery.fee;
+      const grandText = buildTotalText(grandTotals) || '0';
+      const deliveryText = delivery.pickup ? 'مجاني (استلام من الفرع)' : (delivery.free ? 'مجاني' : `${delivery.fee} ${delivery.currency}`);
+      cartTotal.innerHTML = `<div class="cart-summary-row"><span>الإجمالي:</span><strong>${productsText}</strong></div><div class="cart-summary-row delivery"><span>التوصيل:</span><strong>${deliveryText}</strong></div><div class="cart-summary-row grand"><span>الإجمالي مع التوصيل:</span><strong>${grandText}</strong></div>`;
+    }
+
+    function renderCartBankAccounts() {
+      const container = document.getElementById('bank-list-modal');
+      const box = document.getElementById('bank-accounts-container');
+      const accounts = storeData.bankAccounts || [];
+
+      if (accounts.length === 0) {
+        box.style.display = 'none';
+        return;
+      }
+      box.style.display = 'block';
+
+      const select = document.getElementById('selected-bank');
+      if (select) select.innerHTML = '<option value="">-- اختر البنك --</option>' + accounts.map((acc,i) => `<option value="${i}">${acc.bankName} — ${acc.accountNumber}</option>`).join('');
+      container.innerHTML = accounts.map((acc) => `
+        <div class="bank-item">
+          <div style="display:flex;align-items:center;gap:10px;">
+            ${acc.logo ? `<img src="${acc.logo}" alt="شعار ${acc.bankName}" style="width:46px;height:46px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--border);padding:4px;">` : ''}
+            <div>
+              <strong>${acc.bankName}</strong><br>
+              <span style="font-size:11px; color:var(--muted);">المستفيد: ${acc.accountName || ''}</span><br>
+              <span style="font-size:12px; color:var(--primary); font-weight:700;">${acc.accountNumber}</span>
+            </div>
+          </div>
+          <button class="copy-btn" onclick="copyAccountNum('${acc.accountNumber}')">نسخ الرقم</button>
+        </div>
+      `).join('');
+    }
+
+    function copyAccountNum(num) {
+      navigator.clipboard.writeText(num);
+      alert('تم نسخ رقم الحساب بنجاح');
+    }
+
+    function toggleCart() {
+      const modal = document.getElementById('cart-modal');
+      modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+      updateCartUI();
+      renderCartBankAccounts();
+    }
+
+    function toggleDeliveryFields() {
+      const type = document.querySelector('input[name="delivery-type"]:checked')?.value;
+      const box = document.getElementById('delivery-fields');
+      if (box) box.style.display = type === 'pickup' ? 'none' : 'block';
+      updateCartUI();
+    }
+
+    function getCurrentLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          document.getElementById('customer-location').value = `https://maps.google.com/?q=${lat},${lon}`;
+        }, () => alert("تعذر تحديد الموقع الجغرافي."));
+      } else {
+        alert("المتصفح لا يدعم تحديد الموقع.");
+      }
+    }
+
+    function togglePaymentFields() {
+      selectedPayment = document.querySelector('input[name="payment-method"]:checked')?.value || 'cash';
+      document.getElementById('transfer-fields').style.display = selectedPayment === 'transfer' ? 'block' : 'none';
+      renderCartBankAccounts();
+    }
+
+    async function previewTransferImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        transferImage = await processOrderImage(file, 900);
+        const img = document.getElementById('transfer-preview');
+        img.src = transferImage; img.style.display = 'block';
+      } catch(e) { alert('تعذر قراءة صورة الحوالة.'); }
+    }
+
+    function processOrderImage(file, maxWidth=900) {
+      return new Promise((resolve,reject)=>{
+        const r=new FileReader(); r.onload=e=>{const img=new Image(); img.onload=()=>{let w=img.width,h=img.height;if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);resolve(c.toDataURL('image/jpeg',0.82));};img.onerror=()=>reject();img.src=e.target.result;};r.onerror=()=>reject();r.readAsDataURL(file);
+      });
+    }
+
+    function showOrderSuccessPopup(orderId) {
+      const old = document.getElementById('order-success-popup');
+      if (old) old.remove();
+
+      const popup = document.createElement('div');
+      popup.id = 'order-success-popup';
+      popup.innerHTML = `
+        <div class="order-success-card">
+          <div class="order-success-icon">✅</div>
+          <div class="order-success-title">تم الطلب بنجاح</div>
+          <div class="order-success-number">رقم الطلب: ${orderId}</div>
+        </div>
+      `;
+      document.body.appendChild(popup);
+      setTimeout(() => popup.remove(), 1800);
+    }
+
+    async function sendOrderToWhatsApp() {
+      currentCustomer = currentCustomer || (window.auth && window.auth.currentUser) || null;
+      if (!currentCustomer) {
+        openCustomerAuth();
+        showOneTimeMessage('سجّل الدخول أولاً حتى يرتبط الطلب بحسابك وتظهر لك حالته.');
+        return;
+      }
+      if (storeData.isClosed) {
+        alert("عذراً، الكافيه مغلق حالياً وإرسال الطلبات متوقف!");
+        return;
+      }
+      if (cart.length === 0) { alert("السلة فارغة!"); return; }
+
+      const customerName = document.getElementById('customer-name').value.trim();
+      const customerPhone = document.getElementById('customer-phone').value.trim();
+      const deliveryType = document.querySelector('input[name="delivery-type"]:checked')?.value || 'delivery';
+      const location = document.getElementById('customer-location').value.trim();
+      const paymentMethod = document.querySelector('input[name="payment-method"]:checked')?.value || 'cash';
+      const selectedBankIndex = document.getElementById('selected-bank')?.value || '';
+      const selectedBank = paymentMethod === 'transfer' && selectedBankIndex !== '' ? (storeData.bankAccounts || [])[Number(selectedBankIndex)] : null;
+
+      if (!customerName) { alert("اسم العميل إجباري."); return; }
+      const normalizedPhone = normalizeYemenPhone(customerPhone);
+      if (!normalizedPhone) { alert("رقم الجوال يجب أن يكون يمنياً ويبدأ بـ 77 أو 71 أو 73 أو 78."); return; }
+      if (deliveryType === 'delivery' && !location) { alert("يرجى تحديد موقع/عنوان التوصيل."); return; }
+      if (paymentMethod === 'transfer' && !selectedBank) { alert('يجب اختيار طريقة الدفع تحويل ثم اختيار البنك.'); return; }
+      if (paymentMethod === 'transfer' && !transferImage) { alert('يرجى تحديد صورة الحوالة من المعرض.'); return; }
+
+      const orderId = 'POINT-' + Date.now().toString().slice(-8);
+      const items = cart.map(cartItem => {
+        const p = (storeData.products || []).find(prod => sameId(prod.id, cartItem.id));
+        if (!p) return null;
+        return {
+          id:p.id, name:p.name, price:Number(p.price)||0, cost:Number(p.cost)||0,
+          currency:p.currency||'ر.س', qty:cartItem.qty,
+          subtotal:(Number(p.price)||0)*cartItem.qty, img:p.img||''
+        };
+      }).filter(Boolean);
+
+      if (!items.length) { alert("تعذر تجهيز المنتجات."); return; }
+
+      const totals = {};
+      items.forEach(i => totals[i.currency] = (totals[i.currency]||0) + i.subtotal);
+      const delivery = deliveryType === 'delivery'
+        ? { fee: (storeData.deliveryFree === true ? 0 : Number(storeData.deliveryFee || 0)), currency: storeData.deliveryCurrency || 'ر.س', free: storeData.deliveryFree === true || Number(storeData.deliveryFee || 0) <= 0 }
+        : { fee: 0, currency: storeData.deliveryCurrency || 'ر.س', free: true };
+      const grandTotals = { ...totals };
+      if (delivery.fee > 0) grandTotals[delivery.currency] = (grandTotals[delivery.currency] || 0) + delivery.fee;
+      const totalText = buildTotalText(totals);
+      const grandTotalText = buildTotalText(grandTotals);
+
+      const order = {
+        orderId,
+        customerName,
+        customerUid: currentCustomer ? currentCustomer.uid : '',
+        customerEmail: currentCustomer ? (currentCustomer.email || '') : '',
+        customerPhotoURL: currentCustomer ? (currentCustomer.photoURL || '') : '',
+        customerPhone: normalizedPhone,
+        deliveryType,
+        paymentMethod,
+        paymentBank: selectedBank ? {
+          bankName:selectedBank.bankName,
+          accountName:selectedBank.accountName,
+          accountNumber:selectedBank.accountNumber
+        } : null,
+        transferImage: paymentMethod === 'transfer' ? transferImage : '',
+        customerLocation: deliveryType === 'delivery' ? location : '',
+        items,
+        totals,
+        deliveryFee: delivery.fee,
+        deliveryCurrency: delivery.currency,
+        deliveryFree: delivery.free,
+        grandTotals,
+        totalText,
+        grandTotalText,
+        status: 'جديد',
+        driverId: '',
+        driverName: '',
+        assignedAt: '',
+        driverRequestedAt: '',
+        createdAt: new Date().toISOString()
+      };
+
+      let msg = `☕ *طلب جديد من POINT CAFE*\n*رقم الطلب:* ${orderId}\n👤 *العميل:* ${customerName}\n📞 *الجوال:* ${normalizedPhone}\n`;
+      msg += `📦 *طريقة الاستلام:* ${deliveryType === 'delivery' ? 'توصيل إلى الموقع' : 'استلام من الفرع'}\n`;
+      if (deliveryType === 'delivery') msg += `📍 *الموقع:* ${location}\n`;
+      msg += `💳 *طريقة الدفع:* ${paymentMethod === 'transfer' ? 'تحويل' : 'كاش'}\n`;
+      if (selectedBank) msg += `🏦 *البنك:* ${selectedBank.bankName}\n`;
+      msg += `💰 *الإجمالي:* ${totalText}\n`;
+      msg += `🚚 *التوصيل:* ${delivery.fee > 0 ? delivery.fee + ' ' + delivery.currency : 'مجاني'}\n`;
+      msg += `💰 *الإجمالي مع التوصيل:* ${grandTotalText}\n\n`;
+      items.forEach((i,n) => msg += `${n+1}. ${i.name} × ${i.qty} = ${i.subtotal} ${i.currency}\n`);
+
+      const targetPhone = normalizeWhatsAppPhone(storeData.phone) || '967771234567';
+      const url = `https://wa.me/${targetPhone}?text=${encodeURIComponent(msg)}`;
+
+      // حفظ الطلب أولاً حتى يظهر فوراً في "طلباتي" ولو انتقل العميل بعدها إلى واتساب.
+      try {
+        if (window.db && window.addDoc && window.collection) {
+          const orderRef = await window.addDoc(window.collection(window.db, 'orders'), order);
+        } else {
+          throw new Error('Firebase غير جاهز');
+        }
+      } catch (e) {
+        console.error('تعذر حفظ الطلب في Firebase:', e);
+        alert('تعذر حفظ الطلب في النظام. تحقق من الإنترنت ثم حاول مرة أخرى.');
+        return;
+      }
+
+      showOrderSuccessPopup(orderId);
+      cart = [];
+      try { localStorage.removeItem('point_cafe_cart'); } catch(e) {}
+      updateCartUI();
+      document.getElementById('customer-name').value = '';
+      document.getElementById('customer-phone').value = '';
+      document.getElementById('customer-location').value = '';
+      transferImage = '';
+      document.getElementById('transfer-image').value = '';
+      document.getElementById('transfer-preview').style.display = 'none';
+      document.querySelector('input[name="payment-method"][value="cash"]').checked = true;
+      togglePaymentFields();
+      document.getElementById('cart-modal').style.display = 'none';
+
+      // بعد تأكيد الحفظ في النظام، افتح واتساب برسالة الطلب.
+      try {
+        const waLink = document.createElement('a');
+        waLink.href = url;
+        waLink.target = '_self';
+        waLink.rel = 'noopener';
+        document.body.appendChild(waLink);
+        waLink.click();
+        waLink.remove();
+      } catch (e) {
+        window.location.assign(url);
+      }
+    }
+
+    const customerTrackingMaps=new Map(), customerTrackingUnsubs=new Map();
+    function parseLatLonFromLocation(value){const m=String(value||'').match(/(-?\d+(?:\.\d+)?)[, ]+(-?\d+(?:\.\d+)?)/); return m?[Number(m[1]),Number(m[2])]:null;}
+    function startCustomerOrderTracking(order){
+      if(!order?.docId||!window.db||!window.onSnapshot)return;
+      const mapEl=document.getElementById('customer-map-'+order.docId); if(!mapEl||typeof L==='undefined')return;
+      if(customerTrackingUnsubs.has(order.docId))return;
+      const map=L.map(mapEl,{zoomControl:true}).setView([24,45],5); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+      customerTrackingMaps.set(order.docId,{map,driverMarker:null,customerMarker:null,firstFit:false});
+      setTimeout(()=>map.invalidateSize(),150);
+      const state=customerTrackingMaps.get(order.docId);
+      const orderUnsub=window.onSnapshot(window.doc(window.db,'orders',order.docId),snap=>{
+        if(!snap.exists())return; const o=snap.data()||{}; const st=document.getElementById('track-order-status-'+order.docId); if(st)st.textContent=o.status||'جديد';
+        if(o.customerLocation){const c=parseLatLonFromLocation(o.customerLocation); if(c){if(!state.customerMarker)state.customerMarker=L.marker(c).addTo(map).bindPopup('📍 موقع التسليم'); else state.customerMarker.setLatLng(c);}}
+        if(o.driverId){ if(!state.driverUnsub){state.driverUnsub=window.onSnapshot(window.doc(window.db,'driver_locations',String(o.driverId)),ds=>{const x=ds.data(); const label=document.getElementById('track-status-'+order.docId); if(!x||typeof x.lat!=='number'||typeof x.lon!=='number'){if(label)label.textContent='بانتظار موقع السائق';return;} if(!state.driverMarker)state.driverMarker=L.marker([x.lat,x.lon]).addTo(map).bindPopup('🚗 السائق'); else state.driverMarker.setLatLng([x.lat,x.lon]); if(label)label.textContent='🟢 السائق متصل مباشر'; const pts=[];if(state.customerMarker)pts.push(state.customerMarker.getLatLng());pts.push([x.lat,x.lon]);if(!state.firstFit){map.fitBounds(pts,{padding:[30,30]});state.firstFit=true;} });}} else {const label=document.getElementById('track-status-'+order.docId);if(label)label.textContent='بانتظار تعيين السائق';}
+      });
+      customerTrackingUnsubs.set(order.docId,()=>{try{orderUnsub();}catch(e){} const st=customerTrackingMaps.get(order.docId);try{st?.driverUnsub?.();}catch(e){} try{st?.map?.remove();}catch(e){} customerTrackingMaps.delete(order.docId);});
+    }
+
+    function openPointCafeAssistant(){
+      const modal=document.getElementById('point-ai-modal'); modal.style.display='flex';
+      const logo=String(storeData.logo||'').trim()||'./point-cafe-logo.jpg'; const fab=document.getElementById('ai-fab-logo'); const chat=document.getElementById('ai-chat-logo'); if(fab){fab.onerror=()=>{fab.onerror=null;fab.src='./point-cafe-logo.jpg';};fab.src=logo;} if(chat){chat.onerror=()=>{chat.onerror=null;chat.src='./point-cafe-logo.jpg';};chat.src=logo;}
+      const box=document.getElementById('point-ai-messages'); if(!box.children.length){appendPointCafeMessage('bot',(storeData.aiSettings&&storeData.aiSettings.welcome)||'أهلاً بك 👋 أنا مساعد POINT CAFE. اسألني عن المنتجات والأسعار والتوصيل والدفع وطلباتك.');}
+      setTimeout(()=>document.getElementById('point-ai-input')?.focus(),100);
+    }
+    function closePointCafeAssistant(){document.getElementById('point-ai-modal').style.display='none';}
+    function appendPointCafeMessage(type,text){const box=document.getElementById('point-ai-messages');const el=document.createElement('div');el.className='point-ai-msg '+type;el.textContent=text;box.appendChild(el);box.scrollTop=box.scrollHeight;}
+    async function pointCafeAssistantReply(q){
+      const raw=String(q||'').trim(); const text=raw.toLowerCase(); const products=storeData.products||[];
+      const ai=storeData.aiSettings||{};
+      // تعليمات المدير وأسئلة/أجوبة مخصصة تُطبّق أولاً.
+      const qa=Array.isArray(ai.qa)?ai.qa:[];
+      for(const item of qa){
+        const question=String(item.question||'').trim().toLowerCase();
+        const answer=String(item.answer||'').trim();
+        if(question && answer && (text===question || text.includes(question) || question.includes(text))) return answer;
+      }
+      if(/(مرحبا|اهلا|أهلا|السلام|هاي|hello|hi)/i.test(text))return ai.welcome||'أهلاً وسهلاً بك ☕ كيف أساعدك؟';
+      if(/(منتج|المنتجات|متوفر|موجود|عندكم)/i.test(text))return products.length?'لدينا حالياً: '+products.slice(0,30).map(p=>`${p.name} — ${p.price} ${p.currency||'ر.س'}`).join('، '):'لا توجد منتجات محملة حالياً.';
+      if(/(سعر|اسعار|أسعار|بكم|كم سعر|تكلفة)/i.test(text)){const hits=products.filter(p=>text.includes(String(p.name).toLowerCase())); if(hits.length)return hits.map(p=>`${p.name}: ${p.price} ${p.currency||'ر.س'}`).join('\n'); return products.length?'الأسعار: '+products.slice(0,20).map(p=>`${p.name}: ${p.price} ${p.currency||'ر.س'}`).join('، '):'لا توجد أسعار محملة حالياً.';}
+      if(/(توصيل|يوصل|التوصيل|استلام)/i.test(text))return storeData.deliveryFree?'التوصيل مجاني حالياً حسب إعدادات المتجر. ويمكنك أيضاً اختيار الاستلام من الفرع.':`رسوم التوصيل ${storeData.deliveryFee||0} ${storeData.deliveryCurrency||'ر.س'}، ويمكنك اختيار الاستلام من الفرع.`;
+      if(/(دفع|تحويل|بنك|حوالة)/i.test(text))return (storeData.bankAccounts||[]).length?'يمكنك الدفع بالتحويل واختيار أحد الحسابات البنكية الظاهرة عند إتمام الطلب، كما يتوفر الدفع كاش.':'يتوفر الدفع كاش، ويمكن أن تظهر خيارات التحويل عند تفعيل الحسابات البنكية من لوحة المدير.';
+      if(/(طلبي|طلب|تتبع|وين|اين|أين)/i.test(text)&&currentCustomer){try{const qs=window.query(window.collection(window.db,'orders'),window.where('customerUid','==',currentCustomer.uid));const snap=await window.getDocs(qs);if(snap.empty)return'لا توجد طلبات مرتبطة بحسابك حتى الآن.';const rows=[];snap.forEach(d=>rows.push(d.data()));rows.sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));const o=rows[0];return `آخر طلب ${o.orderId||''}: الحالة ${o.status||'جديد'}، الإجمالي ${o.grandTotalText||o.totalText||'غير متوفر'}${o.driverName?'، السائق: '+o.driverName:''}. افتح «طلباتي» لرؤية الخريطة المباشرة.`;}catch(e){return'افتح «طلباتي» وسأعرض لك حالة طلبك عند توفر الاتصال.';}}
+      if(/(كيف اطلب|كيف أطلب|طريقة الطلب)/i.test(text))return'اختر المنتج واضغط «إضافة للسلة»، ثم افتح السلة وأدخل بيانات التوصيل والدفع واضغط «إتمام الطلب وإرساله». ';
+      if(/(موقع|عنوان|مكان المتجر)/i.test(text))return storeData.locationUrl?'موقع المتجر متاح من زر موقع المتجر داخل الصفحة.':'يمكن للمدير إضافة موقع المتجر من لوحة التحكم.';
+      return ai.fallback||'أستطيع مساعدتك في منتجات POINT CAFE وأسعارها والتوصيل والدفع وطلبك الحالي. اكتب اسم المنتج أو سؤالك بالتفصيل.';
+    }
+    async function askPointCafeAssistant(q){const text=q||document.getElementById('point-ai-input')?.value||'';if(!String(text).trim())return;document.getElementById('point-ai-input').value='';const fab=document.querySelector('.point-ai-fab');fab?.classList.add('ai-thinking');appendPointCafeMessage('user',text);appendPointCafeMessage('bot','...');try{const reply=await pointCafeAssistantReply(text);const box=document.getElementById('point-ai-messages');const last=box.lastElementChild;if(last&&last.classList.contains('bot'))last.textContent=reply;else appendPointCafeMessage('bot',reply);}finally{setTimeout(()=>fab?.classList.remove('ai-thinking'),350);}}
+    function sendPointCafeAssistant(){askPointCafeAssistant();}
+    window.addEventListener('online',()=>{ if(typeof retryPendingCloudSave==='function') retryPendingCloudSave(); });
+
+    const translations={ar:{aboutTitle:"من نحن",aboutText:"كوفيه POINT CAFE يقدم القهوة والمشروبات والحلويات بطلب سهل وخدمة ودودة.",deliveryTitle:"التوصيل",deliveryText:"نوفر التوصيل داخل مناطق الخدمة، ويمكنك إرسال موقعك مع الطلب.",paymentTitle:"دفع تحويل",paymentText:"يمكنك اختيار التحويل وإرفاق صورة الحوالة ليتم التحقق منها.",storeTitle:"متجر الكوفيه",storeText:"تصفح المنتجات، أضفها إلى السلة، ثم اختر التوصيل أو الاستلام.",themeLight:"☀️ الوضع النهاري",themeDark:"🌙 الوضع الليلي",ticker:"🌸 أهلاً بكم في POINT CAFE ☕ نقدم لكم أشهى المشروبات والحلويات 🛍️"},en:{aboutTitle:"About Us",aboutText:"POINT CAFE serves coffee, drinks and desserts with an easy ordering experience.",deliveryTitle:"Delivery",deliveryText:"Delivery is available in service areas. You can send your location with the order.",paymentTitle:"Bank Transfer",paymentText:"Choose transfer payment and attach the transfer receipt for verification.",storeTitle:"Coffee Shop",storeText:"Browse products, add them to your cart, then choose delivery or pickup.",themeLight:"☀️ Light Mode",themeDark:"🌙 Dark Mode",ticker:"🌸 Welcome to POINT CAFE ☕ We serve delicious drinks and desserts 🛍️"},zh:{aboutTitle:"关于我们",aboutText:"POINT CAFE 提供咖啡、饮品和甜点，点单简单方便。",deliveryTitle:"配送",deliveryText:"服务区域内提供配送，您可以随订单发送您的位置。",paymentTitle:"转账支付",paymentText:"选择转账付款并上传转账凭证，以便核实。",storeTitle:"咖啡店",storeText:"浏览商品，加入购物车，然后选择配送或到店自取。",themeLight:"☀️ 浅色模式",themeDark:"🌙 深色模式",ticker:"🌸 欢迎来到 POINT CAFE ☕ 为您提供美味的饮品和甜点 🛍️"}};
+    function setLanguage(lang){
+      const t=translations[lang]||translations.ar;
+      // تغيير اللغة يجب ألا يعيد بناء الإعلانات أو يمسح صورها.
+      // نحفظ الإعلان الحالي مؤقتاً ثم نعيده إذا قام أي جزء آخر بإعادة الرسم.
+      const slider=document.getElementById('slider-main');
+      const sliderHTML=slider ? slider.innerHTML : '';
+      const sliderDisplay=document.getElementById('slider-box')?.style.display || '';
+      document.documentElement.lang=lang;
+      // اللغة تغيّر النصوص فقط. اتجاه الصفحة ومواقع الأقسام والشعار ثابتة دائماً.
+      document.documentElement.dir='rtl';
+      document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(t[k])el.textContent=t[k]});
+      const ticker=document.getElementById('point-cafe-ticker-text'); if(ticker) ticker.textContent=t.ticker; const tickerCopy=document.getElementById('point-cafe-ticker-text-copy'); if(tickerCopy) tickerCopy.textContent=t.ticker;
+      document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
+      localStorage.setItem('point_cafe_lang',lang);
+      updateThemeButton();
+      requestAnimationFrame(()=>{
+        const box=document.getElementById('slider-box');
+        const tr=document.getElementById('slider-main');
+        if(tr && sliderHTML && !tr.innerHTML.trim()) tr.innerHTML=sliderHTML;
+        if(box){ if(sliderHTML && tr && tr.querySelector('.slider-slide')) box.style.display=sliderDisplay==='none' ? 'block' : (sliderDisplay||'block'); else if(!tr?.querySelector('.slider-slide')) box.style.display='none'; }
+      });
+    }
+    function toggleTheme(){document.body.classList.toggle('dark-mode');localStorage.setItem('point_cafe_theme',document.body.classList.contains('dark-mode')?'dark':'light');updateThemeButton()}
+    function updateThemeButton(){const b=document.getElementById('theme-toggle');if(!b)return;const dark=document.body.classList.contains('dark-mode');const lang=localStorage.getItem('point_cafe_lang')||'ar';b.textContent=translations[lang][dark?'themeLight':'themeDark']}
+    function initAppearance(){if(localStorage.getItem('point_cafe_theme')==='dark')document.body.classList.add('dark-mode');setLanguage(localStorage.getItem('point_cafe_lang')||'ar')}
+    function normalizeYemenPhone(phone){
+      let n = String(phone || '').replace(/\D/g, '');
+      if (n.startsWith('00')) n = n.slice(2);
+      if (n.startsWith('967')) n = n.slice(3);
+      if (n.startsWith('0')) n = n.slice(1);
+      if (/^7[1378]\d{7}$/.test(n)) return '967' + n;
+      return '';
+    }
+
+    function normalizeWhatsAppPhone(phone){
+      let n=String(phone||'').replace(/\D/g,'');
+      if(n.startsWith('00')) n=n.slice(2);
+      if(n.startsWith('0')) n=n.slice(1);
+      // رقم يمني محلي مثل 777052026 يتحول تلقائياً إلى 967777052026
+      if(/^7[0-9]{8}$/.test(n)) n='967'+n;
+      return n.length >= 10 && n.length <= 15 ? n : '';
+    }
+
+
+    function getProductReviews(productId){
+      return (storeData.reviews||[]).filter(r=>r.productId && String(r.productId)===String(productId));
+    }
+    function getProductRating(productId){
+      const rows=getProductReviews(productId);
+      if(!rows.length)return {avg:0,count:0};
+      const avg=rows.reduce((sum,r)=>sum+(Number(r.rating)||0),0)/rows.length;
+      return {avg,count:rows.length};
+    }
+    function productRatingHTML(productId){
+      const r=getProductRating(productId);
+      if(!r.count) return '<div class="product-rating-empty">☆ لا توجد تقييمات بعد</div>';
+      return `<div class="product-rating" title="${r.count} تقييم"><span class="rating-stars">★★★★★</span><strong>${r.avg.toFixed(1)}</strong><small>(${r.count})</small></div>`;
+    }
+
+    function renderReviews() {
+      const list = document.getElementById('reviews-list');
+      list.innerHTML = (storeData.reviews || []).map(r => `
+        <div class="review-item">
+          <div class="review-header">
+            <span>${r.name}</span>
+            <span class="review-stars">${'★'.repeat(r.rating)}</span>
+          </div>
+          <div>${r.text}</div>
+        </div>
+      `).join('');
+    }
+
+    function setRating(stars) {
+      selectedRating = stars;
+      const elements = document.querySelectorAll('#star-rating span');
+      elements.forEach((el, index) => {
+        if (5 - index <= stars) el.classList.add('active');
+        else el.classList.remove('active');
+      });
+    }
+
+    async function addReview() {
+      const name = document.getElementById('review-name').value.trim();
+      const text = document.getElementById('review-text').value.trim();
+
+      if (!name || !text) {
+        alert('يرجى كتابة الاسم ورأيك قبل الإرسال.');
+        return;
+      }
+
+      const newReview = {
+        name,
+        rating: selectedRating,
+        text,
+        date: new Date().toISOString(),
+        customerUid: currentCustomer ? currentCustomer.uid : '',
+        productId: window.currentReviewProductId ? String(window.currentReviewProductId) : ''
+      };
+      
+      try {
+        await window.addDoc(window.collection(window.db, "reviews"), newReview);
+      } catch(e) {
+        console.error("خطأ في حفظ التقييم سحابياً:", e);
+      }
+
+      if(!storeData.reviews) storeData.reviews = [];
+      storeData.reviews.push(newReview);
+      renderReviews();
+
+      document.getElementById('review-name').value = '';
+      document.getElementById('review-text').value = '';
+      alert('شكراً لك على تقييمك!');
+    }
+  </script>
+
+<script>
+(function(){
+const APP_NAME='تطبيق متجر POINT CAFE';
+let deferredInstallPrompt=null,installModal=null,installBtn=null,helpBox=null;
+function isStandalone(){return(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true}
+function createInstallUI(){
+ if(document.getElementById('pwa-install-modal'))return;
+ const m=document.createElement('div');m.id='pwa-install-modal';m.className='pwa-install-modal';
+ m.innerHTML='<div class="pwa-install-card"><img class="pwa-install-logo" src="./point-cafe-logo.jpg" alt="POINT CAFE"><div class="pwa-install-title">'+APP_NAME+'</div><p class="pwa-install-subtitle">ثبّت التطبيق على هاتفك للوصول إليه بسرعة مثل أي تطبيق عادي.</p><button id="pwa-install-btn" class="pwa-install-btn">📲 تثبيت التطبيق</button><button id="pwa-skip-btn" class="pwa-skip-btn" type="button">تخطي</button><div id="pwa-install-help" class="pwa-install-help"></div></div>';
+ document.body.appendChild(m);installModal=m;installBtn=m.querySelector('#pwa-install-btn');helpBox=m.querySelector('#pwa-install-help');installBtn.addEventListener('click',installApp);
+const skipBtn=m.querySelector('#pwa-skip-btn');
+if(skipBtn) skipBtn.addEventListener('click',function(){
+  try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(e){}
+  m.classList.add('installed');
+  m.style.setProperty('display','none','important');
+  m.style.setProperty('visibility','hidden','important');
+  m.style.setProperty('pointer-events','none','important');
+});
+
+}
+function showInstallModal(){if(isStandalone())return;createInstallUI();installModal.classList.remove('installed')}
+async function installApp(){
+ if(deferredInstallPrompt){const p=deferredInstallPrompt;deferredInstallPrompt=null;try{await p.prompt();const choice=await p.userChoice;if(choice&&choice.outcome==='accepted'){installBtn.textContent='✅ تم اختيار تثبيت التطبيق';setTimeout(()=>installModal&&installModal.classList.add('installed'),500)}else installBtn.textContent='📲 اضغط لتثبيت التطبيق'}catch(e){showHelp()}return}
+ showHelp();
+}
+function showHelp(){if(!helpBox)return;helpBox.style.display='block';helpBox.innerHTML='إذا لم تظهر نافذة التثبيت تلقائياً، افتح قائمة المتصفح <b>⋮</b> ثم اختر <b>تثبيت التطبيق</b> أو <b>إضافة إلى الشاشة الرئيسية</b>.';installBtn.textContent='📲 حاول التثبيت مرة أخرى'}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;if(!isStandalone())createInstallUI()});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;if(installModal)installModal.classList.add('installed')});
+window.addEventListener('load',()=>{if(!isStandalone()){createInstallUI();if(localStorage.getItem('pointCafeInstallSkipped')!=='1')setTimeout(showInstallModal,8000)}if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('PWA SW:',err))});
+window.openPointCafeInstall=showInstallModal;
+})();
+</script>
+
+
+
+
+
+
+<style id="pca-final-install-fix">
+.pwa-install-modal.installed{display:none!important;visibility:hidden!important;pointer-events:none!important}
+.pwa-install-modal:not(.installed){display:block}
+.pwa-install-card .pwa-skip-btn{
+  width:34px!important;height:26px!important;min-height:26px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  padding:0!important;margin:0!important;
+  position:absolute!important;top:6px!important;left:6px!important;
+  border-radius:8px!important;
+  background:#f0e2d2!important;color:#76583b!important;
+  font-size:10px!important;font-weight:900!important;
+}
+.header-actions .pwa-install-page-btn{
+  width:42px!important;height:42px!important;
+  padding:5px!important;font-size:16px!important;
+  border:1px solid #d9c3a9!important;border-radius:12px!important;
+  background:#fffaf3!important;color:#76583b!important;
+}
+</style>
+<script>
+document.addEventListener('click', function(e){
+  if(e.target && e.target.id === 'pwa-skip-btn'){
+    const modal=document.getElementById('pwa-install-modal');
+    if(modal){
+      modal.classList.add('installed');
+      modal.style.display='none';
+    }
+    try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(_){}
+  }
+});
+</script>
+
+<style id="point-cafe-install-polish">
+/* FINAL INSTALL UI POLISH - POINT CAFE */
+.pwa-install-modal:not(.installed){
+  position:fixed!important;
+  inset:auto 12px 78px auto!important;
+  width:auto!important;
+  height:auto!important;
+  padding:0!important;
+  background:transparent!important;
+  display:block!important;
+  z-index:200000!important;
+}
+.pwa-install-card{
+  direction:rtl!important;
+  width:285px!important;
+  max-width:calc(100vw - 24px)!important;
+  display:grid!important;
+  grid-template-columns:46px 1fr!important;
+  grid-template-rows:auto auto auto!important;
+  gap:5px 10px!important;
+  align-items:center!important;
+  padding:12px!important;
+  background:rgba(255,250,243,.98)!important;
+  border:1px solid #dfc9ad!important;
+  border-radius:16px!important;
+  box-shadow:0 10px 28px rgba(65,43,24,.20)!important;
+  text-align:right!important;
+  position:relative!important;
+}
+.pwa-install-logo{
+  grid-row:1/3!important;
+  width:46px!important;height:46px!important;
+  border-radius:11px!important;
+  border:1px solid rgba(154,118,82,.45)!important;
+  padding:3px!important;
+}
+.pwa-install-title{
+  margin:0!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:13px!important;
+  line-height:1.35!important;
+  font-weight:800!important;
+  color:#76583b!important;
+}
+.pwa-install-subtitle{
+  margin:0!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:10.5px!important;
+  line-height:1.5!important;
+  font-weight:500!important;
+  color:#806b58!important;
+}
+.pwa-install-btn{
+  grid-column:1/3!important;
+  width:100%!important;
+  min-height:38px!important;
+  margin:4px 0 0!important;
+  padding:6px 10px!important;
+  border:0!important;
+  border-radius:10px!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:13px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  background:#9a7652!important;
+  color:#fff!important;
+  box-shadow:0 4px 10px rgba(118,88,59,.16)!important;
+}
+.pwa-install-btn:active{transform:scale(.98)}
+.pwa-install-help{
+  grid-column:1/3!important;
+  display:none!important;
+  margin:3px 0 0!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:10px!important;
+  line-height:1.6!important;
+}
+.pwa-install-card .pwa-skip-btn{
+  position:absolute!important;
+  top:6px!important;
+  left:6px!important;
+  width:36px!important;
+  height:27px!important;
+  min-height:27px!important;
+  margin:0!important;
+  padding:0!important;
+  border:1px solid #dfc9ad!important;
+  border-radius:8px!important;
+  background:#f1e5d7!important;
+  color:#76583b!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:10px!important;
+  line-height:27px!important;
+  font-weight:800!important;
+  cursor:pointer!important;
+  z-index:5!important;
+}
+.pwa-install-card .pwa-skip-btn:active{background:#eadbc7!important;transform:scale(.97)}
+.header-actions .pwa-install-page-btn{
+  width:auto!important;
+  min-width:118px!important;
+  height:42px!important;
+  padding:5px 10px!important;
+  font-family:'Tajawal',sans-serif!important;
+  font-size:12px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+  word-break:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+@media(max-width:420px){
+  .pwa-install-modal:not(.installed){right:9px!important;bottom:72px!important}
+  .pwa-install-card{width:260px!important}
+  .header-actions .pwa-install-page-btn{min-width:112px!important;font-size:11px!important}
+}
+</style>
+<script id="point-cafe-install-polish-js">
+(function(){
+  function hideInstallNotice(){
+    var modal=document.getElementById('pwa-install-modal');
+    if(!modal)return;
+    modal.classList.add('installed');
+    modal.style.setProperty('display','none','important');
+    modal.style.setProperty('visibility','hidden','important');
+    modal.style.setProperty('opacity','0','important');
+    modal.style.setProperty('pointer-events','none','important');
+    try{localStorage.setItem('pointCafeInstallSkipped','1')}catch(e){}
+  }
+  document.addEventListener('click',function(e){
+    var btn=e.target && e.target.closest ? e.target.closest('#pwa-skip-btn') : null;
+    if(btn){
+      e.preventDefault();
+      e.stopPropagation();
+      hideInstallNotice();
+    }
+  },true);
+  window.hidePointCafeInstall=hideInstallNotice;
+})();
+</script>
+
+<script id="point-cafe-ticker-real-motion">
+(function(){
+  function startPointCafeTicker(){
+    var track=document.getElementById('point-cafe-main-ticker-track');
+    if(!track) return;
+    var first=track.querySelector('.ticker-item');
+    var second=track.querySelectorAll('.ticker-item')[1];
+    if(!first || !second) return;
+
+    track.style.animation='none';
+    track.style.transform='translate3d(0,0,0)';
+    track.style.width='max-content';
+    track.style.display='flex';
+
+    var x=0;
+    var last=performance.now();
+    var running=true;
+
+    function frame(now){
+      if(!running) return;
+      var dt=Math.min(40, now-last);
+      last=now;
+      var distance=first.getBoundingClientRect().width;
+      if(distance>0){
+        x -= (dt * 0.055);
+        if(x <= -distance) x += distance;
+        track.style.transform='translate3d('+x+'px,0,0)';
+      }
+      requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+
+    window.addEventListener('resize',function(){
+      if(x < -first.getBoundingClientRect().width) x=0;
+    });
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startPointCafeTicker);
+  else startPointCafeTicker();
+})();
+</script>
+</body>
+</html>
